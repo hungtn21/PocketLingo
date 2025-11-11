@@ -1,6 +1,6 @@
 # Pocket Lingo
 ## Cài đặt
-### 1. Clone reposistory
+### 1. Clone repository
 ```
 git clone https://github.com/hungtn21/PocketLingo.git
 cd PocketLingo
