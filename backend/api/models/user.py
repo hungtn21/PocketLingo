@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 class User(models.Model):
     class Role(models.TextChoices):
@@ -25,4 +26,4 @@ class User(models.Model):
         return self.email
     
     class Meta:
-        db_table = 'users'
+        db_table = 'users'     
