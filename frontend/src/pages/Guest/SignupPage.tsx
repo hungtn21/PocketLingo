@@ -21,7 +21,7 @@ const SignupPage: React.FC = () => {
     setToast(null);
 
     try {
-      const response = await axios.post(`/users/register/`, {
+      const response = await api.post(`/users/register/`, {
         name,
         email,
       });

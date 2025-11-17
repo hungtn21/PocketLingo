@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import axios from "axios";
 import LandingHeader from "../../component/LandingPage/Header";
 import ToastMessage from "../../component/ToastMessage";
 import "./LandingPage.css";
@@ -16,7 +15,6 @@ const SetPasswordPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [userEmail, setUserEmail] = useState("");
@@ -30,7 +28,7 @@ const SetPasswordPage: React.FC = () => {
     }
 
     // Verify email_verify token (signup flow)
-    axios
+    api
       .get(`/users/verify-email/`, {
         params: { token },
       })
@@ -54,7 +52,7 @@ const SetPasswordPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`/users/set-password/`, {
+      const response = await api.post(`/users/set-password/`, {
         token,
         password,
       });

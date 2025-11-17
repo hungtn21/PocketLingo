@@ -80,7 +80,7 @@ const LandingPage: React.FC = () => {
 			setLoading(true);
 			try {
 				const params = { page: 1, page_size: 6 };
-				const res = await axios.get(`$/courses/`, { params });
+				const res = await api.get(`$/courses/`, { params });
 				if (res.data?.success) {
 					setCourses(res.data.data.courses);
 				}
