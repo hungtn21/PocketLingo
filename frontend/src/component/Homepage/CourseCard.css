@@ -120,6 +120,45 @@
   transition: background 0.2s;
 }
 
-.register-btn:hover {
+.register-btn:hover:not(:disabled) {
   background: #5a3aa0;
+}
+
+.register-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Status-specific button styles */
+.register-btn.pending {
+  background: #f59e0b;
+}
+
+.register-btn.pending:hover {
+  background: #f59e0b;
+}
+
+.register-btn.approved {
+  background: #10b981;
+}
+
+.register-btn.approved:hover {
+  background: #059669;
+}
+
+.register-btn.rejected {
+  background: #ef4444;
+  cursor: pointer;
+}
+
+.register-btn.rejected:hover {
+  background: #dc2626;
+}
+
+.register-btn.completed {
+  background: #3b82f6;
+}
+
+.register-btn.completed:hover {
+  background: #3b82f6;
 }

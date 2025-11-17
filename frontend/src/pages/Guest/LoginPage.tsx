@@ -4,6 +4,7 @@ import LandingHeader from "../../component/LandingPage/Header";
 import ToastMessage from "../../component/ToastMessage"; // import component
 import "./LandingPage.css";
 import { api } from "../../api";
+import { useUser } from "../../context/UserContext.tsx";
 
 const HERO_LOGO_URL =
   "https://res.cloudinary.com/dytfwdgzc/image/upload/v1763300982/logo_pbhiqx.png";
@@ -14,6 +15,7 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,14 +23,22 @@ const LoginPage: React.FC = () => {
     setToast(null);
 
     try {
-      const response = await api.post("/users/login/", 
+      const loginResponse = await api.post("/users/login/", 
         { email, password });
 
-      if (response.data?.role) {
+      if (loginResponse.data?.role) {
+        // Lấy thông tin user từ API /users/me/
+        const userResponse = await api.get("/users/me/");
+        setUser({
+          id: userResponse.data.user_id,
+          email: userResponse.data.email,
+          role: userResponse.data.role,
+        });
+
         setToast({ message: "Đăng nhập thành công!", type: "success" });
 
         // Redirect dựa trên role (JWT đã được lưu trong HttpOnly cookie)
-        const role = response.data.role;
+        const role = loginResponse.data.role;
         setTimeout(() => {
           if (role === "learner") navigate("/");
           else if (role === "admin" || role === "superadmin") navigate("/admin-dashboard");

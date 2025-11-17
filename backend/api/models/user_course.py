@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 class UserCourse(models.Model):
     class Status(models.TextChoices):
@@ -10,7 +9,7 @@ class UserCourse(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
+        'User',  # Dùng string reference đến User model trong cùng app
         on_delete=models.CASCADE, 
         related_name='user_courses'
     )
