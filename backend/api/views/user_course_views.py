@@ -36,20 +36,20 @@ def enroll_course(request, course_id):
     """Tạo yêu cầu đăng ký khóa học"""
     user = get_user_from_token(request)
     if not user:
-        return Response({'error': 'Chưa đăng nhập.'}, status=401)
+        return Response({'error': 'Chưa đăng nhập.'}, status=status.HTTP_401_UNAUTHORIZED)
     
     try:
         course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
-        return Response({'error': 'Khóa học không tồn tại.'}, status=404)
+        return Response({'error': 'Khóa học không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
     
     # Kiểm tra xem user đã đăng ký chưa
     existing_enrollment = UserCourse.objects.filter(user=user, course=course).first()
     if existing_enrollment:
         if existing_enrollment.status == UserCourse.Status.PENDING:
-            return Response({'error': 'Bạn đã gửi yêu cầu đăng ký khóa học này.'}, status=400)
+            return Response({'error': 'Bạn đã gửi yêu cầu đăng ký khóa học này.'}, status=status.HTTP_400_BAD_REQUEST)
         elif existing_enrollment.status == UserCourse.Status.APPROVED:
-            return Response({'error': 'Bạn đã được chấp nhận vào khóa học này.'}, status=400)
+            return Response({'error': 'Bạn đã được chấp nhận vào khóa học này.'}, status=status.HTTP_400_BAD_REQUEST)
         elif existing_enrollment.status == UserCourse.Status.REJECTED:
             # Cho phép đăng ký lại nếu bị từ chối
             existing_enrollment.status = UserCourse.Status.PENDING
@@ -63,7 +63,7 @@ def enroll_course(request, course_id):
                     'status': existing_enrollment.status,
                     'requested_at': existing_enrollment.requested_at
                 }
-            }, status=200)
+            }, status=status.HTTP_200_OK)
     
     # Tạo enrollment mới
     enrollment = UserCourse.objects.create(
@@ -79,7 +79,7 @@ def enroll_course(request, course_id):
             'status': enrollment.status,
             'requested_at': enrollment.requested_at
         }
-    }, status=201)
+    }, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])
@@ -87,7 +87,7 @@ def get_enrollment_status(request, course_id):
     """Lấy trạng thái đăng ký của user cho một khóa học"""
     user = get_user_from_token(request)
     if not user:
-        return Response({'error': 'Chưa đăng nhập.'}, status=401)
+        return Response({'error': 'Chưa đăng nhập.'}, status=status.HTTP_401_UNAUTHORIZED)
     
     try:
         enrollment = UserCourse.objects.get(user=user, course_id=course_id)
@@ -106,7 +106,7 @@ def approve_enrollment(request, enrollment_id):
     """Admin chấp nhận yêu cầu đăng ký (for future admin panel)"""
     user = get_user_from_token(request)
     if not user or user.role not in ['admin', 'superadmin']:
-        return Response({'error': 'Không có quyền truy cập.'}, status=403)
+        return Response({'error': 'Không có quyền truy cập.'}, status=status.HTTP_403_FORBIDDEN)
     
     try:
         enrollment = UserCourse.objects.get(id=enrollment_id)
@@ -115,7 +115,7 @@ def approve_enrollment(request, enrollment_id):
         enrollment.save()
         return Response({'message': 'Đã chấp nhận yêu cầu đăng ký.'})
     except UserCourse.DoesNotExist:
-        return Response({'error': 'Yêu cầu đăng ký không tồn tại.'}, status=404)
+        return Response({'error': 'Yêu cầu đăng ký không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
@@ -123,11 +123,11 @@ def reject_enrollment(request, enrollment_id):
     """Admin từ chối yêu cầu đăng ký (for future admin panel)"""
     user = get_user_from_token(request)
     if not user or user.role not in ['admin', 'superadmin']:
-        return Response({'error': 'Không có quyền truy cập.'}, status=403)
+        return Response({'error': 'Không có quyền truy cập.'}, status=status.HTTP_403_FORBIDDEN)
     
     reason = request.data.get('reason', '')
     if not reason:
-        return Response({'error': 'Vui lòng cung cấp lý do từ chối.'}, status=400)
+        return Response({'error': 'Vui lòng cung cấp lý do từ chối.'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
         enrollment = UserCourse.objects.get(id=enrollment_id)
@@ -136,4 +136,4 @@ def reject_enrollment(request, enrollment_id):
         enrollment.save()
         return Response({'message': 'Đã từ chối yêu cầu đăng ký.'})
     except UserCourse.DoesNotExist:
-        return Response({'error': 'Yêu cầu đăng ký không tồn tại.'}, status=404)
+        return Response({'error': 'Yêu cầu đăng ký không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
