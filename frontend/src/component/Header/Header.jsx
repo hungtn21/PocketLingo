@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import "./Header.css";
 import logo from "../../assets/logo.png";
 import { api } from "../../api";
+import { useUser } from "../../context/UserContext.tsx";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -22,6 +24,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await api.post("/users/logout/");
+      setUser(null); // Remove user information from context
       setIsDropdownOpen(false);
       navigate("/login");
     } catch (err) {
@@ -63,7 +66,9 @@ const Header = () => {
               <div className="custom-dropdown-menu">
                 <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
                 <button className="custom-dropdown-item">Đổi mật khẩu</button>
-                <button className="custom-dropdown-item" onClick={handleLogout}>Đăng xuất</button>
+                <button className="custom-dropdown-item" onClick={handleLogout}>
+                  Đăng xuất
+                </button>
               </div>
             )}
           </div>
