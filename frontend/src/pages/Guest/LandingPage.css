@@ -1,0 +1,147 @@
+.landing-page {
+  background: #fff;
+  color: #111;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 1rem 0 1.25rem;
+}
+
+/* Hero */
+.hero-logo-wrapper {
+  width: 320px;
+  height: 200px;
+  background: #5E3C86;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+.hero-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.btn { border-radius: 999px; }
+
+.btn-purple-outline {
+  color: #fff !important;                  /* chữ trắng */
+  border: 2px solid #5E3C86 !important;    /* viền tím */
+  background-color: #5E3C86 !important;    /* nền tím */
+  border-radius: 15px !important;  
+  transition: all 0.3s !important;  
+  width: 155px;  
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.5rem !important;
+}
+
+.btn-purple-outline:hover {
+  color: #5E3C86 !important;               /* chữ tím khi hover */
+  background-color: #fff !important;        /* nền trắng khi hover */
+  border-color: #5E3C86 !important;        /* viền tím giữ nguyên */
+}
+
+/* Highlight */
+.highlight-row { 
+    position: relative; 
+    width: 100%;
+}
+.highlight-track {
+  display: flex;
+  gap: 1rem;
+  animation: scroll 20s linear infinite; /* auto scroll */
+}
+.nav-arrow {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #5E3C86;
+  cursor: pointer;
+}
+.highlight-card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 0.75rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+.highlight-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.hl-img {
+  background: #eee;
+  height: 120px;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+.hl-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hl-title {
+  font-weight: 700;
+}
+.hl-desc {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Highlight carousel */
+.hl-carousel { position: relative; }
+.hl-carousel-viewport { overflow: hidden; }
+.hl-carousel-track { display: flex; will-change: transform; }
+.hl-carousel-item { flex: 0 0 auto; padding: 0.25rem; }
+
+/* Intro */
+.intro-img {
+  background: #eee;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.intro-img img { width: 100%; height: 100%; object-fit: cover; }
+.intro-content p { color: #555; }
+.intro-cta { margin-top: 0.5rem; }
+
+/* Featured courses */
+.course-card-wrapper { width: 100%; }
+/* Ẩn nút đăng ký trong Landing */
+.landing-page .course-card .register-btn { display: none; }
+
+/* FAQ */
+.faq details { margin: 0.5rem 0; }
+.faq summary { cursor: pointer; font-weight: 600; }
+.faq .answer { color: #555; margin-left: 1rem; margin-top: 0.25rem; }
+/* FAQ accordion tweaks */
+.accordion-button { font-weight: 600; }
+.accordion-button { font-weight: 600; border:1px solid #d8cbe9; }
+.accordion-button:focus { box-shadow: 0 0 0 0.15rem rgba(94,60,134,0.4); border-color:#5E3C86; outline: none}
+.accordion-item { border-radius: 8px; overflow: hidden; border:1px solid #d8cbe9; }
+.accordion-button:not(.collapsed) {
+  background-color: #e9d2f9 !important; /* màu nền tùy ý */
+  color: #5E3C86; /* màu chữ */
+  border-color: #5E3C86;
+}
+/* Footer */
+.footer {
+  background: #5E3C86 !important;
+  color: #fff;
+  text-align: center;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+
+

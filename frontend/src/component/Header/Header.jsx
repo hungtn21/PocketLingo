@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Bell, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./Header.css";
 import logo from "../../assets/logo.png";
+import { api } from "../../api";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -13,6 +16,16 @@ const Header = () => {
   const handleClickOutside = (e) => {
     if (!e.target.closest(".profile-container")) {
       setIsDropdownOpen(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/users/logout/");
+      setIsDropdownOpen(false);
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
     }
   };
 
@@ -47,10 +60,10 @@ const Header = () => {
             </button>
 
             {isDropdownOpen && (
-              <div className="dropdown-menu">
-                <button className="dropdown-item">Hồ sơ cá nhân</button>
-                <button className="dropdown-item">Đổi mật khẩu</button>
-                <button className="dropdown-item">Đăng xuất</button>
+              <div className="custom-dropdown-menu">
+                <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
+                <button className="custom-dropdown-item">Đổi mật khẩu</button>
+                <button className="custom-dropdown-item" onClick={handleLogout}>Đăng xuất</button>
               </div>
             )}
           </div>
