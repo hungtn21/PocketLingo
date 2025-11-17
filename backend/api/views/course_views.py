@@ -22,6 +22,7 @@ def get_courses(request):
     - max_rating: filter by maximum rating
     - page: page number (default: 1)
     - page_size: number of items per page (default: 6)
+    - user_id: user id to check enrollment status (optional, for demo purpose)
     """
     try:
         # Get query parameters
@@ -32,6 +33,7 @@ def get_courses(request):
         max_rating = request.GET.get('max_rating', '')
         page = int(request.GET.get('page', 1))
         page_size = int(request.GET.get('page_size', 6))
+        user_id = request.GET.get('user_id', None)  # Giả lập user_id
 
         # Base queryset
         courses = Course.objects.all()
@@ -71,17 +73,26 @@ def get_courses(request):
             except ValueError:
                 pass
 
-        # Order by created_at descending
-        courses = courses.order_by('-created_at')
+        # Order by id ascending
+        courses = courses.order_by('id')
 
         # Pagination
         paginator = Paginator(courses, page_size)
         page_obj = paginator.get_page(page)
 
+        # Get user enrollments if user_id provided
+        user_enrollments = {}
+        if user_id:
+            enrollments = UserCourse.objects.filter(
+                user_id=user_id,
+                course_id__in=list(page_obj.object_list.values_list('id', flat=True))
+            ).values('course_id', 'status')
+            user_enrollments = {e['course_id']: e['status'] for e in enrollments}
+
         # Serialize data
         courses_data = []
         for course in page_obj:
-            courses_data.append({
+            course_data = {
                 'id': course.id,
                 'title': course.title,
                 'description': course.description,
@@ -91,7 +102,9 @@ def get_courses(request):
                 'lesson_count': course.lesson_count,
                 'rating': round(course.avg_rating, 1) if course.avg_rating else 0.0,
                 'created_at': course.created_at,
-            })
+                'user_status': user_enrollments.get(course.id, None)  # None = chưa đăng ký
+            }
+            courses_data.append(course_data)
 
         return Response({
             'success': True,

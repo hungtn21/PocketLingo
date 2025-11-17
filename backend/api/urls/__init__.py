@@ -4,4 +4,5 @@ from django.urls import path, include
 # This lets us keep each domain's endpoints in its own file while exposing a unified /api/ tree.
 urlpatterns = [
     path('users/', include('api.urls.user_urls')),
+    path('', include('api.urls.user_course_urls')),
 ]
