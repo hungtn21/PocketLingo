@@ -5,6 +5,7 @@ import { api } from "../api";
 interface User {
   id: string;
   email: string;
+  name : string;
   role: string;
 }
 
@@ -29,6 +30,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           id: response.data.user_id,
           email: response.data.email,
           role: response.data.role,
+          name: response.data.name,
         });
       } catch (error) {
         // If there is no token or the token has expired, user will be null

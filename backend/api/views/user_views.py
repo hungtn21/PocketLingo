@@ -119,6 +119,7 @@ class LoginView(APIView):
             'user_id': str(user.id),
             'email': user.email,
             'role': user.role,
+            'name': user.name,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=JWT_TOKEN_EXPIRY_DAYS)
         }
 
@@ -152,7 +153,7 @@ class MeView(APIView):
         except jwt.InvalidTokenError:
             return Response({'error': 'Token không hợp lệ.'}, status=401)
 
-        return Response({'user_id': payload['user_id'], 'email': payload['email'], 'role': payload['role']})
+        return Response({'user_id': payload['user_id'], 'email': payload['email'], 'role': payload['role'], 'name': payload['name']})
 
 class ForgotPasswordView(APIView):
     """Gửi email với token để reset mật khẩu."""

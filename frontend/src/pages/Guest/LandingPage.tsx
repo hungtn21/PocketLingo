@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import LandingHeader from "../../component/LandingPage/Header";
 import CourseCard from "../../component/Homepage/CourseCard";
 import "./LandingPage.css";
@@ -172,7 +171,7 @@ const LandingPage: React.FC = () => {
 						<div className="row g-3">
 							{courses.map((c) => (
 								<div className="col-12 col-md-6 col-lg-4" key={c.id}>
-									<CourseCard course={c as any} />
+									<CourseCard course={c as any} onEnrollmentChange={undefined} />
 								</div>
 							))}
 						</div>

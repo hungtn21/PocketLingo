@@ -1,0 +1,36 @@
+/* Icon hamburger màu trắng */
+.hamburger-left svg {
+  color: white !important;
+  stroke: white !important;
+}
+
+.hamburger-left {
+  background: transparent !important;
+  border: none !important;
+  padding: 8px !important;
+  border-radius: 8px;
+}
+
+.hamburger-left:hover {
+  background: rgba(255,255,255,0.15) !important;
+}
+
+/* Nhóm các icon bên phải (bell, user) */
+.admin-header-layout .header-right {
+  order: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-left: auto !important; /* đẩy nhóm icon về bên phải */
+  padding-right: 6px !important;
+}
+
+.admin-header-layout.shrink-right .header-right {
+  padding-right: 0 !important;
+}
+
+.left-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
