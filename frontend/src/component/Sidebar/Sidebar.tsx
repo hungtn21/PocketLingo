@@ -25,7 +25,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="sidebar-body">
           <button className="sidebar-item">Dashboard</button>
           <button className="sidebar-item">Quản lý học viên</button>
-          <button className="sidebar-item">Quản lý admin</button>
+          {user?.role === "superadmin" && (
+            <button className="sidebar-item">Quản lý admin</button>
+          )} {/* Chỉ hiện cho superadmin */}
           <button className="sidebar-item">Quản lý khóa học</button>
           <button className="sidebar-item">Duyệt yêu cầu tham gia</button>
         </div>
