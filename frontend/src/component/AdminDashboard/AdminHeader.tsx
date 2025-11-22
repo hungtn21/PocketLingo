@@ -28,6 +28,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
     }
   };
 
+  const navigateToPasswordChange = () => {
+    navigate("/admin/profile");
+    setTimeout(() => {
+      const el = document.getElementById("change-password");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  };
   useEffect(() => {
     const close = (e: MouseEvent) => {
       if (!(e.target as HTMLElement)?.closest(".profile-container")) {
@@ -67,8 +74,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
 
             {isDropdownOpen && (
               <div className="custom-dropdown-menu">
-                <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
-                <button className="custom-dropdown-item">Đổi mật khẩu</button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/admin/profile')}>Hồ sơ cá nhân</button>
+                <button className="custom-dropdown-item" onClick={navigateToPasswordChange}>Đổi mật khẩu</button>
                 <button className="custom-dropdown-item" onClick={handleLogout}>
                   Đăng xuất
                 </button>
