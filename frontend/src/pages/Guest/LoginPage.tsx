@@ -33,6 +33,7 @@ const LoginPage: React.FC = () => {
           id: userResponse.data.user_id,
           email: userResponse.data.email,
           role: userResponse.data.role,
+          name: userResponse.data.name,
         });
 
         setToast({ message: "Đăng nhập thành công!", type: "success" });
@@ -41,7 +42,7 @@ const LoginPage: React.FC = () => {
         const role = loginResponse.data.role;
         setTimeout(() => {
           if (role === "learner") navigate("/");
-          else if (role === "admin" || role === "superadmin") navigate("/admin-dashboard");
+          else if (role === "admin" || role === "superadmin") navigate("/admin");
         }, 1000); // delay 1s cho toast hiện ra
       }
     } catch (err: any) {

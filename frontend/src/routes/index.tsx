@@ -7,7 +7,7 @@ import SetPasswordPage from "../pages/Guest/SetPasswordPage";
 import ResetPasswordPage from "../pages/Guest/ResetPasswordPage";
 import ForgotPasswordPage from "../pages/Guest/ForgotPasswordPage";
 import ProtectedRoute from "./ProtectedRoute";
-
+import AdminDashboard from "../pages/Admin/AdminDashboard";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -26,14 +26,17 @@ export const router = createBrowserRouter([
   //Routes dành cho admin
    {
     path: "/admin",
-    element: <ProtectedRoute allowRoles={["admin"]} />,
+    element: <ProtectedRoute allowRoles={["admin", "superadmin"]} />,
     children: [
+      {
+        path: "",
+        element: <AdminDashboard />,
+      }
       // Thêm các routes khác cho role admin ở đây
       // Ví dụ: 
       // { path: "dashboard", element: <AdminDashboard /> }, // "/admin/dashboard"
     ],
   },
-
   // Routes công khai (không cần login)
   {
     path: "/landing",
