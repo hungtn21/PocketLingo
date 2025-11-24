@@ -8,6 +8,7 @@ import ResetPasswordPage from "../pages/Guest/ResetPasswordPage";
 import ForgotPasswordPage from "../pages/Guest/ForgotPasswordPage";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
+import LessonDetail from "../pages/User/LessonDetail/LessonDetail";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       { path: "", 
         element: <Homepage /> 
       },
+      { path: "lessons/:lessonId", element: <LessonDetail /> },
       // Thêm các routes khác cho role learner ở đây
       // Ví dụ:
       //{path: "profile", element: <ProfilePage />}  "/profile"

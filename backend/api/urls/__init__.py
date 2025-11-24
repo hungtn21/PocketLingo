@@ -5,4 +5,5 @@ from django.urls import path, include
 urlpatterns = [
     path('users/', include('api.urls.user_urls')),
     path('', include('api.urls.user_course_urls')),
+    path('', include('api.urls.user_lesson_urls')),
 ]

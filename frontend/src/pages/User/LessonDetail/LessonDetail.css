@@ -1,0 +1,191 @@
+.lesson-page {
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.lesson-header-bar {
+  background-color: #5E3C86;
+  padding: 0.2rem 1.5rem;
+  border-bottom: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.lesson-container {
+  max-width: 800px; 
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* --- Top Flashcard Section --- */
+.flashcard-preview-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto; 
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+  scrollbar-width: thin;
+}
+
+.flashcard-preview-item {
+  min-width: 160px;
+  height: 120px;
+  background-color: #e5e7eb; 
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.flashcard-preview-item:hover {
+  transform: translateY(-4px);
+  background-color: #d1d5db;
+}
+
+.flashcard-text {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+/* --- Lesson Info Section --- */
+.lesson-header {
+  margin-bottom: 1.5rem;
+}
+
+.lesson-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.term-count {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* --- Action Buttons --- */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 6px rgba(107, 70, 193, 0.25);
+  text-transform: uppercase;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.btn-start {
+  background-color: #5E3C86; 
+}
+
+.btn-quiz {
+  background-color: #5E3C86; /* Màu tím đậm tương tự */
+}
+
+/* --- Term List Section --- */
+.term-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+}
+
+.term-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.term-item {
+  background-color: #e5e7eb; /* Màu nền xám cho item */
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.term-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  order: 2;
+}
+
+.term-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  order: 1;
+}
+
+.term-word {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.term-definition {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: #666;
+}

@@ -129,7 +129,7 @@ class LoginView(APIView):
             key='jwt',
             value=token,
             httponly=True,
-            secure=True, 
+            secure=False,  # Dev: False (HTTP), Prod: True (HTTPS)
             samesite='Lax',
             max_age=7*24*60*60
         )
