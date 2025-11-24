@@ -40,6 +40,7 @@ const LoginPage: React.FC = () => {
 
         // Redirect dựa trên role (JWT đã được lưu trong HttpOnly cookie)
         const role = loginResponse.data.role;
+        console.log("Logged from email:", email, "in as role:", role);
         setTimeout(() => {
           if (role === "learner") navigate("/");
           else if (role === "admin" || role === "superadmin") navigate("/admin");

@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from ..models import User
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -137,9 +138,13 @@ class LoginView(APIView):
         return response
 
 class LogoutView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # Disable authentication for logout
+    
     def post(self, request):
         response = Response({"message": "Đăng xuất thành công."})
         response.delete_cookie('jwt')
+        response.delete_cookie('sessionid')  # Also clear Django session
         return response
 
 class MeView(APIView):
