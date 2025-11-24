@@ -43,9 +43,8 @@ const LessonDetail = () => {
   };
 
   const handleBack = () => {
-    const cId = lessonData?.course_id || courseId;
-    if (cId) {
-      navigate(`/courses/${cId}`);
+    if (lessonData?.course_id) {
+      navigate(`/courses/${lessonData.course_id}`);
     } else {
       navigate(-1);
     }
@@ -114,7 +113,7 @@ const LessonDetail = () => {
           {flashcards.map((card) => (
             <div key={card.id} className="term-item">
               {card.image_url && (
-                <img src={card.image_url} alt={card.word} className="term-image" />
+                <img src={card.image_url} alt={`Image illustrating ${card.word}`} className="term-image" />
               )}
               <div className="term-content">
                 <div className="term-word">{card.word}</div>

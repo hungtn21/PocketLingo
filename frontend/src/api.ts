@@ -10,11 +10,15 @@ export const api = axios.create({
 // Interceptor: Thêm token vào Authorization header nếu có
 api.interceptors.request.use(
   (config) => {
-    // Thử lấy token từ cookie (key là 'jwt')
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("jwt="))
-      ?.split("=")[1];
+    // Parse JWT token from cookie safely (handles JWT with = characters)
+    const cookies = document.cookie.split("; ");
+    let token = null;
+    for (const cookie of cookies) {
+      if (cookie.startsWith("jwt=")) {
+        token = cookie.substring(4); // Remove "jwt=" prefix
+        break;
+      }
+    }
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

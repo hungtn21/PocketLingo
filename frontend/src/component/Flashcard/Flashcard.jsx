@@ -22,7 +22,7 @@ const Flashcard = ({ data }) => {
         {/* MẶT SAU: Hiển thị ảnh + nghĩa */}
         <div className="flashcard-back">
           {data.image_url && (
-            <img src={data.image_url} alt={data.word} className="flashcard-image" />
+            <img src={data.image_url} alt={`Image illustrating ${data.word}`} className="flashcard-image" />
           )}
           <span className="flashcard-meaning">{data.meaning}</span>
           {data.example && (

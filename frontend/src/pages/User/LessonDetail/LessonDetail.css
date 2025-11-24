@@ -126,7 +126,7 @@
 }
 
 .btn-quiz {
-  background-color: #5E3C86; /* Màu tím đậm tương tự */
+  background-color: #5E3C86; 
 }
 
 /* --- Term List Section --- */
@@ -144,7 +144,7 @@
 }
 
 .term-item {
-  background-color: #e5e7eb; /* Màu nền xám cho item */
+  background-color: #e5e7eb;
   padding: 1.5rem;
   border-radius: 12px;
   display: flex;

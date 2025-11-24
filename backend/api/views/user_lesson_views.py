@@ -83,26 +83,16 @@ def get_lesson_detail(request, lesson_id):
     # 1. Authentication
     user = get_user_from_token(request)
     
-    # --- CHỐT CHẶN AN TOÀN: Đảm bảo user là Object ---
     if not user:
-        return Response({'success': False, 'message': 'Chưa đăng nhập.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # Nếu vì lý do nào đó user vẫn là string (email), ta query lại lần nữa
-    if isinstance(user, str):
-        try:
-            user = User.objects.get(email=user)
-        except User.DoesNotExist:
-            return Response({'success': False, 'message': 'User không hợp lệ.'}, status=status.HTTP_401_UNAUTHORIZED)
-    # -------------------------------------------------
+        return Response({'success': False, 'error': 'Chưa đăng nhập.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     # 2. Get Lesson
     try:
         lesson = Lesson.objects.select_related('course').get(id=lesson_id)
     except Lesson.DoesNotExist:
-        return Response({'success': False, 'message': 'Bài học không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'success': False, 'error': 'Bài học không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
 
     # 3. Check Authorization
-    # Lúc này user chắc chắn là Object, query sẽ không lỗi
     enrolled = UserCourse.objects.filter(
         user=user, 
         course=lesson.course, 
@@ -110,7 +100,7 @@ def get_lesson_detail(request, lesson_id):
     ).exists()
     
     if not enrolled:
-        return Response({'success': False, 'message': 'Bạn chưa đăng ký khóa học này.'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'success': False, 'error': 'Bạn chưa đăng ký khóa học này.'}, status=status.HTTP_403_FORBIDDEN)
 
     # 4. Fetch Flashcards
     flashcards_qs = Flashcard.objects.filter(lesson=lesson).order_by('id')
@@ -159,10 +149,8 @@ def get_lesson_detail(request, lesson_id):
             })
 
     # 6. User Lesson Status
-    # --- ĐÂY LÀ CHỖ GÂY LỖI CŨ, ĐÃ ĐƯỢC FIX ---
     user_lesson_data = {'bookmark': False, 'completed': False, 'completed_at': None}
     try:
-        # Sử dụng user_id thay vì user object để đồng bộ và an toàn
         ul = UserLesson.objects.get(user_id=user.id, lesson=lesson)
         user_lesson_data = {
             'bookmark': ul.bookmark,
@@ -170,6 +158,7 @@ def get_lesson_detail(request, lesson_id):
             'completed_at': ul.completed_at
         }
     except UserLesson.DoesNotExist:
+        # If user hasn't started this lesson, use default values
         pass
 
     return Response({
