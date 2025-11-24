@@ -130,7 +130,7 @@ class LoginView(APIView):
             key='jwt',
             value=token,
             httponly=True,
-            secure=True, 
+            secure=not settings.DEBUG,
             samesite='Lax',
             max_age=7*24*60*60
         )
