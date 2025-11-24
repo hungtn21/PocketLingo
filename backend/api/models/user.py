@@ -25,5 +25,20 @@ class User(models.Model):
     def __str__(self):
         return self.email
     
+    @property
+    def is_authenticated(self):
+        """Always return True for authenticated users"""
+        return True
+    
+    @property
+    def is_anonymous(self):
+        """Always return False for authenticated users"""
+        return False
+    
+    @property
+    def username(self):
+        """Return name as username"""
+        return self.name
+    
     class Meta:
         db_table = 'users'     

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
 import { api } from "../../api";
 import EnrollmentConfirmModal from "./EnrollmentConfirmModal";
@@ -6,6 +7,7 @@ import RejectionReasonModal from "./RejectionReasonModal";
 import "./CourseCard.css";
 
 const CourseCard = ({ course, onEnrollmentChange }) => {
+  const navigate = useNavigate();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [enrollmentReason, setEnrollmentReason] = useState("");
@@ -123,8 +125,8 @@ const CourseCard = ({ course, onEnrollmentChange }) => {
 
   const handleButtonClick = () => {
     if (course.user_status === "approved") {
-      // Navigate to learning page (will implement later)
-      console.log("Navigate to course:", course.id);
+      // Navigate to course details page
+      navigate(`/courses/${course.id}`);
     } else if (course.user_status === "rejected") {
       // Show rejection reason modal
       handleShowRejectionReason();

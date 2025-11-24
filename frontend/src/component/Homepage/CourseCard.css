@@ -47,7 +47,7 @@
   flex: 1;
 }
 
-.course-title {
+.course-card .course-title {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 0.75rem 0;
@@ -97,7 +97,8 @@
   gap: 0.5rem;
 }
 
-.rating-number {
+.course-card .rating-number {
+  font-size: 24px;
   font-weight: 600;
   color: #333;
 }

@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import Homepage from "../pages/User/Homepage/Homepage";
+import CourseDetail from "../pages/User/CourseDetail/CourseDetail";
 import LandingPage from "../pages/Guest/LandingPage";
 import LoginPage from "../pages/Guest/LoginPage";
 import SignupPage from "../pages/Guest/SignupPage";
@@ -18,10 +19,15 @@ export const router = createBrowserRouter([
     path: "/",
     element: <ProtectedRoute allowRoles={["learner"]} />,
     children: [
-      { path: "", 
+      { 
+        path: "", 
         element: <Homepage /> 
       },
       { path: "lessons/:lessonId", element: <LessonDetail /> },
+      { 
+        path: "courses/:courseId", 
+        element: <CourseDetail /> 
+      },
       // Thêm các routes khác cho role learner ở đây
       // Ví dụ:
       //{path: "profile", element: <ProfilePage />}  "/profile"
