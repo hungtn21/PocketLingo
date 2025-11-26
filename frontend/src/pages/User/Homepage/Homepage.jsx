@@ -5,6 +5,7 @@ import SearchBar from "../../../component/Homepage/SearchBar";
 import FilterPanel from "../../../component/Homepage/FilterPanel";
 import CourseCard from "../../../component/Homepage/CourseCard";
 import ToastMessage from "../../../component/ToastMessage";
+import AIChatBot from "../../../component/AIChatBot/AIChatBot.tsx";
 import { useUser } from "../../../context/UserContext.tsx";
 import "./Homepage.css";
 
@@ -137,6 +138,9 @@ const Homepage = () => {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* AI ChatBot */}
+      <AIChatBot />
 
       <div className="homepage-content">
         <div className="search-filter-section">
