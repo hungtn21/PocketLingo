@@ -11,6 +11,10 @@ from api.models.user_lesson import UserLesson
 from api.models.quiz import Quiz
 from api.models.quiz_attempt import QuizAttempt
 from api.models.user import User
+<<<<<<< HEAD
+=======
+from api.ai.course_review import generate_course_suggestion_from_database
+>>>>>>> 0765bc41883b8b19dd33382e73e87ce50253796a
 
 
 @api_view(['GET'])
@@ -450,3 +454,101 @@ def delete_course_review(request, course_id):
             'success': False,
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+<<<<<<< HEAD
+=======
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_ai_course_suggestions(request):
+    """
+    Get AI-powered course suggestions based on user prompt
+    Request body:
+    - prompt: user's learning requirements (required)
+    
+    Returns:
+    - explanation: AI's explanation in Vietnamese
+    - courses: list of recommended courses with full details
+    """
+    try:
+        # Get prompt from request
+        prompt = request.data.get('prompt', '').strip()
+        
+        if not prompt:
+            return Response({
+                'success': False,
+                'error': 'Vui lòng nhập yêu cầu của bạn'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get all courses from database
+        courses = Course.objects.all().annotate(
+            lesson_count=Count('lessons', distinct=True),
+            avg_rating=Avg('user_courses__rating')
+        )
+        
+        # Prepare course data for AI
+        course_data = []
+        for course in courses:
+            course_data.append({
+                'id': course.id,
+                'title': course.title,
+                'description': course.description,
+                'language': course.get_language_display(),
+                'level': course.get_level_display(),
+            })
+        
+        # Call AI service
+        ai_result = generate_course_suggestion_from_database(prompt, course_data)
+        
+        # Get recommended course IDs
+        course_ids = ai_result.get('course_ids', [])
+        explanation = ai_result.get('explanation', '')
+        
+        # Get user's enrolled course IDs
+        user = request.user
+        enrolled_course_ids = set()
+        if user and hasattr(user, 'id'):
+            # Get all courses that user has enrolled in (any status)
+            enrolled_course_ids = set(
+                UserCourse.objects.filter(user_id=user.id)
+                .values_list('course_id', flat=True)
+            )
+        
+        # Filter out enrolled courses from recommended course IDs
+        unenrolled_course_ids = [cid for cid in course_ids if cid not in enrolled_course_ids]
+        
+        # Fetch full course details only for unenrolled courses
+        recommended_courses = Course.objects.filter(id__in=unenrolled_course_ids).annotate(
+            lesson_count=Count('lessons', distinct=True),
+            avg_rating=Avg('user_courses__rating')
+        )
+        
+        # Prepare response data (only unenrolled courses)
+        courses_response = []
+        for course in recommended_courses:
+            courses_response.append({
+                'id': course.id,
+                'title': course.title,
+                'description': course.description,
+                'language': course.get_language_display(),
+                'level': course.get_level_display(),
+                'thumbnail': course.image_url,
+                'rating': round(course.avg_rating, 1) if course.avg_rating else 0.0,
+                'total_lessons': course.lesson_count,
+                'duration': f"{course.lesson_count} bài học",
+                'user_status': None,  # Always None since we only show unenrolled courses
+            })
+        
+        return Response({
+            'success': True,
+            'explanation': explanation,
+            'courses': courses_response
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(f"Error in get_ai_course_suggestions: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'Đã có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+>>>>>>> 0765bc41883b8b19dd33382e73e87ce50253796a

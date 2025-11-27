@@ -1,0 +1,474 @@
+/* Floating AI Button */
+.ai-floating-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5E3C86, #7B5BA1);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(94, 60, 134, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.ai-floating-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(94, 60, 134, 0.6);
+}
+
+.ai-floating-button:active {
+  transform: scale(0.95);
+}
+
+/* Popup Overlay */
+.ai-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Popup Container */
+.ai-popup-container {
+  background: linear-gradient(135deg, #5E3C86, #7B5BA1);
+  border-radius: 20px;
+  padding: 30px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Close Button */
+.ai-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.ai-popup-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Header */
+.ai-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.ai-popup-icon {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-popup-header h3 {
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Form */
+.ai-popup-form {
+  margin-bottom: 20px;
+}
+
+.ai-popup-textarea {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: white;
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 15px;
+  transition: border-color 0.3s ease;
+}
+
+.ai-popup-textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.ai-popup-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-popup-submit {
+  width: 100%;
+  padding: 12px 24px;
+  background: white;
+  color: #5E3C86;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ai-popup-submit:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ai-popup-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.ai-popup-error {
+  background: rgba(255, 59, 48, 0.2);
+  border: 1px solid rgba(255, 59, 48, 0.5);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* Results Section */
+.ai-popup-results {
+  margin-top: 20px;
+}
+
+/* AI Explanation */
+.ai-explanation {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.ai-message-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ai-message-header span {
+  color: #5E3C86;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.ai-explanation p {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Course Cards Grid */
+.ai-courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.ai-course-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ai-course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ai-course-thumbnail {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.ai-course-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ai-course-info {
+  padding: 15px;
+}
+
+.ai-course-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ai-course-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ai-course-language,
+.ai-course-level {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #666;
+}
+
+.ai-course-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.ai-course-btn {
+  width: 100%;
+  padding: 8px 16px;
+  background: #5E3C86;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.ai-course-btn:hover:not(:disabled) {
+  background: #4A2D6A;
+}
+
+.ai-course-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Status-specific button styles */
+.ai-course-btn.pending {
+  background: #f59e0b;
+}
+
+.ai-course-btn.pending:hover {
+  background: #f59e0b;
+}
+
+.ai-course-btn.approved {
+  background: #10b981;
+}
+
+.ai-course-btn.approved:hover {
+  background: #059669;
+}
+
+.ai-course-btn.rejected {
+  background: #ef4444;
+  cursor: pointer;
+}
+
+.ai-course-btn.rejected:hover {
+  background: #dc2626;
+}
+
+.ai-course-btn.completed {
+  background: #3b82f6;
+}
+
+.ai-course-btn.completed:hover {
+  background: #3b82f6;
+}
+
+/* Rejection Reason Modal */
+.ai-rejection-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+.ai-rejection-modal h3 {
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.rejection-course-name {
+  color: #5E3C86;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 20px 0;
+}
+
+.rejection-reason {
+  background: #f9f9f9;
+  border-left: 4px solid #ef4444;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.rejection-reason p {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.rejection-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.rejection-btn-reregister,
+.rejection-btn-close {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rejection-btn-reregister {
+  background: #5E3C86;
+  color: white;
+}
+
+.rejection-btn-reregister:hover {
+  background: #4A2D6A;
+}
+
+.rejection-btn-close {
+  background: #e5e7eb;
+  color: #333;
+}
+
+.rejection-btn-close:hover {
+  background: #d1d5db;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ai-popup-container {
+    width: 95%;
+    padding: 20px;
+    max-height: 85vh;
+  }
+
+  .ai-courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-floating-button {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .ai-rejection-modal {
+    padding: 20px;
+  }
+
+  .rejection-modal-actions {
+    flex-direction: column;
+  }
+
+  .rejection-btn-reregister,
+  .rejection-btn-close {
+    width: 100%;
+  }
+}
+
+/* Scrollbar Styling */
+.ai-popup-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ai-popup-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.ai-popup-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.ai-popup-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
