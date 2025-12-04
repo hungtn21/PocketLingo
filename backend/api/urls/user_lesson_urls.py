@@ -1,9 +1,10 @@
 from django.urls import path
 from api.views.user_lesson_views import get_lesson_detail
-from api.views.quiz_views import get_lesson_quiz, submit_quiz
+from api.views.quiz_views import get_lesson_quiz, submit_quiz, get_quiz_result
 
 urlpatterns = [
     path('lessons/<int:lesson_id>/', get_lesson_detail, name='get_lesson_detail'),
     path('lessons/<int:lesson_id>/quiz/', get_lesson_quiz, name='get_lesson_quiz'),
     path('lessons/<int:lesson_id>/quiz/submit/', submit_quiz, name='submit_quiz'),
+    path('quiz-attempts/<int:attempt_id>/', get_quiz_result, name='get_quiz_result'),
 ]

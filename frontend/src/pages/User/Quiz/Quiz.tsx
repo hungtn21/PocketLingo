@@ -125,8 +125,8 @@ const Quiz: React.FC = () => {
         answers,
       });
 
-      alert(response.data.message);
-      navigate(`/lessons/${lessonId}`);
+      // Chuyển hướng đến trang kết quả thay vì hiển thị alert
+      navigate(`/quiz-result/${response.data.attempt_id}`);
     } catch (error) {
       console.error("Failed to submit quiz:", error);
       alert("Không thể nộp bài. Vui lòng thử lại.");
