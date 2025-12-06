@@ -242,3 +242,107 @@ def submit_quiz(request, lesson_id):
             {"error": str(e), "details": error_details},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_quiz_result(request, attempt_id):
+    """
+    Lấy chi tiết kết quả một lần làm quiz
+    GET /quiz-attempts/{attempt_id}/
+    """
+    try:
+        user = request.user
+        
+        # Lấy quiz attempt
+        quiz_attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=user)
+        quiz = quiz_attempt.quiz
+        lesson = quiz.lesson
+        
+        # Lấy tất cả câu hỏi của quiz
+        questions = Question.objects.filter(quiz=quiz).order_by('order_index')
+        
+        # Tạo dict từ câu trả lời của user
+        user_answers_dict = {}
+        for ans in quiz_attempt.quiz_answers:
+            if 'question_id' in ans and 'answer' in ans:
+                user_answers_dict[ans['question_id']] = ans['answer']
+        
+        # Chuẩn bị dữ liệu câu hỏi kèm đáp án và kết quả
+        questions_data = []
+        for question in questions:
+            user_answer = user_answers_dict.get(question.id)
+            is_correct = False
+            
+            question_data = {
+                "question_id": question.id,
+                "type": question.question_type,
+                "content": question.question_text,
+                "order_index": question.order_index,
+                "user_answer": user_answer,
+            }
+            
+            # Xử lý theo từng loại câu hỏi
+            if question.question_type == 'multiple_choice':
+                options = question.answer.get("options", [])
+                correct_answer = question.answer.get("correct_answer")
+                
+                question_data["options"] = options
+                question_data["correct_answer"] = correct_answer
+                
+                if user_answer == correct_answer:
+                    is_correct = True
+                    
+            elif question.question_type == 'drag_drop':
+                correct_pairs = question.answer.get("correct_pairs", [])
+                correct_dict = {pair["side_a"]: pair["side_b"] for pair in correct_pairs}
+                
+                question_data["correct_pairs"] = correct_pairs
+                question_data["correct_answer"] = correct_dict
+                
+                if isinstance(user_answer, dict) and user_answer == correct_dict:
+                    is_correct = True
+                    
+            elif question.question_type == 'fill_in':
+                accepted_answers = question.answer.get("accepted_answers", [])
+                
+                question_data["correct_answers"] = accepted_answers
+                
+                if isinstance(user_answer, str) and user_answer.strip():
+                    user_answer_normalized = user_answer.strip().lower()
+                    accepted_normalized = [str(ans).strip().lower() for ans in accepted_answers]
+                    if user_answer_normalized in accepted_normalized:
+                        is_correct = True
+            
+            question_data["is_correct"] = is_correct
+            questions_data.append(question_data)
+        
+        # Tính số câu đúng
+        correct_count = sum(1 for q in questions_data if q["is_correct"])
+        total_questions = len(questions_data)
+        
+        response_data = {
+            "attempt_id": quiz_attempt.id,
+            "lesson_id": lesson.id,
+            "lesson_title": lesson.title,
+            "quiz_id": quiz.id,
+            "submitted_at": quiz_attempt.submitted_at,
+            "score": float(quiz_attempt.score),
+            "status": quiz_attempt.status,
+            "passed_score": quiz.passed_score,
+            "correct_count": correct_count,
+            "total_questions": total_questions,
+            "attempt_no": quiz_attempt.attempt_no,
+            "questions": questions_data
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in get_quiz_result: {error_details}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

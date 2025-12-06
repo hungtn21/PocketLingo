@@ -13,6 +13,7 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import LessonDetail from "../pages/User/LessonDetail/LessonDetail";
 import AdminProfile from "../pages/Admin/Profile/AdminProfile";
 import Quiz from "../pages/User/Quiz/Quiz";
+import QuizResult from "../pages/User/QuizResult/QuizResult";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       },
       { path: "lessons/:lessonId", element: <LessonDetail /> },
       { path: "lessons/:lessonId/quiz", element: <Quiz /> },
+      { path: "quiz-result/:attemptId", element: <QuizResult /> },
       { 
         path: "courses/:courseId", 
         element: <CourseDetail /> 
