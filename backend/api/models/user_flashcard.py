@@ -8,7 +8,7 @@ class UserFlashcard(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
+        'User',  # Tham chiếu trực tiếp đến model User tùy chỉnh 
         on_delete=models.CASCADE, 
         related_name='user_flashcards'
     )

@@ -25,6 +25,7 @@ class User(models.Model):
     def __str__(self):
         return self.email
     
+    # Required properties for Django Auth compatibility
     @property
     def is_authenticated(self):
         """Always return True for authenticated users"""
@@ -37,8 +38,35 @@ class User(models.Model):
     
     @property
     def username(self):
-        """Return name as username"""
+        """Return name as username for compatibility"""
         return self.name
+    
+    @property
+    def is_active(self):
+        """Check if user is active"""
+        return self.status == self.Status.ACTIVE
+    
+    @property
+    def is_staff(self):
+        """Check if user is staff (admin or superadmin)"""
+        return self.role in [self.Role.ADMIN, self.Role.SUPERADMIN]
+    
+    @property
+    def is_superuser(self):
+        """Check if user is superuser"""
+        return self.role == self.Role.SUPERADMIN
+    
+    def has_perm(self, perm, obj=None):
+        """Does the user have a specific permission?"""
+        return self.is_staff
+    
+    def has_module_perms(self, app_label):
+        """Does the user have permissions to view the app `app_label`?"""
+        return self.is_staff
+    
+    # Required for Django Admin
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name']
     
     class Meta:
         db_table = 'users'     

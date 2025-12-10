@@ -13,7 +13,7 @@ class QuizAttempt(models.Model):
         related_name='attempts'
     )
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
+        'User',  # Tham chiếu trực tiếp đến model User tùy chỉnh trong cùng app
         on_delete=models.CASCADE, 
         related_name='quiz_attempts'
     )
