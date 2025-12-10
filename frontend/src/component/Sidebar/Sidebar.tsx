@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { UserCircle } from "lucide-react";
 import { useUser } from "../../context/UserContext";
 import "./Sidebar.css";
@@ -10,6 +11,7 @@ type SidebarProps = {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useUser();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -23,7 +25,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="sidebar-body">
-          <button className="sidebar-item">Dashboard</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin"); onClose(); }}>
+          Dashboard
+          </button>
           <button className="sidebar-item">Quản lý học viên</button>
           {user?.role === "superadmin" && (
             <button className="sidebar-item">Quản lý admin</button>
@@ -33,7 +37,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="sidebar-footer">
-          <UserCircle size={32} className="me-2" />
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt={user?.name || "Avatar"}
+              style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", marginRight: 8 }}
+            />
+          ) : (
+            <UserCircle size={32} className="me-2" />
+          )}
           <span>{user?.name || "User"}</span>
         </div>
       </div>

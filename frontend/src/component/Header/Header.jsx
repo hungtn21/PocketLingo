@@ -9,7 +9,7 @@ import { useUser } from "../../context/UserContext.tsx";
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -59,7 +59,15 @@ const Header = () => {
               onClick={toggleDropdown}
               aria-label="Profile"
             >
-              <User size={24} />
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user?.name || "Avatar"}
+                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                />
+              ) : (
+                <User size={24} />
+              )}
             </button>
 
             {isDropdownOpen && (
