@@ -4,7 +4,8 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from ..authentication import JWTCookieAuthentication
 from ..models import User
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -148,18 +149,13 @@ class LogoutView(APIView):
         return response
 
 class MeView(APIView):
-    def get(self, request):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            return Response({'error': 'Chưa đăng nhập.'}, status=401)
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return Response({'error': 'Token đã hết hạn.'}, status=401)
-        except jwt.InvalidTokenError:
-            return Response({'error': 'Token không hợp lệ.'}, status=401)
+    """Return current authenticated user's minimal info."""
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
 
-        return Response({'user_id': payload['user_id'], 'email': payload['email'], 'role': payload['role'], 'name': payload['name']})
+    def get(self, request):
+        user = request.user
+        return Response({'user_id': str(user.id), 'email': user.email, 'role': user.role, 'name': user.name})
 
 class ForgotPasswordView(APIView):
     """Gửi email với token để reset mật khẩu."""
@@ -246,37 +242,28 @@ class ResetPasswordView(APIView):
 
 class ChangePasswordView(APIView):
     """Đổi mật khẩu cho user đã đăng nhập."""
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        token = request.COOKIES.get('jwt')
+        user = request.user
         old_password = request.data.get('old_password')
         new_password = request.data.get('new_password')
 
-        if not token:
-            return Response({'error': 'Chưa đăng nhập.'}, status=401)
         if not old_password or not new_password:
             return Response({'error': 'Mật khẩu cũ và mới là bắt buộc.'}, status=400)
         try:
             validate_password(new_password)
         except DjangoValidationError as e:
             return Response({'error': 'Mật khẩu phải gồm ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.', 'details': e.messages}, status=400)
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return Response({'error': 'Token đã hết hạn.'}, status=401)
-        except jwt.InvalidTokenError:
-            return Response({'error': 'Token không hợp lệ.'}, status=401)
-
-        try:
-            user = User.objects.get(id=payload['user_id'])
-        except User.DoesNotExist:
-            return Response({'error': 'Tài khoản không tồn tại.'}, status=400)
 
         if user.status != User.Status.ACTIVE:
             return Response({'error': 'Tài khoản không hoạt động.'}, status=400)
         if not check_password(old_password, user.password_hash):
             return Response({'error': 'Mật khẩu cũ không đúng.'}, status=400)
         if old_password == new_password:
-                return Response({'error': 'Mật khẩu mới phải khác mật khẩu cũ.'}, status=400)
+            return Response({'error': 'Mật khẩu mới phải khác mật khẩu cũ.'}, status=400)
+
         user.password_hash = make_password(new_password)
         user.save()
 
@@ -284,41 +271,16 @@ class ChangePasswordView(APIView):
         
 class UserProfileView(APIView):
     """Xem và cập nhật thông tin profile của user đã đăng nhập."""
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            return Response({'error': 'Chưa đăng nhập.'}, status=401)
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return Response({'error': 'Token đã hết hạn.'}, status=401)
-        except jwt.InvalidTokenError:
-            return Response({'error': 'Token không hợp lệ.'}, status=401)
-
-        try:
-            user = User.objects.get(id=payload['user_id'])
-        except User.DoesNotExist:
-            return Response({'error': 'Tài khoản không tồn tại.'}, status=400)
-
+        user = request.user
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
 
     def patch(self, request):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            return Response({'error': 'Chưa đăng nhập.'}, status=401)
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return Response({'error': 'Token đã hết hạn.'}, status=401)
-        except jwt.InvalidTokenError:
-            return Response({'error': 'Token không hợp lệ.'}, status=401)
-
-        try:
-            user = User.objects.get(id=payload['user_id'])
-        except User.DoesNotExist:
-            return Response({'error': 'Tài khoản không tồn tại.'}, status=400)
-
+        user = request.user
         serializer = UserProfileSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -326,23 +288,12 @@ class UserProfileView(APIView):
         return Response(serializer.errors, status=400)
     
 class RequestEmailChangeView(APIView):
+    """Request an email change for the authenticated user."""
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        token_jwt = request.COOKIES.get('jwt')
-        if not token_jwt:
-            return Response({'error': 'Chưa đăng nhập.'}, status=401)
-        try:
-            payload = jwt.decode(token_jwt, settings.SECRET_KEY, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return Response({'error': 'Token đã hết hạn.'}, status=401)
-        except jwt.InvalidTokenError:
-            return Response({'error': 'Token không hợp lệ.'}, status=401)
-
-        user_id = payload['user_id']
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response({'error': 'Tài khoản không tồn tại.'}, status=400)
-
+        user = request.user
         new_email = request.data.get('new_email')
         if not new_email:
             return Response({'error': 'Email mới là bắt buộc.'}, status=400)

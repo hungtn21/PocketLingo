@@ -234,8 +234,4 @@ const AdminProfile: React.FC = () => {
   );
 };
 
-<<<<<<< HEAD
 export default AdminProfile;
-=======
-export default AdminProfile;
->>>>>>> 0765bc41883b8b19dd33382e73e87ce50253796a

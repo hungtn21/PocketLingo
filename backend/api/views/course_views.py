@@ -11,10 +11,7 @@ from api.models.user_lesson import UserLesson
 from api.models.quiz import Quiz
 from api.models.quiz_attempt import QuizAttempt
 from api.models.user import User
-<<<<<<< HEAD
-=======
-from api.ai.course_review import generate_course_suggestion_from_database
->>>>>>> 0765bc41883b8b19dd33382e73e87ce50253796a
+# from api.ai.course_review import generate_course_suggestion_from_database  # Temporarily disabled
 
 
 @api_view(['GET'])
@@ -454,8 +451,6 @@ def delete_course_review(request, course_id):
             'success': False,
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-<<<<<<< HEAD
-=======
 
 
 @api_view(['POST'])
@@ -497,12 +492,12 @@ def get_ai_course_suggestions(request):
                 'level': course.get_level_display(),
             })
         
-        # Call AI service
-        ai_result = generate_course_suggestion_from_database(prompt, course_data)
+        # Call AI service (temporarily disabled)
+        # ai_result = generate_course_suggestion_from_database(prompt, course_data)
         
-        # Get recommended course IDs
-        course_ids = ai_result.get('course_ids', [])
-        explanation = ai_result.get('explanation', '')
+        # Get recommended course IDs (temporarily return empty for now)
+        course_ids = []  # ai_result.get('course_ids', [])
+        explanation = 'AI service temporarily unavailable'  # ai_result.get('explanation', '')
         
         # Get user's enrolled course IDs
         user = request.user
@@ -551,4 +546,3 @@ def get_ai_course_suggestions(request):
             'success': False,
             'error': 'Đã có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
->>>>>>> 0765bc41883b8b19dd33382e73e87ce50253796a
