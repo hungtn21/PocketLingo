@@ -1,5 +1,14 @@
 from django.db import models
+from django.contrib.auth.hashers import check_password
 import uuid
+
+class UserManager(models.Manager):
+    """Custom manager for User model"""
+    
+    def get_by_natural_key(self, username):
+        """Get user by natural key (username/email)"""
+        return self.get(email=username)
+
 
 class User(models.Model):
     class Role(models.TextChoices):
@@ -21,6 +30,8 @@ class User(models.Model):
     avatar_url = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = UserManager()
 
     def __str__(self):
         return self.email
@@ -63,6 +74,10 @@ class User(models.Model):
     def has_module_perms(self, app_label):
         """Does the user have permissions to view the app `app_label`?"""
         return self.is_staff
+    
+    def check_password(self, raw_password):
+        """Check if the provided password matches the stored hash"""
+        return check_password(raw_password, self.password_hash)
     
     # Required for Django Admin
     USERNAME_FIELD = 'email'

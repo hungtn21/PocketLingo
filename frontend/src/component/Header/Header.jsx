@@ -72,9 +72,6 @@ const Header = () => {
 
             {isDropdownOpen && (
               <div className="custom-dropdown-menu">
-                <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid #eee", color: "#666", fontSize: "0.9rem" }}>
-                  {user?.name}
-                </div>
                 <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
                 <button className="custom-dropdown-item">Đổi mật khẩu</button>
                 <button className="custom-dropdown-item" onClick={handleLogout}>

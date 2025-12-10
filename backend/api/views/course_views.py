@@ -11,8 +11,7 @@ from api.models.user_lesson import UserLesson
 from api.models.quiz import Quiz
 from api.models.quiz_attempt import QuizAttempt
 from api.models.user import User
-# from api.ai.course_review import generate_course_suggestion_from_database  # Temporarily disabled
-
+from api.ai.course_review import generate_course_suggestion_from_database
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -493,11 +492,11 @@ def get_ai_course_suggestions(request):
             })
         
         # Call AI service (temporarily disabled)
-        # ai_result = generate_course_suggestion_from_database(prompt, course_data)
+        ai_result = generate_course_suggestion_from_database(prompt, course_data)
         
         # Get recommended course IDs (temporarily return empty for now)
-        course_ids = []  # ai_result.get('course_ids', [])
-        explanation = 'AI service temporarily unavailable'  # ai_result.get('explanation', '')
+        course_ids = ai_result.get('course_ids', [])
+        explanation = ai_result.get('explanation', '')
         
         # Get user's enrolled course IDs
         user = request.user
