@@ -20,7 +20,7 @@ class Course(models.Model):
     image_url = models.TextField(blank=True, null=True)
     
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        'User',  # Tham chiếu trực tiếp đến model User tùy chỉnh
         on_delete=models.SET_NULL, 
         null=True,
         blank=True,

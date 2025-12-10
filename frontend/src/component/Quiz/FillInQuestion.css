@@ -1,0 +1,42 @@
+.fill-in-question {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.question-content {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin: 0;
+}
+
+.answer-input-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.answer-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  font-size: 1.2rem;
+  border: 3px solid #6b4b9e;
+  border-radius: 12px;
+  background: white;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.answer-input:focus {
+  outline: none;
+  border-color: #8b6bb5;
+  box-shadow: 0 0 0 3px rgba(107, 75, 158, 0.2);
+}
+
+.answer-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
