@@ -14,7 +14,7 @@ interface AdminHeaderProps {
 const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
@@ -58,7 +58,14 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
             <Menu size={26} />
           </button>
 
-          <img src={logo} alt="Logo" className="logo" />
+          <button
+            className="logo-button"
+            onClick={() => navigate("/")}
+            aria-label="Trang chủ"
+            style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+          >
+            <img src={logo} alt="Logo" className="logo" />
+          </button>
         </div>
 
         {/* Nhóm icon bên phải */}
@@ -69,7 +76,15 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
 
           <div className="profile-container">
             <button className="profile-button" onClick={toggleDropdown}>
-              <User size={24} />
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user?.name || "Avatar"}
+                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                />
+              ) : (
+                <User size={24} />
+              )}
             </button>
 
             {isDropdownOpen && (

@@ -9,7 +9,7 @@ import { useUser } from "../../context/UserContext.tsx";
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -59,11 +59,22 @@ const Header = () => {
               onClick={toggleDropdown}
               aria-label="Profile"
             >
-              <User size={24} />
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user?.name || "Avatar"}
+                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                />
+              ) : (
+                <User size={24} />
+              )}
             </button>
 
             {isDropdownOpen && (
               <div className="custom-dropdown-menu">
+                <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid #eee", color: "#666", fontSize: "0.9rem" }}>
+                  {user?.name}
+                </div>
                 <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
                 <button className="custom-dropdown-item">Đổi mật khẩu</button>
                 <button className="custom-dropdown-item" onClick={handleLogout}>

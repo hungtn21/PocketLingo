@@ -7,6 +7,7 @@ interface User {
   email: string;
   name : string;
   role: string;
+  avatar_url?: string;
 }
 
 interface UserContextType {
@@ -25,12 +26,24 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await api.get("/users/me/");
+        const meResponse = await api.get("/users/me/");
+        
+        // Fetch avatar from profile endpoint
+        let avatarUrl: string | undefined = undefined;
+        try {
+          const profileResponse = await api.get("/users/profile/");
+          avatarUrl = profileResponse.data.avatar_url || undefined;
+        } catch (e) {
+          // Profile endpoint might not be available, continue without avatar
+          console.log("Could not fetch profile data for avatar");
+        }
+        
         setUser({
-          id: response.data.user_id,
-          email: response.data.email,
-          role: response.data.role,
-          name: response.data.name,
+          id: meResponse.data.user_id,
+          email: meResponse.data.email,
+          role: meResponse.data.role,
+          name: meResponse.data.name,
+          avatar_url: avatarUrl,
         });
       } catch (error) {
         // If there is no token or the token has expired, user will be null
@@ -57,4 +70,13 @@ export const useUser = () => {
     throw new Error("useUser must be used within UserProvider");
   }
   return context;
+};
+
+// Higher order component to ensure UserProvider is available
+export const withUserProvider = (Component: React.ComponentType<any>) => {
+  return (props: any) => (
+    <UserProvider>
+      <Component {...props} />
+    </UserProvider>
+  );
 };
