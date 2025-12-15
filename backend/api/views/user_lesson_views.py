@@ -1,3 +1,5 @@
+# api/views/user_lesson_views.py
+
 import random
 import jwt
 from django.conf import settings
@@ -105,24 +107,32 @@ def get_lesson_detail(request, lesson_id):
     # 4. Fetch Flashcards
     flashcards_qs = Flashcard.objects.filter(lesson=lesson).order_by('id')
     
-    # Query an toàn dùng user.id
+    # Query - Tính status từ level thay vì lấy từ DB
     user_flashcards = UserFlashcard.objects.filter(
         user_id=user.id, 
         flashcard__in=flashcards_qs
-    ).values('flashcard_id', 'status', 'level', 'next_review_date')
+    ).values('flashcard_id', 'level', 'next_review_date')
     
     user_flashcard_map = {uf['flashcard_id']: uf for uf in user_flashcards}
 
     flashcards_data = []
     for fc in flashcards_qs:
         uf_data = user_flashcard_map.get(fc.id)
+        
+        # Tính status từ level thay vì lấy từ DB
+        # level >= 1 → đã nhớ, level == 0 hoặc None → chưa nhớ
+        if uf_data:
+            calculated_status = 'remembered' if uf_data['level'] >= 1 else 'not_remembered'
+        else:
+            calculated_status = 'new'  # Chưa học lần nào
+        
         flashcards_data.append({
             'id': fc.id,
             'word': fc.word,
             'meaning': fc.meaning,
             'example': fc.example,
             'image_url': fc.image_url,
-            'status': uf_data['status'] if uf_data else 'not_remembered',
+            'status': calculated_status,  
             'level': uf_data['level'] if uf_data else 0,
             'next_review_date': uf_data['next_review_date'] if uf_data else None,
         })
@@ -158,7 +168,6 @@ def get_lesson_detail(request, lesson_id):
             'completed_at': ul.completed_at
         }
     except UserLesson.DoesNotExist:
-        # If user hasn't started this lesson, use default values
         pass
 
     return Response({

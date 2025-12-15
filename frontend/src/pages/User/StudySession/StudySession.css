@@ -1,0 +1,364 @@
+.study-session {
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==================== HEADER ==================== */
+.study-header {
+  background-color: #5e3c86;
+  color: white;
+  padding: 0.6rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 50px;
+}
+
+.header-icon-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.header-icon-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.header-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.header-icon-btn.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+
+.back-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  width: 40px;
+  height: 40px;
+}
+
+.back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 1rem;
+  max-width: 400px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #4ade80;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.nav-btn.shuffle-btn {
+  font-size: 1rem;
+}
+
+.nav-btn.shuffle-btn.active {
+  background-color: #5e3c86;
+  color: white;
+}
+
+/* Bookmark button - tối giản */
+.bookmark-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+}
+
+.bookmark-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.bookmark-btn.active {
+  color: #fbbf24;
+}
+
+/* ==================== LESSON INFO ==================== */
+.lesson-info {
+  text-align: center;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.lesson-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.mode-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ==================== FLASHCARD CONTAINER - TO HƠN ==================== */
+.flashcard-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Large flashcard - TO HƠN */
+.flashcard-container .flashcard-wrapper {
+  width: 100%;
+  max-width: 450px;
+  height: 320px;
+}
+
+.flashcard-container .flashcard-inner {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.flashcard-container .flashcard-word {
+  font-size: 2rem;
+}
+
+.flashcard-container .flashcard-meaning {
+  font-size: 1.3rem;
+}
+
+.flashcard-container .flashcard-image {
+  width: 120px;
+  height: 120px;
+}
+
+.flashcard-container .flashcard-hint {
+  font-size: 0.9rem;
+}
+
+/* ==================== NAVIGATION ==================== */
+.card-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #374151;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background-color: #d1d5db;
+}
+
+.nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.card-counter {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* ==================== ACTION BUTTONS - NHỎ HƠN ==================== */
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  padding-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 0.6rem 1.5rem;
+  border: 2px solid;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  min-width: 120px;
+}
+
+.action-btn.not-remembered {
+  background-color: white;
+  border-color: #5e3c86;
+  color: #5e3c86;
+}
+
+.action-btn.not-remembered:hover {
+  background-color: #f3e8ff;
+}
+
+.action-btn.remembered {
+  background-color: #5e3c86;
+  border-color: #5e3c86;
+  color: white;
+}
+
+.action-btn.remembered:hover {
+  background-color: #4c2e6e;
+}
+
+/* ==================== AI BUTTON - GIỐNG AIChatBot ==================== */
+.ai-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5E3C86, #7B5BA1);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(94, 60, 134, 0.4);
+  transition: all 0.3s ease;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(94, 60, 134, 0.6);
+}
+
+.ai-btn:active {
+  transform: scale(0.95);
+}
+
+/* ==================== EMPTY & LOADING ==================== */
+.loading-container,
+.empty-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.primary-btn {
+  padding: 0.6rem 1.5rem;
+  background-color: #5e3c86;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primary-btn:hover {
+  background-color: #4c2e6e;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 480px) {
+  .study-header {
+    padding: 0.2rem 1rem;
+  }
+
+  .flashcard-container .flashcard-wrapper {
+    height: 280px;
+    max-width: 100%;
+  }
+
+  .flashcard-container .flashcard-word {
+    font-size: 1.6rem;
+  }
+
+  .flashcard-container .flashcard-meaning {
+    font-size: 1.1rem;
+  }
+
+  .action-btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+
+  .ai-btn {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .ai-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}
