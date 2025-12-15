@@ -52,25 +52,34 @@ const StudySession = () => {
         const response = await api.get(endpoint);
 
         if (response.data.success) {
-          setLessonData(response.data.data.lesson);
-          setFlashcards(response.data.data.flashcards);
-          setOriginalFlashcards(response.data.data.flashcards);
+          const data = response.data.data;
+          
+          // Nếu backend suggest redirect sang practice (đã học hết từ mới)
+          if (data.redirect === "practice" && mode === "learn_new") {
+            setToast({
+              message: data.message || "Bạn đã học hết từ mới. Chuyển sang luyện tập!",
+              type: "success",
+            });
+            setMode("practice");
+            return; // Không set flashcards, đợi useEffect chạy lại với mode mới
+          }
+          
+          setLessonData(data.lesson);
+          setFlashcards(data.flashcards);
+          setOriginalFlashcards(data.flashcards);
+          
+          // Reset states khi fetch data mới
+          setCurrentIndex(0);
+          setResults([]);
+          setIsCompleted(false);
+          setIsShuffled(false);
         }
       } catch (error) {
         console.error("Failed to fetch study session:", error);
-
-        if (error.response?.data?.data?.redirect === "practice") {
-          setToast({
-            message: "Bạn đã học hết từ mới. Chuyển sang luyện tập!",
-            type: "success",
-          });
-          setMode("practice");
-        } else {
-          setToast({
-            message: error.response?.data?.error || "Có lỗi xảy ra",
-            type: "error",
-          });
-        }
+        setToast({
+          message: error.response?.data?.error || "Có lỗi xảy ra",
+          type: "error",
+        });
       } finally {
         setLoading(false);
       }
@@ -130,6 +139,12 @@ const StudySession = () => {
 
   // Handlers
   const handleMark = (remembered) => {
+    // Safety check: nếu currentCard undefined, không làm gì
+    if (!currentCard) {
+      console.warn('handleMark called but currentCard is undefined');
+      return;
+    }
+
     // Lưu kết quả
     setResults((prev) => [
       ...prev,
@@ -167,8 +182,8 @@ const StudySession = () => {
     }
   };
 
-  const handleSubmitResults = async () => {
-    if (mode === "learn_new") {
+  const handleSubmitResults = useCallback(async () => {
+    if (mode === "learn_new" && results.length > 0) {
       try {
         const response = await api.post(
           `/lessons/${lessonId}/learn-new/submit/`,
@@ -185,24 +200,27 @@ const StudySession = () => {
         console.error("Failed to submit results:", error);
       }
     }
-  };
+  }, [mode, results, lessonId]);
 
   const handleReviewNotRemembered = () => {
     const notRememberedIds = results
       .filter((r) => !r.remembered)
       .map((r) => r.flashcard_id);
 
-    const notRememberedCards = flashcards.filter((fc) =>
+    const notRememberedCards = originalFlashcards.filter((fc) =>
       notRememberedIds.includes(fc.id)
     );
 
     if (notRememberedCards.length > 0) {
       setFlashcards(notRememberedCards);
+      setOriginalFlashcards(notRememberedCards);
       setCurrentIndex(0);
       setResults([]);
       setIsCompleted(false);
       setIsShuffled(false);
-      setMode("practice");
+    } else {
+      // Nếu không có thẻ nào chưa nhớ, quay về lesson
+      handleFinish();
     }
   };
 
@@ -235,7 +253,7 @@ const StudySession = () => {
     if (isCompleted && mode === "learn_new") {
       handleSubmitResults();
     }
-  }, [isCompleted, mode, results]);
+  }, [isCompleted, mode, handleSubmitResults]);
 
   // Render loading
   if (loading) {
@@ -312,7 +330,7 @@ const StudySession = () => {
     );
   }
 
-  // Render study session
+  // Render study session (Flashcard component tự handle null data)
 return (
     <div className="study-session">
       {/* Header */}

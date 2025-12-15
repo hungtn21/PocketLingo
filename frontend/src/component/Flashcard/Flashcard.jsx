@@ -8,6 +8,11 @@ const Flashcard = ({ data }) => {
     setIsFlipped(!isFlipped);
   };
 
+  // Safety check: nếu data undefined, không render gì
+  if (!data) {
+    return null;
+  }
+
   return (
     <div 
       className={`flashcard-wrapper ${isFlipped ? 'flipped' : ''}`} 
