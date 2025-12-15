@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Bookmark } from "lucide-react";
 import api from "../../../api";
@@ -22,8 +22,9 @@ const StudySession = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState([]);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [isShuffled, setIsShuffled] = useState(false)
+  const [isShuffled, setIsShuffled] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isShuffleAnimating, setIsShuffleAnimating] = useState(false);
 
   // UI states
   const [loading, setLoading] = useState(true);
@@ -94,8 +95,8 @@ const StudySession = () => {
     return shuffled;
   };
   
-  // Shuffle handler với animation mượt mà
-  const handleToggleShuffle = () => {
+  // Shuffle handler với animation mượt mà (sử dụng React state thay vì DOM manipulation)
+  const handleToggleShuffle = useCallback(() => {
     // Nếu đã học một số thẻ, hỏi xác nhận
     if (results.length > 0) {
       if (!window.confirm("Trộn từ sẽ reset tiến độ hiện tại. Tiếp tục?")) {
@@ -103,12 +104,8 @@ const StudySession = () => {
       }
     }
 
-    // Add fade animation
-    const flashcardContainer = document.querySelector('.flashcard-container');
-    if (flashcardContainer) {
-      flashcardContainer.style.opacity = '0.5';
-      flashcardContainer.style.transform = 'scale(0.98)';
-    }
+    // Bắt đầu animation
+    setIsShuffleAnimating(true);
 
     // Delay để animation mượt mà
     setTimeout(() => {
@@ -127,14 +124,9 @@ const StudySession = () => {
       // Reset progress
       setCurrentIndex(0);
       setResults([]);
-
-      // Restore animation
-      if (flashcardContainer) {
-        flashcardContainer.style.opacity = '1';
-        flashcardContainer.style.transform = 'scale(1)';
-      }
+      setIsShuffleAnimating(false);
     }, 150);
-  };
+  }, [isShuffled, results, originalFlashcards]);
 
   // Handlers
   const handleMark = (remembered) => {
@@ -243,7 +235,7 @@ const StudySession = () => {
     if (isCompleted && mode === "learn_new") {
       handleSubmitResults();
     }
-  }, [isCompleted]);
+  }, [isCompleted, mode, results]);
 
   // Render loading
   if (loading) {
@@ -358,7 +350,7 @@ return (
       </div>
 
       {/* Flashcard */}
-      <div className="flashcard-container">
+      <div className={`flashcard-container ${isShuffleAnimating ? 'animating' : ''}`}>
         <Flashcard data={currentCard} />
       </div>
 

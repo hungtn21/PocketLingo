@@ -248,7 +248,7 @@ def get_course_detail(request, course_id):
         # Update progress in user_course
         try:
             user_course.progress_percent = round(progress_percent, 2)
-            user_course.update()
+            user_course.save()
             print(f"DEBUG: Progress updated successfully: {progress_percent}%")
         except Exception as save_error:
             print(f"DEBUG: Error saving progress: {str(save_error)}")

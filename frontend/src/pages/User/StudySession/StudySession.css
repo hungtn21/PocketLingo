@@ -157,6 +157,11 @@
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
+.flashcard-container.animating {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
 /* Large flashcard - TO HƠN */
 .flashcard-container .flashcard-wrapper {
   width: 100%;

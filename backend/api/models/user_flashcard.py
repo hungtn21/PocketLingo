@@ -82,6 +82,23 @@ class UserFlashcard(models.Model):
     
     # ==================== CLASS METHODS ====================
     
+    @staticmethod
+    def calculate_status(level):
+        """
+        Tính status học tập từ level.
+        
+        Status: 'new' | 'learning' | 'learned'
+        - level is None hoặc 0 → 'new' (chưa học)
+        - level 1-6 → 'learning' (đang học)
+        - level 7 → 'learned' (đã học xong)
+        """
+        if level is None or level == 0:
+            return 'new'
+        elif level < 7:
+            return 'learning'
+        else:
+            return 'learned'
+    
     @classmethod
     def create_from_first_learn(cls, user, flashcard, remembered: bool):
         """Tạo record khi học lần đầu."""

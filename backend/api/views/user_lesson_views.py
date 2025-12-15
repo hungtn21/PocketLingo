@@ -122,10 +122,9 @@ def get_lesson_detail(request, lesson_id):
         # Tính status từ level thay vì lấy từ DB
         # level >= 1 → đã nhớ, level == 0 hoặc None → chưa nhớ
         if uf_data:
-            calculated_status = 'remembered' if uf_data['level'] >= 1 else 'not_remembered'
+            calculated_status = UserFlashcard.calculate_status(uf_data['level'])
         else:
-            calculated_status = 'new'  # Chưa học lần nào
-        
+            calculated_status = UserFlashcard.calculate_status(None) # Chưa học lần nào
         flashcards_data.append({
             'id': fc.id,
             'word': fc.word,

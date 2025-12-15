@@ -95,10 +95,19 @@ def get_learn_new_session(request, lesson_id):
     
     if not flashcards.exists():
         return Response({
-            'success': False,
-            'error': 'Bạn đã học hết tất cả từ trong bài này.',
-            'data': {'redirect': 'practice'}  # Gợi ý chuyển sang luyện tập
-        }, status=status.HTTP_400_BAD_REQUEST)
+            'success': True,
+            'data': {
+                'lesson': {
+                    'id': lesson.id,
+                    'title': lesson.title,
+                },
+                'mode': 'learn_new',
+                'total': 0,
+                'flashcards': [],
+                'message': 'Bạn đã học hết tất cả từ trong bài này. Hãy chuyển sang luyện tập!',
+                'redirect': 'practice'
+            }
+        }, status=status.HTTP_200_OK)
     
     # 3. Format response
     flashcards_data = [

@@ -8,8 +8,7 @@ const StudyResult = ({
   onFinish,
   mode,
 }) => {
-  const total = rememberedCount + notRememberedCount;
-
+  
   return (
     <div className="study-result">
       <div className="result-icon">✓</div>

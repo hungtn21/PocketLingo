@@ -1,12 +1,10 @@
-# api/views/daily_review_views.py
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.utils import timezone
 
 from api.models.user_flashcard import UserFlashcard
+from api.constants import XP_REWARDS
 
 
 @api_view(['GET'])
@@ -127,8 +125,10 @@ def submit_daily_review_results(request):
         except UserFlashcard.DoesNotExist:
             continue
     
-    # Award XP
-    xp_gained = 50 if remembered_count > 0 else 20
+    # Award XP - Hybrid system: reward both effort (cards reviewed) and results (cards remembered)
+    total_cards_reviewed = remembered_count + not_remembered_count
+    xp_gained = (total_cards_reviewed * XP_REWARDS['daily_review_per_card']) + \
+                (remembered_count * XP_REWARDS['daily_review_per_remembered'])
     user.xp = (user.xp or 0) + xp_gained
     user.save()
     

@@ -1,10 +1,30 @@
 from google import genai
 from dotenv import load_dotenv
 import os
+import logging
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
-client = genai.Client(api_key=os.getenv("AI_API_KEY"))
+# Lazy initialization của Gemini client
+_client = None
+
+def get_client():
+    """Get Gemini client với error handling cho missing/invalid API key."""
+    global _client
+    if _client is not None:
+        return _client
+    
+    api_key = os.getenv("AI_API_KEY")
+    if not api_key:
+        raise ValueError("AI_API_KEY không được cấu hình. Vui lòng kiểm tra file .env")
+    
+    try:
+        _client = genai.Client(api_key=api_key)
+        return _client
+    except Exception as e:
+        logger.error(f"Lỗi khi khởi tạo Gemini client: {str(e)}")
+        raise RuntimeError("Không thể kết nối tới Gemini API. Vui lòng kiểm tra API key.")
 
 
 def generate_flashcard_explanation(word, meaning, user_question=None):
@@ -49,6 +69,7 @@ def generate_flashcard_explanation(word, meaning, user_question=None):
         )
 
     try:
+        client = get_client()
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
@@ -64,7 +85,7 @@ def generate_flashcard_explanation(word, meaning, user_question=None):
 
     except Exception as e:
         error_message = str(e)
-        print(f"Error in generate_flashcard_explanation: {error_message}")
+        logger.error(f"Error in generate_flashcard_explanation: {error_message}")
 
         # Handle 503 UNAVAILABLE (model overloaded)
         if "503" in error_message and "UNAVAILABLE" in error_message:
