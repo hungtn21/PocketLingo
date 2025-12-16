@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../../component/Header/Header";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, ArrowLeft } from "lucide-react";
+import { GraduationCap, ArrowLeft, Search } from "lucide-react";
 import api from "../../../api";
 import ToastMessage from "../../../component/ToastMessage";
 import "./MyCourses.css";
@@ -19,8 +19,10 @@ interface CourseProgress {
 const MyCourses: React.FC = () => {
   const navigate = useNavigate();
   const [allCourses, setAllCourses] = useState<CourseProgress[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<CourseProgress[]>([]);
   const [coursesProgress, setCoursesProgress] = useState<CourseProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -34,6 +36,7 @@ const MyCourses: React.FC = () => {
         const res = await api.get("/users/profile/");
         const courses = res.data.courses_progress || [];
         setAllCourses(courses);
+        setFilteredCourses(courses);
         
         // Tính toán phân trang
         const totalPages = Math.ceil(courses.length / pagination.page_size);
@@ -55,11 +58,28 @@ const MyCourses: React.FC = () => {
     fetchCourses();
   }, [pagination.current_page, pagination.page_size]);
 
+  useEffect(() => {
+    // Filter courses khi search query thay đổi
+    const filtered = allCourses.filter(course => 
+      course.course_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredCourses(filtered);
+    
+    // Cập nhật phân trang
+    const totalPages = Math.ceil(filtered.length / pagination.page_size);
+    setPagination(prev => ({ ...prev, total_pages: totalPages, current_page: 1 }));
+    
+    // Lấy courses cho trang đầu tiên
+    const startIndex = 0;
+    const endIndex = pagination.page_size;
+    setCoursesProgress(filtered.slice(startIndex, endIndex));
+  }, [searchQuery, allCourses, pagination.page_size]);
+
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current_page: page }));
     const startIndex = (page - 1) * pagination.page_size;
     const endIndex = startIndex + pagination.page_size;
-    setCoursesProgress(allCourses.slice(startIndex, endIndex));
+    setCoursesProgress(filteredCourses.slice(startIndex, endIndex));
   };
 
   const renderPagination = () => {
@@ -88,17 +108,39 @@ const MyCourses: React.FC = () => {
       </div>
 
       <div className="my-courses-container">
+        {/* Search Bar */}
+        <div className="search-container">
+          <div className="search-bar">
+            <Search className="search-icon" size={20} />
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Tìm kiếm khóa học theo tên..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
 
         {loading ? (
           <div className="loading-container">Đang tải...</div>
         ) : coursesProgress.length === 0 ? (
           <div className="empty-state">
             <GraduationCap size={64} strokeWidth={1} />
-            <h3>Bạn chưa đăng ký khóa học nào</h3>
-            <p>Hãy khám phá và đăng ký các khóa học để bắt đầu học tập!</p>
-            <button className="browse-btn" onClick={() => navigate("/")}>
-              Khám phá khóa học
-            </button>
+            {allCourses.length === 0 ? (
+              <>
+                <h3>Bạn chưa đăng ký khóa học nào</h3>
+                <p>Hãy khám phá và đăng ký các khóa học để bắt đầu học tập!</p>
+                <button className="browse-btn" onClick={() => navigate("/")}>
+                  Khám phá khóa học
+                </button>
+              </>
+            ) : (
+              <>
+                <h3>Không tìm thấy khóa học</h3>
+                <p>Không có khóa học nào phù hợp với từ khóa "{searchQuery}"</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="courses-grid">
@@ -148,7 +190,7 @@ const MyCourses: React.FC = () => {
           </div>
         )}
 
-        {!loading && allCourses.length > 0 && pagination.total_pages > 1 && (
+        {!loading && filteredCourses.length > 0 && pagination.total_pages > 1 && (
           <div className="pagination">{renderPagination()}</div>
         )}
       </div>

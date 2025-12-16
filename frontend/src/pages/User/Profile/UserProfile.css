@@ -363,7 +363,7 @@
   flex-wrap: nowrap;
 }
 
-.user-profile-page .stat-item {
+.user-profile-page .course-stat-item {
   display: flex;
   flex-direction: row !important;
   align-items: baseline;
@@ -372,13 +372,13 @@
   white-space: nowrap;
 }
 
-.user-profile-page .stat-label {
+.user-profile-page .course-stat-label {
   color: #6b46c1;
   font-weight: 500;
   font-size: 12px;
 }
 
-.user-profile-page .stat-value {
+.user-profile-page .course-stat-value {
   color: #333;
   font-weight: 600;
   font-size: 13px;

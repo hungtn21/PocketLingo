@@ -222,13 +222,13 @@ const UserProfile: React.FC = () => {
                       <div className="course-info">
                         <h4 className="course-name">{course.course_name}</h4>
                         <div className="course-stats">
-                          <div className="stat-item">
-                            <span className="stat-label">Điểm TB:</span>
-                            <span className="stat-value">{course.average_quiz_score}/10</span>
+                          <div className="course-stat-item">
+                            <span className="course-stat-label">Điểm TB:</span>
+                            <span className="course-stat-value">{course.average_quiz_score}/10</span>
                           </div>
-                          <div className="stat-item">
-                            <span className="stat-label">Bài học:</span>
-                            <span className="stat-value">{course.completed_lessons}/{course.total_lessons}</span>
+                          <div className="course-stat-item">
+                            <span className="course-stat-label">Bài học:</span>
+                            <span className="course-stat-value">{course.completed_lessons}/{course.total_lessons}</span>
                           </div>
                         </div>
                         <div className="progress-info">
