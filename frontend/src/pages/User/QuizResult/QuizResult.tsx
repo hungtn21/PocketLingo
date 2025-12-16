@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../api';
 import './QuizResult.css';
 
 interface Question {
@@ -40,9 +40,7 @@ const QuizResult = () => {
   useEffect(() => {
     const fetchQuizResult = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/quiz-attempts/${attemptId}/`, {
-          withCredentials: true,
-        });
+        const response = await api.get(`/quiz-attempts/${attemptId}/`);
         setResult(response.data);
       } catch (error) {
         console.error('Error fetching quiz result:', error);
@@ -58,6 +56,10 @@ const QuizResult = () => {
     if (result) {
       navigate(`/lessons/${result.lesson_id}`);
     }
+  };
+
+  const handleBackToProfile = () => {
+    navigate('/profile');
   };
 
   const formatDate = (dateString: string) => {
@@ -165,7 +167,10 @@ const QuizResult = () => {
     <div className="quiz-result-page">
       <div className="result-header-bar">
         <button className="back-button" onClick={handleBackToLesson}>
-        ← Quay lại
+        ← Quay lại bài học
+        </button>
+        <button className="back-button" onClick={handleBackToProfile}>
+        ← Quay lại hồ sơ
         </button>
         </div>
       <div className="result-container">

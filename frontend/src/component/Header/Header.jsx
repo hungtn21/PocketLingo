@@ -45,7 +45,13 @@ const Header = () => {
     <header className="header">
       <div className="header-container">
         <div className="logo-section">
-          <img src={logo} alt="PocketLingo Logo" className="logo" />
+          <img 
+            src={logo} 
+            alt="PocketLingo Logo" 
+            className="logo" 
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          />
         </div>
 
         <div className="header-actions">
@@ -72,8 +78,12 @@ const Header = () => {
 
             {isDropdownOpen && (
               <div className="custom-dropdown-menu">
-                <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
-                <button className="custom-dropdown-item">Đổi mật khẩu</button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/profile')}>
+                  Hồ sơ cá nhân
+                </button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/change-password')}>
+                  Đổi mật khẩu
+                </button>
                 <button className="custom-dropdown-item" onClick={handleLogout}>
                   Đăng xuất
                 </button>
