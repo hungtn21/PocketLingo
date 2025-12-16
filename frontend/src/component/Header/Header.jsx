@@ -45,7 +45,13 @@ const Header = () => {
     <header className="header">
       <div className="header-container">
         <div className="logo-section">
-          <img src={logo} alt="PocketLingo Logo" className="logo" />
+          <img 
+            src={logo} 
+            alt="PocketLingo Logo" 
+            className="logo" 
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          />
         </div>
 
         <div className="header-actions">
