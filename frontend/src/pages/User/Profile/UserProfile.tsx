@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import Header from "../../../component/Header/Header";
 import { useUser } from "../../../context/UserContext";
 import api from "../../../api";
-import { User as UserIcon, Edit2, Lock, Sparkles, Trophy, GraduationCap } from "lucide-react";
+import { User as UserIcon, Edit2, Lock, Sparkles, Trophy, GraduationCap, ClipboardList, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ToastMessage from "../../../component/ToastMessage";
+import QuizHistoryTab from "./QuizHistory/QuizHistoryTab";
+import LeaderboardTab from "./Leaderboard/LeaderboardTab";
 import "./UserProfile.css";
 
 const UserProfile: React.FC = () => {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"profile" | "history" | "leaderboard">("profile");
   const [name, setName] = useState<string>(user?.name || "");
   const [email, setEmail] = useState<string>(user?.email || "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -21,6 +24,8 @@ const UserProfile: React.FC = () => {
   const [totalWordsLearned, setTotalWordsLearned] = useState<number>(0);
   const [totalQuizzesTaken, setTotalQuizzesTaken] = useState<number>(0);
   const [coursesProgress, setCoursesProgress] = useState<any[]>([]);
+  const [quizHistory, setQuizHistory] = useState<any[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -43,6 +48,22 @@ const UserProfile: React.FC = () => {
     };
     fetchProfile();
   }, []);
+
+  // Preload quiz history when switching to history tab
+  useEffect(() => {
+    if (activeTab === "history" && !historyLoaded) {
+      const fetchHistory = async () => {
+        try {
+          const res = await api.get("/users/quiz-history/");
+          setQuizHistory(res.data.history || []);
+          setHistoryLoaded(true);
+        } catch (err: any) {
+          console.error("Error fetching quiz history:", err);
+        }
+      };
+      fetchHistory();
+    }
+  }, [activeTab, historyLoaded]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -99,7 +120,36 @@ const UserProfile: React.FC = () => {
           <div className="text-center py-5">Đang tải...</div>
         ) : (
           <>
-            <h2 className="profile-title">Thông tin cá nhân</h2>
+            <h2 className="profile-title">Hồ sơ học tập</h2>
+
+            {/* Tab Navigation */}
+            <div className="profile-tabs">
+              <button
+                className={`tab-button ${activeTab === "profile" ? "active" : ""}`}
+                onClick={() => setActiveTab("profile")}
+              >
+                <UserIcon size={20} />
+                Thông tin cá nhân
+              </button>
+              <button
+                className={`tab-button ${activeTab === "history" ? "active" : ""}`}
+                onClick={() => setActiveTab("history")}
+              >
+                <ClipboardList size={20} />
+                Lịch sử làm bài
+              </button>
+              <button
+                className={`tab-button ${activeTab === "leaderboard" ? "active" : ""}`}
+                onClick={() => setActiveTab("leaderboard")}
+              >
+                <Award size={20} />
+                Bảng xếp hạng
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === "profile" ? (
+              <div className="profile-tab-content" key="profile-tab">
 
             {/* Statistics Cards */}
             <div className="stats-container">
@@ -200,7 +250,7 @@ const UserProfile: React.FC = () => {
                     <GraduationCap size={24} />
                     Các khóa học của tôi
                   </h3>
-                  <button 
+                  <button
                     className="view-all-btn"
                     onClick={() => navigate("/my-courses")}
                   >
@@ -209,8 +259,8 @@ const UserProfile: React.FC = () => {
                 </div>
                 <div className="courses-scroll-container">
                   {coursesProgress.map((course) => (
-                    <div 
-                      key={course.course_id} 
+                    <div
+                      key={course.course_id}
                       className="course-progress-card"
                       onClick={() => navigate(`/courses/${course.course_id}`)}
                     >
@@ -236,8 +286,8 @@ const UserProfile: React.FC = () => {
                           <span className="progress-percent">{course.progress}%</span>
                         </div>
                         <div className="progress-bar-container">
-                          <div 
-                            className="progress-bar-fill" 
+                          <div
+                            className="progress-bar-fill"
                             style={{ width: `${course.progress}%` }}
                           ></div>
                         </div>
@@ -246,6 +296,12 @@ const UserProfile: React.FC = () => {
                   ))}
                 </div>
               </div>
+            )}
+              </div>
+            ) : activeTab === "history" ? (
+              <QuizHistoryTab history={quizHistory} historyLoaded={historyLoaded} />
+            ) : (
+              <LeaderboardTab courses={coursesProgress} />
             )}
           </>
         )}

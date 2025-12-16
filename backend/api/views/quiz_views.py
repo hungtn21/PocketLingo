@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.db.models import Q
 from api.models.lesson import Lesson
 from api.models.quiz import Quiz
 from api.models.question import Question
@@ -342,6 +343,55 @@ def get_quiz_result(request, attempt_id):
         import traceback
         error_details = traceback.format_exc()
         print(f"Error in get_quiz_result: {error_details}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_quiz_history(request):
+    """
+    Lấy danh sách lịch sử làm quiz của user
+    GET /users/quiz-history/
+    """
+    try:
+        user = request.user
+
+        # Lấy tất cả các lần làm quiz của user, sắp xếp theo thời gian mới nhất
+        quiz_attempts = QuizAttempt.objects.filter(
+            user=user
+        ).select_related(
+            'quiz__lesson__course'
+        ).order_by('-submitted_at')
+
+        # Chuẩn bị dữ liệu trả về
+        history_data = []
+        for attempt in quiz_attempts:
+            lesson = attempt.quiz.lesson
+            course = lesson.course if hasattr(lesson, 'course') else None
+
+            history_data.append({
+                "attempt_id": attempt.id,
+                "lesson_id": lesson.id,
+                "lesson_title": lesson.title,
+                "course_name": course.title if course else None,
+                "score": float(attempt.score),
+                "status": attempt.status,
+                "submitted_at": attempt.submitted_at,
+                "attempt_no": attempt.attempt_no,
+            })
+
+        return Response({
+            "total_attempts": len(history_data),
+            "history": history_data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in get_user_quiz_history: {error_details}")
         return Response(
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
