@@ -70,21 +70,12 @@ const QuizHistoryTab: React.FC<QuizHistoryTabProps> = ({ history, historyLoaded 
         <table className="quiz-history-table">
           <thead>
             <tr>
-              <th>
-                <BookOpen size={16} />
-                Bài học
-              </th>
-              <th>
-                <Award size={16} />
-                Điểm số
-              </th>
-              <th>
-                <Calendar size={16} />
-                Ngày làm bài
-              </th>
-              <th>Trạng thái</th>
+              <th>Tên bài học</th>
+              <th>Điểm số</th>
+              <th>Thời gian làm bài</th>
+              <th>Kết quả</th>
               <th>Lần thứ</th>
-              <th>Hành động</th>
+              <th>Chi tiết</th>
             </tr>
           </thead>
           <tbody>
