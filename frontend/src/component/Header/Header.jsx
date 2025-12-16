@@ -72,8 +72,12 @@ const Header = () => {
 
             {isDropdownOpen && (
               <div className="custom-dropdown-menu">
-                <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
-                <button className="custom-dropdown-item">Đổi mật khẩu</button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/profile')}>
+                  Hồ sơ cá nhân
+                </button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/change-password')}>
+                  Đổi mật khẩu
+                </button>
                 <button className="custom-dropdown-item" onClick={handleLogout}>
                   Đăng xuất
                 </button>
