@@ -17,6 +17,7 @@ import QuizResult from "../pages/User/QuizResult/QuizResult";
 import FlashcardStudy from "../pages/User/StudySession/StudySession";
 import UserProfile from "../pages/User/Profile/UserProfile";
 import UserChangePassword from "../pages/User/ChangePassword/UserChangePassword";
+import MyCourses from "../pages/User/MyCourses/MyCourses";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       },
       { path: "profile", element: <UserProfile /> },
       { path: "change-password", element: <UserChangePassword /> },
+      { path: "my-courses", element: <MyCourses /> },
       // Thêm các routes khác cho role learner ở đây
     ],
   },

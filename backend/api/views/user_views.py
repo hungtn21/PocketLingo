@@ -283,8 +283,10 @@ class UserProfileView(APIView):
         user = request.user
         serializer = UserProfileSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            updated_user = serializer.save()
+            # Trả về serializer với context để có thể tính toán lại statistics
+            response_serializer = UserProfileSerializer(updated_user)
+            return Response(response_serializer.data)
         return Response(serializer.errors, status=400)
     
 class RequestEmailChangeView(APIView):

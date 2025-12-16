@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../../../component/Header/Header";
 import { useUser } from "../../../context/UserContext";
 import api from "../../../api";
-import { User as UserIcon, Edit2, Lock } from "lucide-react";
+import { User as UserIcon, Edit2, Lock, Sparkles, Trophy, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ToastMessage from "../../../component/ToastMessage";
 import "./UserProfile.css";
@@ -18,6 +18,9 @@ const UserProfile: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [totalWordsLearned, setTotalWordsLearned] = useState<number>(0);
+  const [totalQuizzesTaken, setTotalQuizzesTaken] = useState<number>(0);
+  const [coursesProgress, setCoursesProgress] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -26,6 +29,9 @@ const UserProfile: React.FC = () => {
         setAvatarUrl(res.data.avatar_url || null);
         setName(res.data.name || "");
         setEmail(res.data.email || "");
+        setTotalWordsLearned(res.data.total_words_learned || 0);
+        setTotalQuizzesTaken(res.data.total_quizzes_taken || 0);
+        setCoursesProgress(res.data.courses_progress || []);
       } catch (e: any) {
         setToast({
           message: e?.response?.data?.error || "Không thể tải thông tin hồ sơ",
@@ -95,6 +101,29 @@ const UserProfile: React.FC = () => {
           <>
             <h2 className="profile-title">Thông tin cá nhân</h2>
 
+            {/* Statistics Cards */}
+            <div className="stats-container">
+              <div className="stat-card">
+                <div className="stat-icon" style={{ background: "linear-gradient(135deg, #4d2775 0%, #764ba2 100%)" }}>
+                  <Sparkles size={28} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-value">{totalWordsLearned}</div>
+                  <div className="stat-label">Tổng số từ đã học</div>
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon" style={{ background: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)" }}>
+                  <Trophy size={28} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-value">{totalQuizzesTaken}</div>
+                  <div className="stat-label">Tổng số quiz đã làm</div>
+                </div>
+              </div>
+            </div>
+
             <div className="profile-grid">
               <div className="avatar-section">
                 <div className="avatar-placeholder">
@@ -162,6 +191,62 @@ const UserProfile: React.FC = () => {
                 </div>
               </form>
             </div>
+
+            {/* Courses Progress Section */}
+            {coursesProgress.length > 0 && (
+              <div className="courses-progress-section">
+                <div className="section-header">
+                  <h3 className="section-title">
+                    <GraduationCap size={24} />
+                    Các khóa học của tôi
+                  </h3>
+                  <button 
+                    className="view-all-btn"
+                    onClick={() => navigate("/my-courses")}
+                  >
+                    Xem tất cả →
+                  </button>
+                </div>
+                <div className="courses-scroll-container">
+                  {coursesProgress.map((course) => (
+                    <div 
+                      key={course.course_id} 
+                      className="course-progress-card"
+                      onClick={() => navigate(`/courses/${course.course_id}`)}
+                    >
+                      {course.course_image && (
+                        <div className="course-image-wrapper">
+                          <img src={course.course_image} alt={course.course_name} className="course-image" />
+                        </div>
+                      )}
+                      <div className="course-info">
+                        <h4 className="course-name">{course.course_name}</h4>
+                        <div className="course-stats">
+                          <div className="stat-item">
+                            <span className="stat-label">Điểm TB:</span>
+                            <span className="stat-value">{course.average_quiz_score}/10</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-label">Bài học:</span>
+                            <span className="stat-value">{course.completed_lessons}/{course.total_lessons}</span>
+                          </div>
+                        </div>
+                        <div className="progress-info">
+                          <span className="progress-text">Hoàn thành</span>
+                          <span className="progress-percent">{course.progress}%</span>
+                        </div>
+                        <div className="progress-bar-container">
+                          <div 
+                            className="progress-bar-fill" 
+                            style={{ width: `${course.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
