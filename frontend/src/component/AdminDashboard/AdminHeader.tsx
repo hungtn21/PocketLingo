@@ -7,6 +7,7 @@ import logo from "../../assets/logo.png";
 import { api } from "../../api";
 import { useUser } from "../../context/UserContext";
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import ChristmasAvatar from "../ChristmasTheme/ChristmasAvatar";
 
 interface AdminHeaderProps {
   onHamburgerClick: () => void;
@@ -86,15 +87,17 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
 
           <div className="profile-container">
             <button className="profile-button" onClick={toggleDropdown}>
-              {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user?.name || "Avatar"}
-                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
-                />
-              ) : (
-                <User size={24} />
-              )}
+              <ChristmasAvatar size={32}>
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user?.name || "Avatar"}
+                    style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <User size={24} />
+                )}
+              </ChristmasAvatar>
             </button>
 
             {isDropdownOpen && (

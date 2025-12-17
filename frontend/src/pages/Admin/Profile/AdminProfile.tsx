@@ -6,6 +6,7 @@ import api from "../../../api";
 import { User as UserIcon, Edit2 } from "lucide-react";
 import ToastMessage from "../../../component/ToastMessage";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
+import ChristmasAvatar from "../../../component/ChristmasTheme/ChristmasAvatar";
 import "./AdminProfile.css";
 
 const AdminProfile: React.FC = () => {
