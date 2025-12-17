@@ -9,7 +9,7 @@ import { useUser } from "../../context/UserContext.tsx";
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -45,7 +45,13 @@ const Header = () => {
     <header className="header">
       <div className="header-container">
         <div className="logo-section">
-          <img src={logo} alt="PocketLingo Logo" className="logo" />
+          <img 
+            src={logo} 
+            alt="PocketLingo Logo" 
+            className="logo" 
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          />
         </div>
 
         <div className="header-actions">
@@ -59,13 +65,25 @@ const Header = () => {
               onClick={toggleDropdown}
               aria-label="Profile"
             >
-              <User size={24} />
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user?.name || "Avatar"}
+                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                />
+              ) : (
+                <User size={24} />
+              )}
             </button>
 
             {isDropdownOpen && (
               <div className="custom-dropdown-menu">
-                <button className="custom-dropdown-item">Hồ sơ cá nhân</button>
-                <button className="custom-dropdown-item">Đổi mật khẩu</button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/profile')}>
+                  Hồ sơ cá nhân
+                </button>
+                <button className="custom-dropdown-item" onClick={() => navigate('/change-password')}>
+                  Đổi mật khẩu
+                </button>
                 <button className="custom-dropdown-item" onClick={handleLogout}>
                   Đăng xuất
                 </button>

@@ -15,7 +15,7 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, refreshUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +35,9 @@ const LoginPage: React.FC = () => {
           role: userResponse.data.role,
           name: userResponse.data.name,
         });
+
+        // Refresh user to get avatar
+        await refreshUser();
 
         setToast({ message: "Đăng nhập thành công!", type: "success" });
 

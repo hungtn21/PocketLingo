@@ -1,6 +1,7 @@
 from django.urls import path
 from ..views.user_views import RegisterUserView, VerifyEmailView, SetPasswordView, ResetPasswordView, LoginView, LogoutView, MeView, ForgotPasswordView
-from ..views.user_views import UserProfileView, ChangePasswordView, RequestEmailChangeView, VerifyEmailChangeView
+from ..views.user_views import UserProfileView, ChangePasswordView, RequestEmailChangeView, VerifyEmailChangeView, get_leaderboard
+from ..views.quiz_views import get_user_quiz_history
 urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
     path('verify-email/', VerifyEmailView.as_view(), name='verify_email'),
@@ -14,4 +15,6 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('request-email-change/', RequestEmailChangeView.as_view(), name='request_email_change'),
     path('verify-email-change/', VerifyEmailChangeView.as_view(), name='verify_email_change'),
+    path('quiz-history/', get_user_quiz_history, name='user_quiz_history'),
+    path('leaderboard/', get_leaderboard, name='leaderboard'),
 ]
