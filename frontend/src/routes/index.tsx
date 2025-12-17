@@ -16,6 +16,10 @@ import Quiz from "../pages/User/Quiz/Quiz";
 import QuizResult from "../pages/User/QuizResult/QuizResult";
 import UserList from "../pages/Admin/UserList/UserList";
 import AdminList from "../pages/Admin/Admins/AdminList";
+import FlashcardStudy from "../pages/User/StudySession/StudySession";
+import UserProfile from "../pages/User/Profile/UserProfile";
+import UserChangePassword from "../pages/User/ChangePassword/UserChangePassword";
+import MyCourses from "../pages/User/MyCourses/MyCourses";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -28,15 +32,17 @@ export const router = createBrowserRouter([
         element: <Homepage /> 
       },
       { path: "lessons/:lessonId", element: <LessonDetail /> },
+      { path: "lessons/:lessonId/learn", element: <FlashcardStudy /> },
       { path: "lessons/:lessonId/quiz", element: <Quiz /> },
       { path: "quiz-result/:attemptId", element: <QuizResult /> },
       { 
         path: "courses/:courseId", 
         element: <CourseDetail /> 
       },
+      { path: "profile", element: <UserProfile /> },
+      { path: "change-password", element: <UserChangePassword /> },
+      { path: "my-courses", element: <MyCourses /> },
       // Thêm các routes khác cho role learner ở đây
-      // Ví dụ:
-      //{path: "profile", element: <ProfilePage />}  "/profile"
     ],
   },
   //Routes dành cho admin

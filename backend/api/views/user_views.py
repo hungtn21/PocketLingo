@@ -14,6 +14,8 @@ from django.core.validators import validate_email
 from django.contrib.auth.password_validation import validate_password
 from ..serializers.user_serializers import UserProfileSerializer
 from django.db import transaction
+from django.db.models import Q
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 TOKEN_EXPIRY_HOURS = 1
 JWT_TOKEN_EXPIRY_DAYS = 7
@@ -283,8 +285,10 @@ class UserProfileView(APIView):
         user = request.user
         serializer = UserProfileSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            updated_user = serializer.save()
+            # Trả về serializer với context để có thể tính toán lại statistics
+            response_serializer = UserProfileSerializer(updated_user)
+            return Response(response_serializer.data)
         return Response(serializer.errors, status=400)
     
 class RequestEmailChangeView(APIView):
@@ -370,3 +374,78 @@ class VerifyEmailChangeView(APIView):
             return Response({'error': 'Người dùng không tồn tại.'}, status=400)
 
         return Response({'message': 'Email đã được xác minh thành công.'}, status=200)
+
+@api_view(['GET'])
+@authentication_classes([JWTCookieAuthentication])
+@permission_classes([IsAuthenticated])
+def get_leaderboard(request):
+    """
+    Lấy bảng xếp hạng cho một khóa học dựa trên XP.
+    Query params:
+        - course_id: ID của khóa học (bắt buộc)
+    Response:
+        - top_users: Danh sách top 20 users có XP cao nhất trong khóa học
+        - my_rank: Thứ hạng của user hiện tại (null nếu user trong top 20)
+    """
+    from ..models import UserCourse
+
+    course_id = request.GET.get('course_id')
+
+    if not course_id:
+        return Response({'error': 'course_id là bắt buộc.'}, status=400)
+
+    try:
+        course_id = int(course_id)
+    except (ValueError, TypeError):
+        return Response({'error': 'course_id không hợp lệ.'}, status=400)
+
+    # Lấy tất cả users đã được approved hoặc completed course này
+    user_courses = UserCourse.objects.filter(
+        course_id=course_id,
+        status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
+    ).select_related('user').order_by('-user__xp')
+
+    if not user_courses.exists():
+        return Response({
+            'top_users': [],
+            'my_rank': None
+        })
+
+    # Tạo danh sách top users
+    top_users = []
+    current_user_rank = None
+    current_user_data = None
+
+    for index, uc in enumerate(user_courses, start=1):
+        user = uc.user
+        user_data = {
+            'rank': index,
+            'user_id': user.id,
+            'name': user.name,
+            'xp': user.xp,
+            'is_current_user': user.id == request.user.id
+        }
+
+        # Lưu thông tin user hiện tại
+        if user.id == request.user.id:
+            current_user_rank = index
+            current_user_data = user_data
+
+        # Chỉ lấy top 20
+        if index <= 20:
+            top_users.append(user_data)
+
+    # Nếu user hiện tại nằm ngoài top 20, thêm thông tin riêng
+    my_rank = None
+    if current_user_rank and current_user_rank > 20:
+        my_rank = {
+            'rank': current_user_rank,
+            'name': request.user.name,
+            'xp': request.user.xp
+        }
+
+    return Response({
+        'top_users': top_users,
+        'my_rank': my_rank
+    })
+

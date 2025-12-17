@@ -16,6 +16,8 @@ class UserLesson(models.Model):
     bookmark = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
+    flashcard_completed = models.BooleanField(default=False)
+    flashcard_completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'user_lessons'
