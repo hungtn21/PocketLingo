@@ -59,6 +59,67 @@
   padding: 40px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
+  position: relative;
+  overflow: visible;
+}
+
+/* ===== Santa Animation ===== */
+.santa-animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.santa-sleigh {
+  --santa-gap: 28px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 144px;
+  height: 96px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+  will-change: offset-distance, opacity;
+
+  /* Smooth orbit around the card border (outside, not covering content) */
+  offset-path: inset(calc(-1 * var(--santa-gap)) round 16px);
+  offset-distance: 0%;
+  offset-rotate: auto;
+  animation: santaOrbit 7.5s linear forwards;
+}
+
+.santa-sleigh-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes santaOrbit {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .santa-sleigh {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .header-top {
