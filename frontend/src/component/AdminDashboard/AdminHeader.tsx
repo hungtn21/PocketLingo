@@ -6,6 +6,7 @@ import "../AdminDashboard/AdminHeader.css";
 import logo from "../../assets/logo.png";
 import { api } from "../../api";
 import { useUser } from "../../context/UserContext";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
 
 interface AdminHeaderProps {
   onHamburgerClick: () => void;
@@ -13,18 +14,27 @@ interface AdminHeaderProps {
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showConfirmLogout, setShowConfirmLogout] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { setUser, user } = useUser();
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const handleLogout = async () => {
+    setShowConfirmLogout(true);
+  };
+
+  const confirmLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await api.post("/users/logout/");
       setUser(null);
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
+      setIsLoggingOut(false);
+      setShowConfirmLogout(false);
     }
   };
 
@@ -100,6 +110,18 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
         </div>
 
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmLogout}
+        title="Xác nhận đăng xuất"
+        message="Bạn chắc chắn muốn đăng xuất?"
+        confirmText="Đăng xuất"
+        cancelText="Hủy"
+        isDangerous={true}
+        onConfirm={confirmLogout}
+        onCancel={() => setShowConfirmLogout(false)}
+        isLoading={isLoggingOut}
+      />
     </header>
   );
 };

@@ -12,6 +12,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import LessonDetail from "../pages/User/LessonDetail/LessonDetail";
 import AdminProfile from "../pages/Admin/Profile/AdminProfile";
+import LessonManagement from "../pages/Admin/LessonManagement";
 import Quiz from "../pages/User/Quiz/Quiz";
 import QuizResult from "../pages/User/QuizResult/QuizResult";
 import FlashcardStudy from "../pages/User/StudySession/StudySession";
@@ -55,6 +56,10 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <AdminProfile />,
+      },
+      {
+        path: "lessons/:lessonId/manage",
+        element: <LessonManagement />,
       },
       // Thêm các routes khác cho role admin ở đây
       // Ví dụ: 

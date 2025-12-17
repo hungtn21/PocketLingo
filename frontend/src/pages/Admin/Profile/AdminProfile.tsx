@@ -5,6 +5,7 @@ import { useUser } from "../../../context/UserContext";
 import api from "../../../api";
 import { User as UserIcon, Edit2 } from "lucide-react";
 import ToastMessage from "../../../component/ToastMessage";
+import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
 import "./AdminProfile.css";
 
 const AdminProfile: React.FC = () => {
@@ -24,6 +25,10 @@ const AdminProfile: React.FC = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+
+  // Confirm modals
+  const [showConfirmProfile, setShowConfirmProfile] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -55,6 +60,10 @@ const AdminProfile: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowConfirmProfile(true);
+  };
+
+  const confirmSaveProfile = async () => {
     setSaving(true);
 
     try {
@@ -87,18 +96,23 @@ const AdminProfile: React.FC = () => {
       setToast({ message: err?.response?.data?.error || "Có lỗi xảy ra khi lưu thông tin.", type: "error" });
     } finally {
       setSaving(false);
+      setShowConfirmProfile(false);
     }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    setChangingPassword(true);
 
     if (newPassword !== confirmPassword) {
       setToast({ message: "Mật khẩu mới không khớp", type: "error" });
-      setChangingPassword(false);
       return;
     }
+
+    setShowConfirmPassword(true);
+  };
+
+  const confirmPasswordChange = async () => {
+    setChangingPassword(true);
 
     try {
       await api.post("/users/change-password/", {
@@ -114,6 +128,7 @@ const AdminProfile: React.FC = () => {
       setToast({ message, type: "error" });
     } finally {
       setChangingPassword(false);
+      setShowConfirmPassword(false);
     }
   };
 
@@ -230,6 +245,28 @@ const AdminProfile: React.FC = () => {
           duration={4000}
         />
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmProfile}
+        title="Xác nhận cập nhật thông tin"
+        message="Bạn chắc chắn muốn cập nhật thông tin cá nhân này?"
+        confirmText="Cập nhật"
+        cancelText="Hủy"
+        onConfirm={confirmSaveProfile}
+        onCancel={() => setShowConfirmProfile(false)}
+        isLoading={saving}
+      />
+
+      <ConfirmModal
+        isOpen={showConfirmPassword}
+        title="Xác nhận đổi mật khẩu"
+        message="Bạn chắc chắn muốn đổi mật khẩu? Vui lòng đăng nhập lại sau khi đổi."
+        confirmText="Đổi mật khẩu"
+        cancelText="Hủy"
+        onConfirm={confirmPasswordChange}
+        onCancel={() => setShowConfirmPassword(false)}
+        isLoading={changingPassword}
+      />
     </div>
   );
 };

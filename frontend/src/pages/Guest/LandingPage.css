@@ -3,11 +3,13 @@
   color: #111;
 }
 
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 1rem 0 1.25rem;
+.guest-form-title {
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin: 1rem 0 1.25rem !important;
+  display: block !important;
+  width: 100% !important;
 }
 
 /* Hero */

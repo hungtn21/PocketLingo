@@ -89,7 +89,7 @@ const SignupPage: React.FC = () => {
             boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           }}
         >
-          <h2 className="section-title">Đăng ký</h2>
+          <h2 className="guest-form-title" style={{ textAlign: "center" }}>Đăng ký</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="name" className="form-label">Họ và tên</label>

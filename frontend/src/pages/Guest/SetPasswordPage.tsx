@@ -116,7 +116,7 @@ const SetPasswordPage: React.FC = () => {
             boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           }}
         >
-          <h2 className="section-title">Đặt mật khẩu mới</h2>
+          <h2 className="guest-form-title" style={{ textAlign: "center" }}>Đặt mật khẩu mới</h2>
           <p>Xin chào <strong>{userName}</strong>!</p>
           <p>Hãy thiết lập mật khẩu để hoàn tất đăng ký.</p>
           <form onSubmit={handleSubmit}>
