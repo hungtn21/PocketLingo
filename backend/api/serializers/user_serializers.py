@@ -22,4 +22,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-        
+class LearnerListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'status', 'xp', 'avatar_url', 'created_at']
+
+class AdminListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'status', 'avatar_url', 'created_at']
+

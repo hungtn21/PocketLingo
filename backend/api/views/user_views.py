@@ -370,4 +370,3 @@ class VerifyEmailChangeView(APIView):
             return Response({'error': 'Người dùng không tồn tại.'}, status=400)
 
         return Response({'message': 'Email đã được xác minh thành công.'}, status=200)
-    
