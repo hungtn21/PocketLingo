@@ -49,8 +49,22 @@ export default function AdminList() {
     }
   };
 
+  const thStyle = {
+    backgroundColor: "#6f42c1",
+    color: "white",
+    fontWeight: 700,
+    fontSize: "0.9rem",
+    borderBottom: "none"
+  };
+
   return (
     <div className="admin-dashboard-page">
+      <style>{`
+        .table-custom-header th {
+          background-color: #6f42c1 !important;
+          color: white !important;
+        }
+      `}</style>
       <AdminHeader onHamburgerClick={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="container" style={{ marginTop: 40, maxWidth: 1100 }}>
@@ -64,21 +78,21 @@ export default function AdminList() {
               onKeyDown={e => e.key === "Enter" && fetchAdmins(1)}
               style={{ border: "none", background: "transparent", boxShadow: "none" }} />
           </div>
-          <button className="btn btn-primary" onClick={() => fetchAdmins(1)}>Tìm kiếm</button>
+          <button className="btn btn-primary" style={{ backgroundColor: "#6f42c1", borderColor: "#6f42c1" }} onClick={() => fetchAdmins(1)}>Tìm kiếm</button>
         </div>
         {error && <div className="alert alert-danger">{error}</div>}
         {loading ? <div className="text-center py-4">Đang tải...</div> : (
-          <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", borderTop: "4px solid #6f42c1" }}>
+          <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #6f42c1" }}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">
-                <thead style={{ color: "#6f42c1", fontWeight: 700, fontSize: "0.9rem" }}>
+                <thead className="table-custom-header">
                   <tr>
-                    <th style={{ width: 60 }}>STT</th>
-                    <th>Họ Và Tên</th>
-                    <th>Email</th>
-                    <th style={{ width: 140 }}>Trạng thái</th>
-                    <th style={{ width: 140 }}>Ngày tạo</th>
-                    <th style={{ width: 100, textAlign: "center" }}>Thao tác</th>
+                    <th style={{ ...thStyle, width: 60 }}>STT</th>
+                    <th style={thStyle}>Họ Và Tên</th>
+                    <th style={thStyle}>Email</th>
+                    <th style={{ ...thStyle, width: 140 }}>Trạng thái</th>
+                    <th style={{ ...thStyle, width: 140 }}>Ngày tạo</th>
+                    <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -107,11 +121,21 @@ export default function AdminList() {
                 </tbody>
               </table>
             </div>
-            <div className="d-flex justify-content-center align-items-center p-3" style={{ gap: 6 }}>
-              <button className="btn btn-outline-secondary" disabled={page <= 1} onClick={() => fetchAdmins(page - 1)}>Trước</button>
-              <span>Trang {page}/{totalPages}</span>
-              <button className="btn btn-outline-secondary" disabled={page >= totalPages} onClick={() => fetchAdmins(page + 1)}>Sau</button>
-            </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-center mt-4 gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                        <button 
+                            key={p} 
+                            className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
+                            style={p === page ? { backgroundColor: "#6f42c1", borderColor: "#6f42c1" } : {}}
+                            onClick={() => fetchAdmins(p)}
+                        >
+                            {p}
+                        </button>
+                    ))}
+                </div>
+            )}
           </div>
         )}
       </div>

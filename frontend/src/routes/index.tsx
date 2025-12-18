@@ -20,6 +20,9 @@ import FlashcardStudy from "../pages/User/StudySession/StudySession";
 import UserProfile from "../pages/User/Profile/UserProfile";
 import UserChangePassword from "../pages/User/ChangePassword/UserChangePassword";
 import MyCourses from "../pages/User/MyCourses/MyCourses";
+import CourseList from "../pages/Admin/CourseList/CourseList";
+import AdminCourseDetail from "../pages/Admin/CourseDetail/AdminCourseDetail";
+import EnrollmentRequests from "../pages/Admin/EnrollmentRequests/EnrollmentRequests";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -65,6 +68,18 @@ export const router = createBrowserRouter([
       {
         path: "admins",
         element: <AdminList />,
+      },
+      {
+        path: "courses",
+        element: <CourseList />,
+      },
+      {
+        path: "courses/:courseId",
+        element: <AdminCourseDetail />,
+      },
+      {
+        path: "enrollments",
+        element: <EnrollmentRequests />,
       },
       // Thêm các routes khác cho role admin ở đây
       // Ví dụ: 

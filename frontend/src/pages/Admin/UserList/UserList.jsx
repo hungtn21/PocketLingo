@@ -65,18 +65,25 @@ const UserList = () => {
     borderRadius: 12,
     overflow: "hidden",
     border: "1px solid #e7e7e7",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
     borderTop: "4px solid #6f42c1", // gạch tím phía trên
   };
 
   const thStyle = {
-    color: "#6f42c1",   // tím cho chữ header
+    backgroundColor: "#6f42c1",
+    color: "white",
     fontWeight: 700,
     fontSize: "0.9rem",
+    borderBottom: "none"
   };
 
   return (
     <div className="admin-dashboard-page">
+      <style>{`
+        .table-custom-header th {
+          background-color: #6f42c1 !important;
+          color: white !important;
+        }
+      `}</style>
       <AdminHeader onHamburgerClick={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
@@ -105,7 +112,7 @@ const UserList = () => {
               style={{ border: "none", background: "transparent", boxShadow: "none" }}
             />
           </div>
-          <button className="btn btn-primary" onClick={() => fetchLearners(1)}>
+          <button className="btn btn-primary" style={{ backgroundColor: "#6f42c1", borderColor: "#6f42c1" }} onClick={() => fetchLearners(1)}>
             Tìm kiếm
           </button>
         </div>
@@ -117,14 +124,14 @@ const UserList = () => {
           <div className="card shadow-sm" style={tableStyle}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">
-                <thead style={thStyle}>
+                <thead className="table-custom-header">
                   <tr>
-                    <th style={{ width: 60 }}>STT</th>
-                    <th>Họ Và Tên</th>
-                    <th>Email</th>
-                    <th style={{ width: 140 }}>Trạng thái</th>
-                    <th style={{ width: 140 }}>Ngày tạo</th>
-                    <th style={{ width: 100, textAlign: "center" }}>Thao tác</th>
+                    <th style={{ ...thStyle, width: 60 }}>STT</th>
+                    <th style={thStyle}>Họ Và Tên</th>
+                    <th style={thStyle}>Email</th>
+                    <th style={{ ...thStyle, width: 140 }}>Trạng thái</th>
+                    <th style={{ ...thStyle, width: 140 }}>Ngày tạo</th>
+                    <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,17 +169,21 @@ const UserList = () => {
               </table>
             </div>
 
-            <div className="d-flex justify-content-center align-items-center p-3" style={{ gap: 6 }}>
-              <button className="btn btn-outline-secondary" disabled={page <= 1} onClick={() => fetchLearners(page - 1)}>
-                Trước
-              </button>
-              <span>
-                Trang {page}/{totalPages}
-              </span>
-              <button className="btn btn-outline-secondary" disabled={page >= totalPages} onClick={() => fetchLearners(page + 1)}>
-                Sau
-              </button>
-            </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-center mt-4 gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                        <button 
+                            key={p} 
+                            className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
+                            style={p === page ? { backgroundColor: "#6f42c1", borderColor: "#6f42c1" } : {}}
+                            onClick={() => fetchLearners(p)}
+                        >
+                            {p}
+                        </button>
+                    ))}
+                </div>
+            )}
           </div>
         )}
       </div>
