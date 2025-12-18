@@ -210,8 +210,10 @@ const CourseDetail: React.FC = () => {
                     <p className="lesson-description">{lesson.description}</p>
                   )}
                 </div>
-                <div className={`lesson-status ${lesson.completed ? 'completed' : 'incomplete'}`}>
-                  {lesson.completed ? '✓ Đã hoàn thành' : '○ Chưa hoàn thành'}
+                <div className="lesson-status-container">
+                  <div className={`lesson-status ${lesson.completed ? 'completed' : 'incomplete'}`}>
+                    {lesson.completed ? '✓ Đã hoàn thành' : '○ Chưa hoàn thành'}
+                  </div>
                 </div>
               </div>
             ))}
