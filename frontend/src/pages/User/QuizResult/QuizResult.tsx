@@ -10,7 +10,7 @@ interface Question {
   order_index: number;
   user_answer: any;
   is_correct: boolean;
-  options?: string[];
+  options?: Array<string | { text?: string } | any>;
   correct_answer?: any;
   correct_pairs?: Array<{ side_a: string; side_b: string }>;
   correct_answers?: string[];
@@ -36,6 +36,11 @@ const QuizResult = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<QuizResultData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSanta, setShowSanta] = useState(false);
+
+  // Put the provided image at: frontend/public/santa-sleigh.png
+  // Then we can reference it by absolute path.
+  const SANTA_SLEIGH_SRC = '../../public/santa-sleigh.png';
 
   useEffect(() => {
     const fetchQuizResult = async () => {
@@ -51,6 +56,20 @@ const QuizResult = () => {
 
     fetchQuizResult();
   }, [attemptId]);
+
+  // UI only: show the celebration effect for ~5–8s after loading the result
+  useEffect(() => {
+    if (!result) return;
+
+    if (result.status !== 'passed') {
+      setShowSanta(false);
+      return;
+    }
+
+    setShowSanta(true);
+    const timeoutId = window.setTimeout(() => setShowSanta(false), 7500);
+    return () => window.clearTimeout(timeoutId);
+  }, [result?.attempt_id, result?.status]);
 
   const handleBackToLesson = () => {
     if (result) {
@@ -91,7 +110,7 @@ const QuizResult = () => {
                 const isUserAnswer = user_answer === optionLetter;
                 const isCorrectAnswer = correct_answer === optionLetter;
                 // Handle both string and object format
-                const optionText = typeof option === 'string' ? option : option.text || option;
+                const optionText = typeof option === 'string' ? option : (option as any)?.text || option;
 
                 return (
                   <div
@@ -161,6 +180,7 @@ const QuizResult = () => {
   }
 
   const isPassed = result.status === 'passed';
+  const percentage = Math.round((result.correct_count / result.total_questions) * 100);
 
   return (
     
@@ -176,18 +196,30 @@ const QuizResult = () => {
       <div className="result-container">
         {/* Header Section */}
         <div className="result-header">
-          <h1 className="lesson-title">{result.lesson_title}</h1>
-          <p className="submitted-date">Ngày làm bài: {formatDate(result.submitted_at)}</p>
-          
-          <div className="result-summary">
-            <div className="result-score">
-              <span className="score-label">Kết quả</span>
-              <span className="score-value">
-                {result.correct_count}/{result.total_questions}
+          {/* Santa Animation - Only show when passed */}
+          {isPassed && showSanta && (
+            <div className="santa-animation" aria-hidden="true">
+              <span className="santa-sleigh">
+                <img className="santa-sleigh-img" src={SANTA_SLEIGH_SRC} alt="" />
               </span>
             </div>
+          )}
+          
+          <div className="header-top">
+            <div className="title-section">
+              <h1 className="lesson-title">{result.lesson_title}</h1>
+              <p className="submitted-date">Ngày làm bài: {formatDate(result.submitted_at)}</p>
+            </div>
             <div className={`result-status ${isPassed ? 'passed' : 'failed'}`}>
-              {isPassed ? 'Vượt qua' : 'Không vượt qua'}
+              {isPassed ? '✓ Vượt qua' : '✕ Không vượt qua'}
+            </div>
+          </div>
+          
+          <div className="result-summary">
+            <div className="score-card">
+              <span className="score-label">Điểm số</span>
+              <span className="score-value">{percentage}%</span>
+              <span className="score-detail">{result.correct_count}/{result.total_questions} câu đúng</span>
             </div>
           </div>
         </div>
