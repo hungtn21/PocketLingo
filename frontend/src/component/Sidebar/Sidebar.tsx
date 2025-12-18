@@ -29,12 +29,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button className="sidebar-item" onClick={() => { navigate("/admin"); onClose(); }}>
           Dashboard
           </button>
-          <button className="sidebar-item">Quản lý học viên</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin/learners"); onClose(); }}>
+  Quản lý học viên
+</button>
           {user?.role === "superadmin" && (
-            <button className="sidebar-item">Quản lý admin</button>
+            <button
+              className="sidebar-item"
+              onClick={() => { navigate("/admin/admins"); onClose(); }}
+            >
+              Quản lý admin
+            </button>
           )} {/* Chỉ hiện cho superadmin */}
-          <button className="sidebar-item">Quản lý khóa học</button>
-          <button className="sidebar-item">Duyệt yêu cầu tham gia</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin/courses"); onClose(); }}>Quản lý khóa học</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin/enrollments"); onClose(); }}>Duyệt yêu cầu tham gia</button>
         </div>
 
         <div className="sidebar-footer">

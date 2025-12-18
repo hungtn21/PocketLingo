@@ -375,7 +375,6 @@ class VerifyEmailChangeView(APIView):
 
         return Response({'message': 'Email đã được xác minh thành công.'}, status=200)
 
-
 @api_view(['GET'])
 @authentication_classes([JWTCookieAuthentication])
 @permission_classes([IsAuthenticated])
@@ -449,3 +448,4 @@ def get_leaderboard(request):
         'top_users': top_users,
         'my_rank': my_rank
     })
+
