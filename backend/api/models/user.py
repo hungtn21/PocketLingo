@@ -28,6 +28,7 @@ class User(models.Model):
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.ACTIVE)
     xp = models.BigIntegerField(default=0)
     avatar_url = models.TextField(blank=True, null=True)
+    email_notifications_enabled = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

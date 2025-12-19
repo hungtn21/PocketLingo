@@ -24,6 +24,7 @@ import MyCourses from "../pages/User/MyCourses/MyCourses";
 import CourseList from "../pages/Admin/CourseList/CourseList";
 import AdminCourseDetail from "../pages/Admin/CourseDetail/AdminCourseDetail";
 import EnrollmentRequests from "../pages/Admin/EnrollmentRequests/EnrollmentRequests";
+import UserDetail from "../pages/Admin/UserDetail/UserDetail";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -65,6 +66,10 @@ export const router = createBrowserRouter([
       {
         path: "learners",
         element: <UserList />,
+      },
+      {
+        path: "learners/:learnerId",
+        element: <UserDetail />,
       },
       {
         path: "admins",

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useUser } from "../../../context/UserContext";
+import AddAdminModal from "./AddAdminModal";
+import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
 import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
+import ToastMessage from "../../../component/ToastMessage";
 import { Lock, Unlock, Search } from "lucide-react";
 
 const Badge = ({ status }: { status: string }) => {
@@ -14,16 +18,20 @@ const Badge = ({ status }: { status: string }) => {
 };
 
 export default function AdminList() {
+  const { user } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<any>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const fetchAdmins = async (targetPage = 1) => {
-    setLoading(true); setError("");
+    setLoading(true);
     try {
       const res = await api.get("/admins/admins/", {
         params: { page: targetPage, page_size: 10, search: search.trim() || undefined },
@@ -32,25 +40,35 @@ export default function AdminList() {
       setPage(res.data.page || targetPage);
       setTotalPages(res.data.total_pages || 1);
     } catch (e: any) {
-      setError(e?.response?.data?.detail || "Không tải được danh sách admin");
+      setToast({ message: e?.response?.data?.detail || "Không tải được danh sách admin", type: "error" });
     } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchAdmins(1); }, []);
 
   const toggleStatus = async (u: any) => {
-    const action = u.status === "active" ? "lock" : "unlock";
+    setConfirmTarget(u);
+    setConfirmOpen(true);
+  };
+
+  const doConfirmToggle = async () => {
+    if (!confirmTarget) return;
+    const action = confirmTarget.status === "active" ? "lock" : "unlock";
     try {
-      await api.post(`/admins/admins/${u.id}/status/`, { action });
-      setAdmins(prev => prev.map(item => item.id === u.id
+      await api.post(`/admins/admins/${confirmTarget.id}/status/`, { action });
+      setAdmins(prev => prev.map(item => item.id === confirmTarget.id
         ? { ...item, status: action === "lock" ? "inactive" : "active" } : item));
+      setToast({ message: `Đã ${action === "lock" ? "khóa" : "mở khóa"} tài khoản admin thành công`, type: "success" });
     } catch (e: any) {
-      alert(e?.response?.data?.error || "Không thể cập nhật trạng thái");
+      setToast({ message: e?.response?.data?.error || "Không thể cập nhật trạng thái", type: "error" });
+    } finally {
+      setConfirmOpen(false);
+      setConfirmTarget(null);
     }
   };
 
   const thStyle = {
-    backgroundColor: "#6f42c1",
+    backgroundColor: "#5E3C86",
     color: "white",
     fontWeight: 700,
     fontSize: "0.9rem",
@@ -61,14 +79,25 @@ export default function AdminList() {
     <div className="admin-dashboard-page">
       <style>{`
         .table-custom-header th {
-          background-color: #6f42c1 !important;
+          background-color: #5E3C86 !important;
           color: white !important;
         }
       `}</style>
       <AdminHeader onHamburgerClick={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="container" style={{ marginTop: 40, maxWidth: 1100 }}>
-        <h3 className="fw-bold mb-3">Danh sách admin</h3>
+      <div className="container" style={{ marginTop: 40, maxWidth: 1100, position: 'relative' }}>
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <h3 className="fw-bold mb-0">Danh sách admin</h3>
+          {user?.role === "superadmin" && (
+            <button
+              className="btn btn-primary"
+              style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86", borderRadius: 6, fontWeight: 600, padding: '6px 18px' }}
+              onClick={() => setAddModalOpen(true)}
+            >
+              + Thêm Admin
+            </button>
+          )}
+        </div>
         <div className="d-flex align-items-center mb-3" style={{ gap: 8 }}>
           <div className="d-flex align-items-center" style={{ border: "1px solid #e0e0e0", borderRadius: 24, padding: "6px 10px", width: 320, background: "#f5f6f8" }}>
             <Search size={18} color="#777" style={{ marginRight: 6 }} />
@@ -78,11 +107,10 @@ export default function AdminList() {
               onKeyDown={e => e.key === "Enter" && fetchAdmins(1)}
               style={{ border: "none", background: "transparent", boxShadow: "none" }} />
           </div>
-          <button className="btn btn-primary" style={{ backgroundColor: "#6f42c1", borderColor: "#6f42c1" }} onClick={() => fetchAdmins(1)}>Tìm kiếm</button>
+          <button className="btn btn-primary" style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }} onClick={() => fetchAdmins(1)}>Tìm kiếm</button>
         </div>
-        {error && <div className="alert alert-danger">{error}</div>}
         {loading ? <div className="text-center py-4">Đang tải...</div> : (
-          <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #6f42c1" }}>
+          <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">
                 <thead className="table-custom-header">
@@ -128,7 +156,7 @@ export default function AdminList() {
                         <button 
                             key={p} 
                             className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
-                            style={p === page ? { backgroundColor: "#6f42c1", borderColor: "#6f42c1" } : {}}
+                            style={p === page ? { backgroundColor: "#5E3C86", borderColor: "#5E3C86" } : {}}
                             onClick={() => fetchAdmins(p)}
                         >
                             {p}
@@ -139,6 +167,32 @@ export default function AdminList() {
           </div>
         )}
       </div>
+      <AddAdminModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSuccess={() => { 
+          setAddModalOpen(false); 
+          fetchAdmins(1); 
+        }}
+        onError={(error) => setToast({ message: error, type: "error" })}
+      />
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title={confirmTarget && confirmTarget.status === 'active' ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa tài khoản'}
+        message={confirmTarget && confirmTarget.status === 'active' ? 'Bạn có chắc muốn khóa tài khoản admin này?' : 'Bạn có chắc muốn mở khóa tài khoản admin này?'}
+        confirmText={confirmTarget && confirmTarget.status === 'active' ? 'Khóa' : 'Mở khóa'}
+        cancelText={'Hủy'}
+        isDangerous={confirmTarget && confirmTarget.status === 'active'}
+        onConfirm={doConfirmToggle}
+        onCancel={() => { setConfirmOpen(false); setConfirmTarget(null); }}
+      />
+      {toast && (
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
+import { Link } from "react-router-dom";
 import { Lock, Unlock, Search } from "lucide-react";
+import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
 
 const Badge = ({ status }) => {
   const isActive = status === "active";
@@ -26,6 +28,8 @@ const UserList = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState(null);
 
   const fetchLearners = async (targetPage = 1) => {
     setLoading(true);
@@ -61,15 +65,27 @@ const UserList = () => {
     }
   };
 
+  const onRequestToggle = (u) => {
+    setConfirmTarget(u);
+    setConfirmOpen(true);
+  };
+
+  const doConfirmToggle = async () => {
+    if (!confirmTarget) return;
+    await toggleStatus(confirmTarget);
+    setConfirmOpen(false);
+    setConfirmTarget(null);
+  };
+
   const tableStyle = {
     borderRadius: 12,
     overflow: "hidden",
     border: "1px solid #e7e7e7",
-    borderTop: "4px solid #6f42c1", // gạch tím phía trên
+    borderTop: "4px solid #5E3C86", // gạch tím phía trên
   };
 
   const thStyle = {
-    backgroundColor: "#6f42c1",
+    backgroundColor: "#5E3C86",
     color: "white",
     fontWeight: 700,
     fontSize: "0.9rem",
@@ -77,10 +93,10 @@ const UserList = () => {
   };
 
   return (
-    <div className="admin-dashboard-page">
+    <><div className="admin-dashboard-page">
       <style>{`
         .table-custom-header th {
-          background-color: #6f42c1 !important;
+          background-color: #5E3C86 !important;
           color: white !important;
         }
       `}</style>
@@ -109,10 +125,9 @@ const UserList = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && fetchLearners(1)}
-              style={{ border: "none", background: "transparent", boxShadow: "none" }}
-            />
+              style={{ border: "none", background: "transparent", boxShadow: "none" }} />
           </div>
-          <button className="btn btn-primary" style={{ backgroundColor: "#6f42c1", borderColor: "#6f42c1" }} onClick={() => fetchLearners(1)}>
+          <button className="btn btn-primary" style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }} onClick={() => fetchLearners(1)}>
             Tìm kiếm
           </button>
         </div>
@@ -145,7 +160,11 @@ const UserList = () => {
                     learners.map((u, idx) => (
                       <tr key={u.id}>
                         <td>{(page - 1) * 10 + idx + 1}</td>
-                        <td className="fw-semibold">{u.name}</td>
+                        <td className="fw-semibold">
+                          <Link to={`/admin/learners/${u.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                            {u.name}
+                          </Link>
+                        </td>
                         <td>{u.email}</td>
                         <td>
                           <Badge status={u.status} />
@@ -153,11 +172,11 @@ const UserList = () => {
                         <td>{u.created_at ? new Date(u.created_at).toLocaleDateString() : ""}</td>
                         <td className="text-center">
                           {u.status === "active" ? (
-                            <button className="btn btn-link" title="Khóa tài khoản" onClick={() => toggleStatus(u)}>
+                            <button className="btn btn-link" title="Khóa tài khoản" onClick={() => onRequestToggle(u)}>
                               <Lock size={20} color="#5b5b5b" />
                             </button>
                           ) : (
-                            <button className="btn btn-link" title="Mở khóa tài khoản" onClick={() => toggleStatus(u)}>
+                            <button className="btn btn-link" title="Mở khóa tài khoản" onClick={() => onRequestToggle(u)}>
                               <Unlock size={20} color="#5b5b5b" />
                             </button>
                           )}
@@ -171,23 +190,30 @@ const UserList = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="d-flex justify-content-center mt-4 gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                        <button 
-                            key={p} 
-                            className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
-                            style={p === page ? { backgroundColor: "#6f42c1", borderColor: "#6f42c1" } : {}}
-                            onClick={() => fetchLearners(p)}
-                        >
-                            {p}
-                        </button>
-                    ))}
-                </div>
+              <div className="d-flex justify-content-center mt-4 gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
+                    style={p === page ? { backgroundColor: "#5E3C86", borderColor: "#5E3C86" } : {}}
+                    onClick={() => fetchLearners(p)}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
       </div>
-    </div>
+    </div><ConfirmModal
+        isOpen={confirmOpen}
+        title={confirmTarget && confirmTarget.status === 'active' ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa tài khoản'}
+        message={confirmTarget && confirmTarget.status === 'active' ? 'Bạn có chắc muốn khóa tài khoản này?' : 'Bạn có chắc muốn mở khóa tài khoản này?'}
+        confirmLabel={confirmTarget && confirmTarget.status === 'active' ? 'Khóa' : 'Mở khóa'}
+        cancelLabel={'Hủy'}
+        onConfirm={doConfirmToggle}
+        onCancel={() => { setConfirmOpen(false); setConfirmTarget(null); } } /></>
   );
 };
 

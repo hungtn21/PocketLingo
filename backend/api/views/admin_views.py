@@ -13,7 +13,7 @@ from django.contrib.auth.hashers import make_password
 
 from ..authentication import JWTCookieAuthentication
 from ..models import User
-from ..serializers.user_serializers import AdminListSerializer, LearnerListSerializer
+from ..serializers.user_serializers import AdminListSerializer, LearnerListSerializer, UserProfileSerializer
 
 def _require_superadmin(user):
     return getattr(user, 'role', None) == User.Role.SUPERADMIN
@@ -47,31 +47,49 @@ class AdminListView(APIView):
         })
 
     def post(self, request):
+        # Only superadmin can create admin
         if not _require_superadmin(request.user):
             return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
 
         name = (request.data.get('name') or '').strip()
         email = (request.data.get('email') or '').strip().lower()
-        password = request.data.get('password') or ''
 
-        if not name or not email or not password:
-            return Response({'error': 'Tên, email và mật khẩu là bắt buộc.'}, status=400)
+        if not name or not email:
+            return Response({'error': 'Tên và email là bắt buộc.'}, status=400)
         try:
             validate_email(email)
-            validate_password(password)
-        except DjangoValidationError as e:
-            return Response({'error': 'Dữ liệu không hợp lệ.', 'details': e.messages}, status=400)
+        except DjangoValidationError:
+            return Response({'error': 'Địa chỉ email không hợp lệ.'}, status=400)
         if User.objects.filter(email=email).exists():
             return Response({'error': 'Email đã được sử dụng.'}, status=400)
 
-        user = User.objects.create(
-            name=name,
-            email=email,
-            password_hash=make_password(password),
-            role=User.Role.ADMIN,
-            status=User.Status.ACTIVE,
+        # Gửi email xác nhận, tạo token
+        import jwt, datetime
+        from django.conf import settings
+        from django.core.mail import send_mail
+        from django.template.loader import render_to_string
+
+        TOKEN_EXPIRY_HOURS = 1
+        payload = {
+            'email': email,
+            'name': name,
+            'purpose': 'admin_email_verify',
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=TOKEN_EXPIRY_HOURS)
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        verify_link = f"{settings.FRONTEND_URL}/set-password?token={token}"
+        html_message = render_to_string('verify_email.html', {'name': name, 'verify_link': verify_link})
+
+        send_mail(
+            subject='Xác minh email Admin PocketLingo',
+            message=f'Vui lòng nhấp vào liên kết sau để xác minh email admin: {verify_link}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+            html_message=html_message
         )
-        return Response({'message': 'Tạo admin thành công.', 'id': user.id}, status=201)
+
+        return Response({'message': 'Vui lòng kiểm tra email để nhận link xác minh.'})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AdminStatusView(APIView):
@@ -128,6 +146,24 @@ class LearnerListView(APIView):
             'total_pages': paginator.num_pages,
             'total_count': paginator.count
         })
+
+
+class LearnerDetailView(APIView):
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, learner_id):
+        # only admin or superadmin can view learner details
+        if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
+            return Response({'error': 'Forbidden'}, status=403)
+
+        try:
+            user = User.objects.get(id=learner_id, role=User.Role.LEARNER)
+        except User.DoesNotExist:
+            return Response({'error': 'Learner not found'}, status=404)
+
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
 
 class LearnerStatusView(APIView):
     authentication_classes = [JWTCookieAuthentication]
