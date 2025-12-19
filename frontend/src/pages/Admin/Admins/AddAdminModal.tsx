@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from '../../../api';
 import ToastMessage from '../../../component/ToastMessage';
+import styles from './AddAdminModal.module.css';
 
 interface AddAdminModalProps {
   isOpen: boolean;
@@ -62,89 +63,64 @@ const AddAdminModal: React.FC<AddAdminModalProps> = ({ isOpen, onClose, onSucces
 
   return (
     <>
-      <div 
-        className="modal-backdrop" 
-        style={{ 
-          position: 'fixed', 
-          inset: 0, 
-          background: 'rgba(0,0,0,0.25)', 
-          zIndex: 1000, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center' 
-        }}
-        onClick={onClose} // Close when clicking backdrop
-      >
-        <div 
-          className="modal-content" 
-          style={{ 
-            background: '#fff', 
-            borderRadius: 12, 
-            padding: 32, 
-            minWidth: 350, 
-            maxWidth: 400, 
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)' 
-          }}
-          onClick={(e) => e.stopPropagation()} // Prevent close when clicking modal content
-        >
-          <h4 className="fw-bold mb-3">Thêm Admin mới</h4>
-          {success ? (
-            <div className="alert alert-success">
-              <i className="bi bi-check-circle-fill me-2"></i>
-              Đã gửi email mời! Admin mới sẽ nhận được link để đặt mật khẩu.
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="form-label">Họ và tên</label>
-                <input 
-                  className="form-control" 
-                  value={name} 
-                  onChange={e => setName(e.target.value)} 
-                  required 
-                  disabled={loading}
-                  placeholder="Nhập họ tên admin"
-                />
+      <div className={styles['add-admin-modal-backdrop']} onClick={onClose}>
+        <div className={styles['add-admin-modal']} onClick={e => e.stopPropagation()}>
+          <div className={styles['add-admin-modal__header']}>Thêm Admin mới</div>
+          <div className={styles['add-admin-modal__body']}>
+            {success ? (
+              <div className="alert alert-success" style={{ marginBottom: 0 }}>
+                <i className="bi bi-check-circle-fill me-2"></i>
+                Đã gửi email mời! Admin mới sẽ nhận được link để đặt mật khẩu.
               </div>
-              <div className="mb-3">
-                <label className="form-label">Email</label>
-                <input 
-                  className="form-control" 
-                  type="email" 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)} 
-                  required 
-                  disabled={loading}
-                  placeholder="admin@example.com"
-                />
-              </div>
-              <div className="d-flex justify-content-end gap-2 mt-3">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
-                  onClick={onClose} 
-                  disabled={loading}
-                >
-                  Hủy
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary" 
-                  style={{ backgroundColor: '#5E3C86', borderColor: '#5E3C86' }} 
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Đang gửi...
-                    </>
-                  ) : (
-                    'Gửi lời mời'
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Họ và tên</label>
+                  <input
+                    className={styles['add-admin-modal__input']}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                    disabled={loading}
+                    placeholder="Nhập họ tên admin"
+                  />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Email</label>
+                  <input
+                    className={styles['add-admin-modal__input']}
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                    placeholder="admin@example.com"
+                  />
+                </div>
+                <div className={styles['add-admin-modal__footer']}>
+                  <button
+                    type="button"
+                    className={styles['add-admin-modal__button'] + ' ' + styles['add-admin-modal__button--secondary']}
+                    onClick={onClose}
+                    disabled={loading}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles['add-admin-modal__button'] + ' ' + styles['add-admin-modal__button--primary']}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>Đang gửi...</span>
+                    ) : (
+                      'Gửi lời mời'
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
       {toast && (

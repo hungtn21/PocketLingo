@@ -1,11 +1,10 @@
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.core.files.storage import default_storage
-from django.conf import settings
-import os
-import uuid
+import cloudinary
+import cloudinary.uploader
 
 class UploadImageView(APIView):
     permission_classes = [IsAuthenticated]
@@ -14,16 +13,14 @@ class UploadImageView(APIView):
     def post(self, request):
         file_obj = request.FILES.get('file')
         if not file_obj:
-            return Response({'error': 'No file provided'}, status=400)
+            return Response({'error': 'Không có file được cung cấp'}, status=400)
 
-        # Generate unique filename
-        ext = os.path.splitext(file_obj.name)[1]
-        filename = f"{uuid.uuid4()}{ext}"
-        
-        # Save file
-        file_path = default_storage.save(f"uploads/{filename}", file_obj)
-        
-        # Generate URL
-        file_url = request.build_absolute_uri(settings.MEDIA_URL + file_path)
-        
-        return Response({'url': file_url})
+        try:
+            upload_result = cloudinary.uploader.upload(file_obj)
+            file_url = upload_result.get('secure_url')
+            if not file_url:
+                return Response({'error': 'Lỗi tải lên ảnh'}, status=500)
+            return Response({'url': file_url})
+        except Exception as e:
+            return Response({'error': f'Lỗi tải lên ảnh: {str(e)}'}, status=500)
+

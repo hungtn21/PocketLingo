@@ -4,6 +4,8 @@ import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
 import { Search, Eye, Edit, Trash2, Plus, Upload } from "lucide-react";
+import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
+import ToastMessage from "../../../component/ToastMessage";
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -22,6 +24,15 @@ const CourseList = () => {
   // Modals
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    isDangerous: false,
+    onConfirm: () => {},
+  });
+  const [toast, setToast] = useState<null | { message: string; type: "success" | "error" }>(null);
   const [courseToDelete, setCourseToDelete] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<any>({
@@ -87,32 +98,69 @@ const CourseList = () => {
 
   const handleDelete = (id: number) => {
     setCourseToDelete(id);
-    setShowDeleteModal(true);
+    setConfirmModal({
+      isOpen: true,
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác.',
+      confirmText: 'Xóa',
+      isDangerous: true,
+      onConfirm: () => {
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        setTimeout(() => confirmDelete(id), 0);
+      },
+    });
   };
 
-  const confirmDelete = async () => {
-    if (!courseToDelete) return;
+  const confirmDelete = async (id?: number) => {
+    const deleteId = typeof id === 'number' ? id : courseToDelete;
+    if (!deleteId) return;
     try {
-      await api.delete(`/admins/courses/${courseToDelete}/`);
+      await api.delete(`/admins/courses/${deleteId}/`);
       fetchCourses(page);
-      setShowDeleteModal(false);
-      setCourseToDelete(null);
+      setToast({ message: "Xóa khóa học thành công", type: "success" });
     } catch (e: any) {
-      alert("Không thể xóa khóa học");
+      setToast({ message: e?.response?.data?.detail || "Không thể xóa khóa học", type: "error" });
+    } finally {
+      setCourseToDelete(null);
     }
   };
 
   const handleSave = async () => {
+    if (isEditing && currentCourse.id) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Xác nhận chỉnh sửa',
+        message: 'Bạn có chắc chắn muốn cập nhật thông tin khóa học này?',
+        confirmText: 'Cập nhật',
+        isDangerous: false,
+        onConfirm: () => doEditCourse(),
+      });
+    } else {
+      doAddCourse();
+    }
+  };
+
+  const doEditCourse = async () => {
     try {
-      if (isEditing && currentCourse.id) {
-        await api.put(`/admins/courses/${currentCourse.id}/`, currentCourse);
-      } else {
-        await api.post("/admins/courses/", currentCourse);
-      }
+      await api.put(`/admins/courses/${currentCourse.id}/`, currentCourse);
+      setToast({ message: "Cập nhật khóa học thành công", type: "success" });
       setShowModal(false);
       fetchCourses(page);
     } catch (e: any) {
-      alert(e?.response?.data?.detail || "Có lỗi xảy ra");
+      setToast({ message: e?.response?.data?.detail || "Có lỗi xảy ra", type: "error" });
+    } finally {
+      setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+    }
+  };
+
+  const doAddCourse = async () => {
+    try {
+      await api.post("/admins/courses/", currentCourse);
+      setToast({ message: "Thêm khóa học thành công", type: "success" });
+      setShowModal(false);
+      fetchCourses(page);
+    } catch (e: any) {
+      setToast({ message: e?.response?.data?.detail || "Có lỗi xảy ra", type: "error" });
     }
   };
 
@@ -135,7 +183,7 @@ const CourseList = () => {
   };
 
   const thStyle = {
-    backgroundColor: "#6f42c1",
+    backgroundColor: "#5E3C86",
     color: "white",
     fontWeight: 700,
     fontSize: "0.9rem",
@@ -146,7 +194,7 @@ const CourseList = () => {
     <div className="admin-dashboard-page">
       <style>{`
         .table-custom-header th {
-          background-color: #6f42c1 !important;
+          background-color: #5E3C86 !important;
           color: white !important;
         }
       `}</style>
@@ -158,7 +206,7 @@ const CourseList = () => {
           <h3 className="fw-bold">Danh sách khóa học</h3>
           <button 
             className="btn btn-primary" 
-            style={{ backgroundColor: "#6f42c1", borderColor: "#6f42c1" }}
+            style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }}
             onClick={openAddModal}
           >
             <Plus size={18} className="me-2" />
@@ -167,7 +215,7 @@ const CourseList = () => {
         </div>
 
         <div className="d-flex flex-wrap align-items-center mb-3" style={{ gap: 10 }}>
-          <div className="d-flex align-items-center" style={{ border: "1px solid #e0e0e0", borderRadius: 24, padding: "6px 10px", width: 300, background: "#f5f6f8" }}>
+          <div className="d-flex align-items-center" style={{ border: "1px solid #e0e0e0", borderRadius: 24, padding: "6px 10px", width: 300, background: "#f5f6f8", height: 40 }}>
             <Search size={18} color="#777" style={{ marginRight: 6 }} />
             <input
               type="text"
@@ -176,13 +224,12 @@ const CourseList = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              style={{ border: "none", background: "transparent", boxShadow: "none" }}
+              style={{ border: "none", background: "transparent", boxShadow: "none", height: 28 }}
             />
           </div>
-          
           <select 
             className="form-select" 
-            style={{ width: 150, borderRadius: 24, background: "#f5f6f8", border: "1px solid #e0e0e0" }}
+            style={{ width: 150, borderRadius: 24, background: "#f5f6f8", border: "1px solid #e0e0e0", height: 40, padding: "6px 10px" }}
             value={level}
             onChange={(e) => setLevel(e.target.value)}
           >
@@ -191,10 +238,9 @@ const CourseList = () => {
             <option value="Trung cấp">Trung cấp</option>
             <option value="Cao cấp">Cao cấp</option>
           </select>
-
           <select 
             className="form-select" 
-            style={{ width: 200, borderRadius: 24, background: "#f5f6f8", border: "1px solid #e0e0e0" }}
+            style={{ width: 200, borderRadius: 24, background: "#f5f6f8", border: "1px solid #e0e0e0", height: 40, padding: "6px 10px" }}
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
@@ -208,7 +254,7 @@ const CourseList = () => {
         {loading ? (
           <div className="text-center py-4">Đang tải...</div>
         ) : (
-          <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #6f42c1" }}>
+          <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">
                 <thead className="table-custom-header">
@@ -228,7 +274,15 @@ const CourseList = () => {
                     courses.map((c, idx) => (
                       <tr key={c.id}>
                         <td>{(page - 1) * 10 + idx + 1}</td>
-                        <td className="fw-semibold">{c.title}</td>
+                        <td className="fw-semibold">
+                          <span
+                            style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}
+                            onClick={() => navigate(`/admin/courses/${c.id}`)}
+                            title="Xem chi tiết khóa học"
+                          >
+                            {c.title}
+                          </span>
+                        </td>
                         <td>{c.level}</td>
                         <td>{c.language}</td>
                         <td className="text-center">{c.lesson_count}</td>
@@ -259,7 +313,7 @@ const CourseList = () => {
                     <button 
                         key={p} 
                         className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
-                        style={p === page ? { backgroundColor: "#6f42c1", borderColor: "#6f42c1" } : {}}
+                        style={p === page ? { backgroundColor: "#5E3C86", borderColor: "#5E3C86" } : {}}
                         onClick={() => fetchCourses(p)}
                     >
                         {p}
@@ -271,68 +325,69 @@ const CourseList = () => {
 
       {/* Modal Add/Edit */}
       {showModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: 16, overflow: "hidden" }}>
-              <div className="modal-header text-white" style={{ backgroundColor: "#5a32a3" }}>
-                <h5 className="modal-title fw-bold">{isEditing ? "Chỉnh sửa khóa học" : "Thêm khóa học"}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
-              </div>
-              <div className="modal-body p-4" style={{ backgroundColor: "#5a32a3" }}>
-                <div className="mb-3">
-                  <label className="form-label text-white">Tên khóa học</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 16, minWidth: 600, maxWidth: 700, boxShadow: '0 4px 24px rgba(0,0,0,0.12)', padding: 0, overflow: 'hidden', border: '7px solid #5E3C86' }} onClick={e => e.stopPropagation()}>
+            <div style={{ color: '#5E3C86', padding: '24px 32px 0 32px', fontSize: '1.2rem', fontWeight: 'bold', background: 'none', borderBottom: 'none' }}>
+              {isEditing ? "Chỉnh sửa khóa học" : "Thêm khóa học"}
+            </div>
+            <div style={{ padding: '24px 32px 12px 32px' }}>
+              <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Tên khóa học</label>
+                  <input
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    type="text"
                     value={currentCourse.title}
-                    onChange={(e) => setCurrentCourse({...currentCourse, title: e.target.value})}
+                    onChange={e => setCurrentCourse({ ...currentCourse, title: e.target.value })}
+                    required
                   />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label text-white">Mô tả</label>
-                  <textarea 
-                    className="form-control" 
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Mô tả</label>
+                  <textarea
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
                     rows={2}
                     value={currentCourse.description}
-                    onChange={(e) => setCurrentCourse({...currentCourse, description: e.target.value})}
+                    onChange={e => setCurrentCourse({ ...currentCourse, description: e.target.value })}
                   />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label text-white">Mức độ</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Mức độ</label>
+                  <select
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
                     value={currentCourse.level}
-                    onChange={(e) => setCurrentCourse({...currentCourse, level: e.target.value})}
-                  />
+                    onChange={e => setCurrentCourse({ ...currentCourse, level: e.target.value })}
+                    required
+                  >
+                    <option value="Sơ cấp">Sơ cấp</option>
+                    <option value="Trung cấp">Trung cấp</option>
+                    <option value="Cao cấp">Cao cấp</option>
+                  </select>
                 </div>
-                <div className="row">
-                  <div className="col-6 mb-3">
-                    <label className="form-label text-white">Ảnh bìa</label>
-                    <div className="input-group">
-                       <input 
-                          type="text" 
-                          className="form-control" 
-                          placeholder="URL ảnh"
-                          value={currentCourse.image_url || ""}
-                          onChange={(e) => setCurrentCourse({...currentCourse, image_url: e.target.value})}
-                       />
-                       <button className="btn btn-light" onClick={handleUploadClick}><Upload size={16}/></button>
-                       <input 
-                          type="file" 
-                          ref={fileInputRef} 
-                          style={{ display: "none" }} 
-                          accept="image/*"
-                          onChange={handleFileChange}
-                       />
+                <div style={{ marginBottom: 16, display: 'flex', gap: 24 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Ảnh bìa</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {currentCourse.image_url && (
+                        <img src={currentCourse.image_url} alt="Ảnh bìa" style={{ maxWidth: '100%', maxHeight: 120, borderRadius: 8, marginBottom: 4, border: '1px solid #eee' }} />
+                      )}
+                      <button type="button" style={{ borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: '1rem', background: '#eee', border: 'none', cursor: 'pointer', width: 'fit-content' }} onClick={handleUploadClick}><Upload size={16}/> Upload ảnh</button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: "none" }}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
                     </div>
                   </div>
-                  <div className="col-6 mb-3">
-                    <label className="form-label text-white">Ngôn ngữ</label>
-                    <select 
-                      className="form-select"
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Ngôn ngữ</label>
+                    <select
+                      style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
                       value={currentCourse.language}
-                      onChange={(e) => setCurrentCourse({...currentCourse, language: e.target.value})}
+                      onChange={e => setCurrentCourse({ ...currentCourse, language: e.target.value })}
+                      required
                     >
                       <option value="English">English</option>
                       <option value="Japanese">Japanese</option>
@@ -340,31 +395,45 @@ const CourseList = () => {
                     </select>
                   </div>
                 </div>
-                <div className="d-flex justify-content-end gap-2 mt-3">
-                   <button className="btn btn-light fw-bold" style={{ width: 100 }} onClick={handleSave}>Lưu</button>
-                   <button className="btn btn-secondary fw-bold" style={{ width: 100, backgroundColor: "rgba(255,255,255,0.3)", border: "none" }} onClick={() => setShowModal(false)}>Huỷ</button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, padding: '16px 0 0 0', background: '#fff' }}>
+                  <button
+                    type="button"
+                    style={{ border: 'none', borderRadius: 8, padding: '8px 24px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', background: '#fff', color: '#5E3C86', borderColor: '#5E3C86', borderWidth: 1.5, borderStyle: 'solid' }}
+                    onClick={() => setShowModal(false)}
+                  >
+                    Huỷ
+                  </button>
+                  <button
+                    type="submit"
+                    style={{ border: 'none', borderRadius: 8, padding: '8px 24px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', background: '#5E3C86', color: '#fff' }}
+                  >
+                    Lưu
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Confirm Delete */}
-      {showDeleteModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: 16, overflow: "hidden", backgroundColor: "#5a32a3" }}>
-              <div className="modal-body p-4 text-center">
-                <h4 className="text-white fw-bold mb-4">Bạn có chắc chắn muốn xóa ?</h4>
-                <div className="d-flex justify-content-center gap-3">
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "white", color: "#5a32a3", width: 100 }} onClick={() => setShowDeleteModal(false)}>Hủy</button>
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "#b19cd9", color: "white", width: 100 }} onClick={confirmDelete}>Xóa</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* ConfirmModal for delete and future actions */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        isDangerous={confirmModal.isDangerous}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* ToastMessage for notifications */}
+      {toast && (
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

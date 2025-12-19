@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import ToastMessage from '../../../component/ToastMessage';
+import styles from './EnrollmentRequests.module.css';
 import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
-import { Search, CheckSquare, MinusSquare } from "lucide-react";
+import { Search, Check, X } from "lucide-react";
 
 const EnrollmentRequests = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,6 +19,7 @@ const EnrollmentRequests = () => {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const fetchRequests = async (targetPage = 1) => {
     setLoading(true);
@@ -56,9 +59,10 @@ const EnrollmentRequests = () => {
     try {
       await api.post(`/admins/enrollments/${selectedRequest}/action/`, { action: "approve" });
       setShowApproveModal(false);
+      setToast({ message: "Duyệt yêu cầu thành công!", type: "success" });
       fetchRequests(page);
     } catch (e) {
-      alert("Có lỗi xảy ra khi duyệt");
+      setToast({ message: "Có lỗi xảy ra khi duyệt", type: "error" });
     }
   };
 
@@ -76,14 +80,15 @@ const EnrollmentRequests = () => {
         reason: rejectReason
       });
       setShowRejectModal(false);
+      setToast({ message: "Từ chối yêu cầu thành công!", type: "success" });
       fetchRequests(page);
     } catch (e) {
-      alert("Có lỗi xảy ra khi từ chối");
+      setToast({ message: "Có lỗi xảy ra khi từ chối", type: "error" });
     }
   };
 
   const thStyle = {
-    backgroundColor: "#6f42c1", // Purple header
+    backgroundColor: "#5E3C86", // Purple header
     color: "white",
     fontWeight: 700,
     fontSize: "0.9rem",
@@ -92,26 +97,33 @@ const EnrollmentRequests = () => {
 
   return (
     <div className="admin-dashboard-page">
+      {toast && (
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <AdminHeader onHamburgerClick={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="container" style={{ marginTop: 40, maxWidth: 1100 }}>
         <h3 className="fw-bold mb-4">Yêu cầu tham gia</h3>
 
-        <div className="d-flex align-items-center mb-4" style={{ border: "1px solid #e0e0e0", borderRadius: 24, padding: "8px 16px", width: 400, background: "#e0e0e0" }}>
-            <Search size={18} color="#555" style={{ marginRight: 8 }} />
-            <input
-              type="text"
-              placeholder="Nhập Tên khoá học, Tên học viên"
-              className="form-control p-0"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              style={{ border: "none", background: "transparent", boxShadow: "none", fontSize: "0.95rem" }}
-            />
+        <div className="d-flex align-items-center mb-4" style={{ border: "1px solid #e0e0e0", borderRadius: 24, padding: "6px 10px", width: 300, background: "#f5f6f8" }}>
+          <Search size={18} color="#777" style={{ marginRight: 6 }} />
+          <input
+            type="text"
+            placeholder="Nhập Tên khoá học, Tên học viên"
+            className="form-control"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            style={{ border: "none", background: "transparent", boxShadow: "none" }}
+          />
         </div>
 
-        <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #6f42c1" }}>
+        <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">
                 <thead>
@@ -139,11 +151,10 @@ const EnrollmentRequests = () => {
                         <td>{new Date(req.requested_at).toLocaleDateString('vi-VN')}</td>
                         <td className="text-center">
                           <button className="btn btn-link p-1 me-2" title="Duyệt" onClick={() => handleApprove(req.id)}>
-                            <CheckSquare size={20} color="#000" />
+                            <Check size={22} color="#5E3C86" strokeWidth={3} />
                           </button>
                           <button className="btn btn-link p-1" title="Từ chối" onClick={() => openRejectModal(req.id)}>
-                            <MinusSquare size={20} color="#000" style={{ backgroundColor: "black", color: "white", borderRadius: 2 }} /> 
-                            {/* Using MinusSquare filled black to match design roughly, or just use icon */}
+                            <X size={22} color="#f44336" strokeWidth={3} />
                           </button>
                         </td>
                       </tr>
@@ -161,7 +172,7 @@ const EnrollmentRequests = () => {
                     <button 
                         key={p} 
                         className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-light'}`}
-                        style={p === page ? { backgroundColor: "#6f42c1", borderColor: "#6f42c1" } : {}}
+                        style={p === page ? { backgroundColor: "#5E3C86", borderColor: "#5E3C86" } : {}}
                         onClick={() => fetchRequests(p)}
                     >
                         {p}
@@ -173,23 +184,35 @@ const EnrollmentRequests = () => {
 
       {/* Modal Reject */}
       {showRejectModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: 16, overflow: "hidden", backgroundColor: "#5a32a3" }}>
-              <div className="modal-body p-4 text-center">
-                <h4 className="text-white fw-bold mb-4">Lý do từ chối</h4>
-                <textarea 
-                    className="form-control mb-4" 
-                    rows={4} 
-                    style={{ borderRadius: 8 }}
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                ></textarea>
-                <div className="d-flex justify-content-center gap-3">
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "white", color: "#5a32a3", width: 100 }} onClick={() => setShowRejectModal(false)}>Huỷ</button>
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "#b19cd9", color: "white", width: 100 }} onClick={handleReject}>Lưu</button>
-                </div>
-              </div>
+        <div className={styles['enrollment-modal-backdrop']} onClick={() => setShowRejectModal(false)}>
+          <div className={styles['enrollment-modal']} onClick={e => e.stopPropagation()}>
+            <div className={styles['enrollment-modal__header']}>Lý do từ chối</div>
+            <div className={styles['enrollment-modal__body']}>
+              <textarea
+                className={styles['enrollment-modal__textarea']}
+                rows={4}
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Nhập lý do từ chối..."
+              />
+            </div>
+            <div className={styles['enrollment-modal__footer']}>
+              <button
+                type="button"
+                className={styles['enrollment-modal__button'] + ' ' + styles['enrollment-modal__button--secondary']}
+                onClick={() => setShowRejectModal(false)}
+                disabled={false}
+              >
+                Huỷ
+              </button>
+              <button
+                type="button"
+                className={styles['enrollment-modal__button'] + ' ' + styles['enrollment-modal__button--primary']}
+                onClick={handleReject}
+                disabled={false}
+              >
+                Lưu
+              </button>
             </div>
           </div>
         </div>
@@ -197,16 +220,29 @@ const EnrollmentRequests = () => {
 
       {/* Modal Approve */}
       {showApproveModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: 16, overflow: "hidden", backgroundColor: "#5a32a3" }}>
-              <div className="modal-body p-4 text-center">
-                <h4 className="text-white fw-bold mb-4">Bạn có chắc chắn muốn duyệt ?</h4>
-                <div className="d-flex justify-content-center gap-3">
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "white", color: "#5a32a3", width: 100 }} onClick={() => setShowApproveModal(false)}>Huỷ</button>
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "#b19cd9", color: "white", width: 100 }} onClick={confirmApprove}>Duyệt</button>
-                </div>
-              </div>
+        <div className={styles['enrollment-modal-backdrop']} onClick={() => setShowApproveModal(false)}>
+          <div className={styles['enrollment-modal']} onClick={e => e.stopPropagation()}>
+            <div className={styles['enrollment-modal__header']}>Xác nhận duyệt yêu cầu</div>
+            <div className={styles['enrollment-modal__body']} style={{ textAlign: 'center' }}>
+              <div style={{ fontWeight: 500, fontSize: '1.05rem', marginBottom: 12 }}>Bạn có chắc chắn muốn duyệt yêu cầu?</div>
+            </div>
+            <div className={styles['enrollment-modal__footer']}>
+              <button
+                type="button"
+                className={styles['enrollment-modal__button'] + ' ' + styles['enrollment-modal__button--secondary']}
+                onClick={() => setShowApproveModal(false)}
+                disabled={false}
+              >
+                Huỷ
+              </button>
+              <button
+                type="button"
+                className={styles['enrollment-modal__button'] + ' ' + styles['enrollment-modal__button--primary']}
+                onClick={confirmApprove}
+                disabled={false}
+              >
+                Duyệt
+              </button>
             </div>
           </div>
         </div>

@@ -4,6 +4,8 @@ import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
 import { Trash2, Plus, ArrowLeft, Eye, Edit } from "lucide-react";
+import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
+import ToastMessage from "../../../component/ToastMessage";
 
 const AdminCourseDetail = () => {
   const { courseId } = useParams();
@@ -15,14 +17,25 @@ const AdminCourseDetail = () => {
   
   // Modal
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [lessonToDelete, setLessonToDelete] = useState<number | null>(null);
   const [currentLesson, setCurrentLesson] = useState<any>({
+    id: null,
     title: "",
     description: "",
     order_index: 1,
     status: "active"
   });
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    isDangerous: false,
+    onConfirm: () => {},
+  });
+  const [toast, setToast] = useState<null | { message: string; type: "success" | "error" }>(null);
 
   const fetchCourseDetail = async () => {
     setLoading(true);
@@ -43,12 +56,45 @@ const AdminCourseDetail = () => {
   }, [courseId]);
 
   const handleSaveLesson = async () => {
+    if (!currentLesson.title.trim()) {
+      setToast({ message: "Tên bài học không được để trống.", type: "error" });
+      return;
+    }
+    if (isEditing) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Xác nhận cập nhật',
+        message: 'Bạn chắc chắn muốn cập nhật thông tin bài học?',
+        confirmText: 'Cập nhật',
+        isDangerous: false,
+        onConfirm: () => doEditLesson(),
+      });
+    } else {
+      doAddLesson();
+    }
+  };
+
+  const doAddLesson = async () => {
     try {
       await api.post(`/admins/courses/${courseId}/lessons/`, currentLesson);
       setShowModal(false);
+      setToast({ message: "Thêm bài học thành công", type: "success" });
       fetchCourseDetail();
     } catch (e: any) {
-      alert(e?.response?.data?.detail || "Có lỗi xảy ra");
+      setToast({ message: e?.response?.data?.detail || "Có lỗi xảy ra", type: "error" });
+    }
+  };
+
+  const doEditLesson = async () => {
+    try {
+      await api.put(`/admins/lessons/${currentLesson.id}/update/`, currentLesson);
+      setShowModal(false);
+      setToast({ message: "Cập nhật bài học thành công", type: "success" });
+      fetchCourseDetail();
+    } catch (e: any) {
+      setToast({ message: e?.response?.data?.detail || "Có lỗi xảy ra", type: "error" });
+    } finally {
+      setConfirmModal((prev) => ({ ...prev, isOpen: false }));
     }
   };
 
@@ -70,7 +116,9 @@ const AdminCourseDetail = () => {
   };
 
   const openAddModal = () => {
+    setIsEditing(false);
     setCurrentLesson({
+      id: null,
       title: "",
       description: "",
       order_index: lessons.length + 1,
@@ -79,8 +127,14 @@ const AdminCourseDetail = () => {
     setShowModal(true);
   };
 
+  const openEditModal = (lesson: any) => {
+    setIsEditing(true);
+    setCurrentLesson({ ...lesson });
+    setShowModal(true);
+  };
+
   const thStyle = {
-    backgroundColor: "#6f42c1",
+    backgroundColor: "#5E3C86",
     color: "white",
     fontWeight: 700,
     fontSize: "0.9rem",
@@ -93,7 +147,7 @@ const AdminCourseDetail = () => {
     <div className="admin-dashboard-page">
       <style>{`
         .table-custom-header th {
-          background-color: #6f42c1 !important;
+          background-color: #5E3C86 !important;
           color: white !important;
         }
       `}</style>
@@ -101,8 +155,8 @@ const AdminCourseDetail = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="container" style={{ marginTop: 40, maxWidth: 1100 }}>
-        <button className="btn btn-link text-decoration-none mb-3 ps-0" onClick={() => navigate("/admin/courses")}>
-           <ArrowLeft size={18} className="me-1"/> Quay lại danh sách
+        <button className="btn btn-light btn-sm me-3 mb-3" onClick={() => navigate('/admin/courses')}>
+          <span style={{ fontSize: 18, verticalAlign: 'middle', marginRight: 4 }}>←</span> Quay lại
         </button>
 
         {course && (
@@ -122,7 +176,7 @@ const AdminCourseDetail = () => {
                <div className="ms-auto">
                  <button 
                     className="btn btn-primary" 
-                    style={{ backgroundColor: "#6f42c1", borderColor: "#6f42c1" }}
+                    style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }}
                     onClick={openAddModal}
                  >
                     <Plus size={18} className="me-2" />
@@ -133,7 +187,7 @@ const AdminCourseDetail = () => {
           </div>
         )}
 
-        <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #6f42c1" }}>
+        <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">
                 <thead className="table-custom-header">
@@ -152,25 +206,50 @@ const AdminCourseDetail = () => {
                     <tr><td colSpan={7} className="text-center py-4">Chưa có bài học nào</td></tr>
                   ) : (
                     lessons.map((l, idx) => (
-                      <tr key={l.id}>
+                      <tr key={l.id} style={{ cursor: 'pointer' }}
+                        onClick={e => {
+                          // Prevent navigation if clicking delete button
+                          if ((e.target as HTMLElement).closest('.lesson-delete-btn')) return;
+                          navigate(`/admin/lessons/${l.id}/manage`);
+                        }}
+                      >
                         <td>{idx + 1}</td>
-                        <td className="fw-semibold">{l.title}</td>
-                        <td className="text-center">0</td> {/* Placeholder for flashcard count */}
-                        <td className="text-center">0</td> {/* Placeholder for quiz count */}
+                        <td className="fw-semibold">
+                          <span
+                            style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}
+                            onClick={() => openEditModal(l)}
+                            title="Chỉnh sửa bài học"
+                          >
+                            {l.title}
+                          </span>
+                        </td>
+                        <td className="text-center">{l.flashcard_count ?? 0}</td>
+                        <td className="text-center">{l.quiz_question_count ?? 0}</td>
                         <td className="text-center">
-                           <span className={`badge ${l.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
-                             {l.status === 'active' ? 'Active' : 'Inactive'}
-                           </span>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              padding: '4px 10px',
+                              borderRadius: '999px',
+                              fontWeight: 600,
+                              fontSize: '0.85rem',
+                              backgroundColor: l.status === 'active' ? 'rgba(40,167,69,0.12)' : 'rgba(220,53,69,0.12)',
+                              color: l.status === 'active' ? '#28a745' : '#dc3545',
+                              border: `1px solid ${l.status === 'active' ? '#28a745' : '#dc3545'}`
+                            }}
+                          >
+                            {l.status === 'active' ? 'Active' : 'Inactive'}
+                          </span>
                         </td>
                         <td className="text-center">{l.order_index}</td>
-                        <td className="text-center">
-                          <button className="btn btn-link p-1" title="Xem chi tiết" style={{ cursor: "default", opacity: 0.5 }}>
+                        <td className="text-center" onClick={e => e.stopPropagation()}>
+                          <button className="btn btn-link p-1" title="Xem chi tiết" style={{ cursor: "pointer", opacity: 0.7 }} onClick={() => navigate(`/admin/lessons/${l.id}/manage`)}>
                             <Eye size={18} color="#5b5b5b" />
                           </button>
-                          <button className="btn btn-link p-1" title="Chỉnh sửa" style={{ cursor: "default", opacity: 0.5 }}>
+                          <button className="btn btn-link p-1" title="Chỉnh sửa" style={{ cursor: "pointer", opacity: 0.7 }} onClick={() => openEditModal(l)}>
                             <Edit size={18} color="#5b5b5b" />
                           </button>
-                          <button className="btn btn-link p-1" title="Xóa" onClick={() => handleDeleteLesson(l.id)}>
+                          <button className="btn btn-link p-1 lesson-delete-btn" title="Xóa" onClick={() => handleDeleteLesson(l.id)}>
                             <Trash2 size={18} color="#dc3545" />
                           </button>
                         </td>
@@ -185,57 +264,82 @@ const AdminCourseDetail = () => {
 
       {/* Modal Add/Edit Lesson */}
       {showModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: 16, overflow: "hidden" }}>
-              <div className="modal-header text-white" style={{ backgroundColor: "#5a32a3" }}>
-                <h5 className="modal-title fw-bold">Thêm bài học</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
-              </div>
-              <div className="modal-body p-4" style={{ backgroundColor: "#5a32a3" }}>
-                <div className="mb-3">
-                  <label className="form-label text-white">Tên bài học</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 16, minWidth: 400, maxWidth: 500, boxShadow: '0 4px 24px rgba(0,0,0,0.12)', padding: 0, overflow: 'hidden', border: '7px solid #5E3C86' }} onClick={e => e.stopPropagation()}>
+            <div style={{ color: '#5E3C86', padding: '24px 32px 0 32px', fontSize: '1.2rem', fontWeight: 'bold', background: 'none', borderBottom: 'none' }}>
+              {isEditing ? 'Chỉnh sửa bài học' : 'Thêm bài học'}
+            </div>
+            <div style={{ padding: '24px 32px 12px 32px' }}>
+              <form onSubmit={e => { e.preventDefault(); handleSaveLesson(); }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Tên bài học</label>
+                  <input
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    type="text"
                     value={currentLesson.title}
-                    onChange={(e) => setCurrentLesson({...currentLesson, title: e.target.value})}
+                    onChange={e => setCurrentLesson({ ...currentLesson, title: e.target.value })}
+                    required
                   />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label text-white">Mô tả bài học</label>
-                  <textarea 
-                    className="form-control" 
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Mô tả bài học</label>
+                  <textarea
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
                     rows={2}
                     value={currentLesson.description}
-                    onChange={(e) => setCurrentLesson({...currentLesson, description: e.target.value})}
+                    onChange={e => setCurrentLesson({ ...currentLesson, description: e.target.value })}
                   />
                 </div>
-                <div className="d-flex justify-content-end gap-2 mt-3">
-                   <button className="btn btn-light fw-bold" style={{ width: 100 }} onClick={handleSaveLesson}>Lưu</button>
-                   <button className="btn btn-secondary fw-bold" style={{ width: 100, backgroundColor: "rgba(255,255,255,0.3)", border: "none" }} onClick={() => setShowModal(false)}>Huỷ</button>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Trạng thái</label>
+                  <select
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    value={currentLesson.status}
+                    onChange={e => setCurrentLesson({ ...currentLesson, status: e.target.value })}
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </div>
-              </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, padding: '16px 0 0 0', background: '#fff' }}>
+                  <button
+                    type="button"
+                    style={{ border: 'none', borderRadius: 8, padding: '8px 24px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', background: '#fff', color: '#5E3C86', borderColor: '#5E3C86', borderWidth: 1.5, borderStyle: 'solid' }}
+                    onClick={() => setShowModal(false)}
+                  >
+                    Huỷ
+                  </button>
+                  <button
+                    type="submit"
+                    style={{ border: 'none', borderRadius: 8, padding: '8px 24px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', background: '#5E3C86', color: '#fff' }}
+                  >
+                    Lưu
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Confirm Delete */}
-      {showDeleteModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: 16, overflow: "hidden", backgroundColor: "#5a32a3" }}>
-              <div className="modal-body p-4 text-center">
-                <h4 className="text-white fw-bold mb-4">Bạn có chắc chắn muốn xóa ?</h4>
-                <div className="d-flex justify-content-center gap-3">
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "white", color: "#5a32a3", width: 100 }} onClick={() => setShowDeleteModal(false)}>Hủy</button>
-                   <button className="btn fw-bold px-4" style={{ backgroundColor: "#b19cd9", color: "white", width: 100 }} onClick={confirmDelete}>Xóa</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* ConfirmModal for delete and future actions */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        isDangerous={confirmModal.isDangerous}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* ToastMessage for notifications */}
+      {toast && (
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

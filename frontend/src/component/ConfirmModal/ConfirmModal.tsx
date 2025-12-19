@@ -1,5 +1,5 @@
 import React from "react";
-import "./ConfirmModal.css";
+import styles from './ConfirmModal.module.css';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -27,34 +27,26 @@ const ConfirmModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="confirm-modal__backdrop" onClick={onCancel}>
-      <div
-        className="confirm-modal__container"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="confirm-modal__header">
-          <h2 className="confirm-modal__title">{title}</h2>
+    <div className={styles['confirm-modal-backdrop']} onClick={onCancel}>
+      <div className={styles['confirm-modal']} onClick={e => e.stopPropagation()}>
+        <div className={styles['confirm-modal__header']}>
+          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#5E3C86' }}>{title}</h2>
         </div>
-
-        <div className="confirm-modal__body">
-          <p className="confirm-modal__message">{message}</p>
+        <div className={styles['confirm-modal__body']}>
+          <p style={{ margin: 0, fontSize: '1rem', color: '#333' }}>{message}</p>
         </div>
-
-        <div className="confirm-modal__footer">
+        <div className={styles['confirm-modal__footer']}>
           <button
-            className="confirm-modal__button confirm-modal__button--cancel"
+            type="button"
+            className={styles['confirm-modal__button'] + ' ' + styles['confirm-modal__button--secondary']}
             onClick={onCancel}
             disabled={isLoading}
           >
             {cancelText}
           </button>
           <button
-            className={
-              "confirm-modal__button" +
-              (isDangerous
-                ? " confirm-modal__button--danger"
-                : " confirm-modal__button--primary")
-            }
+            type="button"
+            className={styles['confirm-modal__button'] + ' ' + (isDangerous ? styles['confirm-modal__button--primary'] : styles['confirm-modal__button--primary'])}
             onClick={onConfirm}
             disabled={isLoading}
           >

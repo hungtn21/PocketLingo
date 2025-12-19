@@ -1,3 +1,32 @@
+/* Search and Sort Bar Styles */
+.lesson-management__search-sort-bar {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.lesson-management__search-sort-select {
+  min-width: 180px;
+  border-radius: 10px;
+  padding: 10px 16px;
+  border: 1px solid #d1d1d1;
+  font-size: 1rem;
+  height: 44px;
+  background: #fff;
+}
+
+.lesson-management__search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #f3f3f7;
+  border-radius: 10px;
+  padding: 0 20px;
+  height: 44px;
+  min-width: 320px;
+  max-width: 600px;
+}
 .lesson-management {
   max-width: 1200px;
   margin: 80px auto 24px;
@@ -476,9 +505,7 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.flashcard-field__input:disabled,
-.flashcard-field__textarea:disabled {
-}
+
 
 .flashcard-field__textarea {
   min-height: 40px;

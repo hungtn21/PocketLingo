@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Pencil, Save, Check, Trash2, Search, ChevronDown, Plus, X, Minus } from "lucide-react";
 import api from "../../api";
 import AdminHeader from "../../component/AdminDashboard/AdminHeader";
@@ -65,6 +65,7 @@ const LessonManagement = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"info" | "flashcards" | "quiz">("info");
+  const navigate = useNavigate();
 
   // Helper function to format time from seconds to "X h Y m Z s"
   const formatTimeDisplay = (totalSeconds: number | null): string => {
@@ -115,6 +116,7 @@ const LessonManagement = () => {
   const [flashSearch, setFlashSearch] = useState<string>("");
   const [quizSearchInput, setQuizSearchInput] = useState<string>("");
   const [quizSearch, setQuizSearch] = useState<string>("");
+  const [quizTypeFilter, setQuizTypeFilter] = useState<"all" | "multiple_choice" | "fill_in" | "drag_drop">("all");
   const [addCount, setAddCount] = useState<string>("1");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
@@ -1181,17 +1183,96 @@ const LessonManagement = () => {
             Danh sách câu hỏi
           </h3>
 
-          <div className="flashcard-search">
-            <span className="flashcard-search__icon">
-              <Search size={18} />
-            </span>
-            <input
-              type="text"
-              className="flashcard-search__input"
-              placeholder="Tìm kiếm câu hỏi..."
-              value={quizSearchInput}
-              onChange={(e) => setQuizSearchInput(e.target.value)}
-            />
+          {/* Filter bar for question type as dropdown */}
+          <div className="lesson-management__search-sort-bar">
+            <div className="quiz-questions__type-dropdown" style={{ minWidth: 180, position: 'relative' }}>
+              <div
+                className="lesson-management__select-display lesson-management__input"
+                style={{ userSelect: 'none' }}
+                onClick={() => setIsStatusDropdownOpen((prev) => !prev)}
+              >
+                <span>
+                  {quizTypeFilter === "all"
+                    ? "Tất cả"
+                    : quizTypeFilter === "multiple_choice"
+                    ? "Trắc nghiệm"
+                    : quizTypeFilter === "fill_in"
+                    ? "Điền vào chỗ trống"
+                    : "Kéo thả"}
+                </span>
+                <span className="lesson-management__select-arrow">
+                  <ChevronDown size={16} />
+                </span>
+              </div>
+              {isStatusDropdownOpen && (
+                <div className="lesson-management__select-menu" style={{ zIndex: 20 }}>
+                  <button
+                    type="button"
+                    className={
+                      "lesson-management__select-option" +
+                      (quizTypeFilter === "all" ? " lesson-management__select-option--active" : "")
+                    }
+                    onClick={() => {
+                      setQuizTypeFilter("all");
+                      setIsStatusDropdownOpen(false);
+                    }}
+                  >
+                    Tất cả
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      "lesson-management__select-option" +
+                      (quizTypeFilter === "multiple_choice" ? " lesson-management__select-option--active" : "")
+                    }
+                    onClick={() => {
+                      setQuizTypeFilter("multiple_choice");
+                      setIsStatusDropdownOpen(false);
+                    }}
+                  >
+                    Trắc nghiệm
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      "lesson-management__select-option" +
+                      (quizTypeFilter === "fill_in" ? " lesson-management__select-option--active" : "")
+                    }
+                    onClick={() => {
+                      setQuizTypeFilter("fill_in");
+                      setIsStatusDropdownOpen(false);
+                    }}
+                  >
+                    Điền vào chỗ trống
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      "lesson-management__select-option" +
+                      (quizTypeFilter === "drag_drop" ? " lesson-management__select-option--active" : "")
+                    }
+                    onClick={() => {
+                      setQuizTypeFilter("drag_drop");
+                      setIsStatusDropdownOpen(false);
+                    }}
+                  >
+                    Kéo thả
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="lesson-management__search-bar">
+              <span className="flashcard-search__icon">
+                <Search size={18} />
+              </span>
+              <input
+                type="text"
+                className="flashcard-search__input"
+                placeholder="Tìm kiếm câu hỏi..."
+                value={quizSearchInput}
+                onChange={(e) => setQuizSearchInput(e.target.value)}
+              />
+            </div>
           </div>
 
           {questions.length === 0 ? (
@@ -1200,6 +1281,7 @@ const LessonManagement = () => {
             <div className="quiz-questions__list">
               {questions
                 .filter((q) =>
+                  (quizTypeFilter === 'all' || q.question_type === quizTypeFilter) &&
                   q.question_text.toLowerCase().includes(quizSearch.toLowerCase())
                 )
                 .map((q, index) => (
@@ -1635,11 +1717,31 @@ const LessonManagement = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="lesson-management">
+        {/* Back button to AdminCourseDetail */}
+        {lesson && (
+          <div style={{ marginBottom: 16 }}>
+            <button
+              className="btn btn-light btn-sm me-3 mb-2"
+              onClick={() => navigate(`/admin/courses/${lesson.course_id}`)}
+              style={{ fontSize: 16 }}
+            >
+              <span style={{ fontSize: 18, verticalAlign: 'middle', marginRight: 4 }}>←</span> Quay lại khóa học
+            </button>
+          </div>
+        )}
+
         {lesson && (
           <div className="lesson-management__header-texts">
             <div className="lesson-management__breadcrumb">
               <span className="lesson-management__breadcrumb-label">Khóa học:</span>{" "}
-              <span className="lesson-management__breadcrumb-course">{lesson.course_title}</span>
+              <span
+                className="lesson-management__breadcrumb-course"
+                style={{ color: '#5E3C86', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => navigate(`/admin/courses/${lesson.course_id}`)}
+                title="Quay lại chi tiết khóa học"
+              >
+                {lesson.course_title}
+              </span>
             </div>
             <h2 className="lesson-management__title">{lesson.title}</h2>
           </div>
