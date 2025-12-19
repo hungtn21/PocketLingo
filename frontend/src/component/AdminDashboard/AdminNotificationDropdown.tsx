@@ -11,6 +11,8 @@ interface Notification {
   link: string;
   is_read: boolean;
   created_at: string;
+  status?: 'approved' | 'rejected' | string;
+  request_id?: string | number;
 }
 
 const AdminNotificationDropdown: React.FC = () => {
@@ -20,12 +22,8 @@ const AdminNotificationDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-
-  // Khi mount, fetch số lượng chưa đọc ban đầu
   useEffect(() => {
     fetchNotifications();
-    // Initialize shared socket and listen for incoming notifications so
-    // the badge updates even when dropdown is closed.
     initNotificationSocket();
     const unsubscribe = subscribeNotification((payload) => {
       if (payload && typeof payload.unread_count === 'number') {
@@ -40,7 +38,6 @@ const AdminNotificationDropdown: React.FC = () => {
 
   useEffect(() => {
     if (open) fetchNotifications();
-    // Đóng dropdown khi click ngoài
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpen(false);
@@ -62,22 +59,23 @@ const AdminNotificationDropdown: React.FC = () => {
   };
 
   const handleNotificationClick = async (notif: Notification) => {
-    if (!notif.is_read) {
-      await api.post("/admins/notifications/mark-read/", { id: notif.id });
-      setNotifications((prev) => prev.map((n) => n.id === notif.id ? { ...n, is_read: true } : n));
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    }
     setOpen(false);
-    // Nếu notification có request_id thì truyền vào URL
-    let url = notif.link;
-    // Nếu là thông báo liên quan đến enrollment request, chuyển hướng đúng route admin/enrollments
-    if (url.includes("/enrollments")) {
-      url = "/admin/enrollments";
-      if ((notif as any).request_id) {
-        url += `?id=${(notif as any).request_id}`;
-      }
+    
+    // Điều hướng đến trang duyệt yêu cầu (cả đã đọc và chưa đọc)
+    let url = "/admin/enrollments";
+    if (notif.request_id) {
+      url += `?id=${notif.request_id}`;
     }
     navigate(url);
+    
+    // Đánh dấu đã đọc nếu chưa đọc
+    if (!notif.is_read) {
+      try {
+        await api.post("/admins/notifications/mark-read/", { id: notif.id });
+        setNotifications((prev) => prev.map((n) => n.id === notif.id ? { ...n, is_read: true } : n));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (e) {}
+    }
   };
 
   const handleDeleteNotification = async (notifId: string) => {
@@ -101,28 +99,38 @@ const AdminNotificationDropdown: React.FC = () => {
             <div className="no-notification">Không có thông báo nào</div>
           ) : (
             <ul className="notification-list">
-              {notifications.map((notif) => (
-                <li
-                  key={notif.id}
-                  className={`notification-item${notif.is_read ? "" : " unread"}`}
-                >
-                  <div onClick={() => handleNotificationClick(notif)} style={{ flex: 1, cursor: 'pointer' }}>
-                    <div className="notification-message">{notif.message}</div>
-                    <div className="notification-time">{new Date(notif.created_at).toLocaleString()}</div>
-                  </div>
-                  <button
-                    className="notification-delete-btn"
-                    title="Xóa thông báo"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteNotification(notif.id);
-                    }}
-                    style={{ marginLeft: 8 }}
+              {notifications.map((notif) => {
+                // Logic màu sắc:
+                // - Chưa đọc: nền tím (status-approved-unread)
+                // - Đã đọc: nền trắng (read)
+                let statusClass = '';
+                if (!notif.is_read) {
+                  statusClass = 'status-approved-unread'; // Nền tím khi chưa đọc
+                }
+
+                return (
+                  <li
+                    key={notif.id}
+                    className={`notification-item ${notif.is_read ? 'read' : 'unread'} ${statusClass}`}
                   >
-                    ×
-                  </button>
-                </li>
-              ))}
+                    <div onClick={() => handleNotificationClick(notif)} style={{ flex: 1, cursor: 'pointer' }}>
+                      <div className="notification-message">{notif.message}</div>
+                      <div className="notification-time">{new Date(notif.created_at).toLocaleString()}</div>
+                    </div>
+                    <button
+                      className="notification-delete-btn"
+                      title="Xóa thông báo"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteNotification(notif.id);
+                      }}
+                      style={{ marginLeft: 8 }}
+                    >
+                      ×
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

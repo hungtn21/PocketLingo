@@ -1,11 +1,6 @@
-/* Approved (chưa đọc) nền tím */
-.notification-item.status-approved {
+/* Default unread background for non-status notifications */
+.notification-item.unread {
   background: #f3e8ff;
-}
-
-/* Đã đọc thì luôn trắng */
-.notification-item.read.status-approved {
-  background: #fff;
 }
 .admin-notification-dropdown-wrapper {
   position: relative;
@@ -19,37 +14,6 @@
   position: relative;
   cursor: pointer;
   padding: 6px;
-}
-
-
-.notification-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: #a21caf;
-  color: #fff;
-  border-radius: 50%;
-  font-size: 12px;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 5px;
-  font-weight: bold;
-  z-index: 2;
-}
-
-.notification-dot {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 10px;
-  height: 10px;
-  background: #a21caf;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(162,28,175,0.12);
-  z-index: 2;
 }
 
 .admin-notification-dropdown {
@@ -67,7 +31,6 @@
   overflow: hidden;
 }
 
-
 .no-notification {
   padding: 20px;
   text-align: center;
@@ -83,7 +46,7 @@
 }
 
 .notification-item {
-  padding: 12px 16px 8px 16px;
+  padding: 12px 16px;
   cursor: pointer;
   border-bottom: 1px solid #f3e8ff;
   transition: background 0.2s;
@@ -91,30 +54,21 @@
   align-items: center;
 }
 
-.notification-item.unread {
-  background: #f3e8ff;
+/* Unread + status-specific backgrounds for user dropdown */
+.notification-item.unread.approved {
+  background: #f3e8ff; /* light purple for approved, unread */
 }
 
-.notification-item.approved {
-  background: #f3e8ff;
+.notification-item.unread.rejected {
+  background: #fde8e8; /* light red for rejected, unread */
 }
 
-.notification-item.rejected {
-  background: #fde8e8;
-}
-
-/* Read notifications should appear with white background */
+/* Read notifications are white regardless of status */
 .notification-item.read {
   background: #ffffff;
 }
 
-/* Ensure read overrides status colors */
-.notification-item.read.approved,
-.notification-item.read.rejected {
-  background: #ffffff;
-}
-
-.notification-item:last-child {
+.notification-item.last {
   border-bottom: none;
 }
 

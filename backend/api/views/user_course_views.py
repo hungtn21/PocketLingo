@@ -5,11 +5,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from ..models import UserCourse, Course, User
-from ..models import Notification
-from ..utils.notification_realtime import send_admin_notification
-from api.serializers.notification_serializers import NotificationSerializer
-import uuid
-from django.utils import timezone
 
 
 def get_user_from_token(request):
@@ -61,8 +56,6 @@ def enroll_course(request, course_id):
             existing_enrollment.requested_at = timezone.now()
             existing_enrollment.reason = None  # Xóa lý do từ chối cũ
             existing_enrollment.save()
-            # --- Thêm notification cho admin ---
-            _add_admin_notification(user, course)
             return Response({
                 'message': 'Đã gửi lại yêu cầu đăng ký thành công.',
                 'enrollment': {
@@ -78,8 +71,7 @@ def enroll_course(request, course_id):
         course=course,
         status=UserCourse.Status.PENDING
     )
-    # --- Thêm notification cho admin ---
-    _add_admin_notification(user, course)
+    
     return Response({
         'message': 'Đăng ký thành công. Vui lòng chờ duyệt.',
         'enrollment': {
@@ -88,27 +80,6 @@ def enroll_course(request, course_id):
             'requested_at': enrollment.requested_at
         }
     }, status=201)
-
-# --- Helper để thêm notification cho admin ---
-def _add_admin_notification(user, course):
-    # Create a persistent notification for each admin user
-    message = f"{user.name} ({user.email}) đã gửi yêu cầu tham gia khóa học '{course.title}'"
-    link = f"/admin/enrollments/requests/"
-    # Find admin users (staff or superuser)
-    from ..models import User as AppUser
-    admins = AppUser.objects.filter(role__in=[AppUser.Role.ADMIN, AppUser.Role.SUPERADMIN])
-    for admin in admins:
-        notif_obj = Notification.objects.create(user=admin, description=message)
-        serializer = NotificationSerializer(notif_obj)
-        payload = {
-            'unread_count': Notification.objects.filter(user=admin, status=Notification.Status.UNREAD).count(),
-            'notification': {**serializer.data, 'link': link}
-        }
-        try:
-            send_admin_notification(payload)
-        except Exception:
-            # Silently ignore realtime send errors
-            pass
 
 
 @api_view(['GET'])
