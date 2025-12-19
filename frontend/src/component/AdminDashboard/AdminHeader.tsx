@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Bell, User, Menu } from "lucide-react";
+import { User, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../Header/Header.css";
 import "../AdminDashboard/AdminHeader.css";
 import logo from "../../assets/logo.png";
 import { api } from "../../api";
+import AdminNotificationDropdown from "./AdminNotificationDropdown";
 import { useUser } from "../../context/UserContext";
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
 import ChristmasAvatar from "../ChristmasTheme/ChristmasAvatar";
@@ -81,9 +82,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
 
         {/* Nhóm icon bên phải */}
         <div className="header-actions header-right">
-          <button className="notification-button">
-            <Bell size={24} />
-          </button>
+          <AdminNotificationDropdown />
 
           <div className="profile-container">
             <button className="profile-button" onClick={toggleDropdown}>

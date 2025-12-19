@@ -7,6 +7,7 @@ from ..views.admin_views import LearnerListView, LearnerDetailView, LearnerStatu
 from ..views.admin_course_views import AdminCourseListView, AdminCourseDetailView, AdminLessonListView, AdminLessonDetailView
 from ..views.upload_views import UploadImageView
 from ..views.admin_enrollment_views import EnrollmentRequestListView, EnrollmentActionView
+from api.views.notification_views import delete_admin_notification
 
 urlpatterns = [
     path('stats/overview/', OverviewStatsView.as_view(), name='admin_stats_overview'),
@@ -47,4 +48,7 @@ urlpatterns = [
     # Enrollment Requests
     path('enrollments/requests/', EnrollmentRequestListView.as_view(), name='admin_enrollment_requests'),
     path('enrollments/<int:pk>/action/', EnrollmentActionView.as_view(), name='admin_enrollment_action'),
+
+    # Delete notification
+    path('notifications/<int:notif_id>/delete/', delete_admin_notification, name='admin_notification_delete'),
 ]

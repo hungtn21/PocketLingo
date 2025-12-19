@@ -9,6 +9,10 @@ from rest_framework import serializers
 
 from ..authentication import JWTCookieAuthentication
 from ..models import User, UserCourse
+from ..utils.notification_realtime import send_user_notification
+from ..models import Notification
+from ..serializers.notification_serializers import NotificationSerializer
+from django.utils import timezone as dj_timezone
 
 def _require_admin(user):
     return user.role in [User.Role.ADMIN, User.Role.SUPERADMIN]
@@ -75,6 +79,19 @@ class EnrollmentActionView(APIView):
             enrollment.status = UserCourse.Status.APPROVED
             enrollment.approved_at = timezone.now()
             enrollment.save()
+
+            # Create notification DB record for learner
+            message = f"Yêu cầu ghi danh của bạn vào khóa học '{enrollment.course.title}' đã được duyệt."
+            notif_obj = Notification.objects.create(user=enrollment.user, description=message)
+            ser = NotificationSerializer(notif_obj).data
+            # augment serialized data with enrollment-specific fields
+            notif_payload = {**ser, 'link': f"/courses/{enrollment.course.id}", 'status': 'approved', 'reason': '', 'course_title': enrollment.course.title}
+            # send realtime
+            try:
+                send_user_notification(enrollment.user.id, {'unread_count': Notification.objects.filter(user=enrollment.user, status=Notification.Status.UNREAD).count(), 'notification': notif_payload})
+            except Exception:
+                pass
+
             return Response({'detail': 'Approved successfully'})
             
         elif action == 'reject':
@@ -82,6 +99,16 @@ class EnrollmentActionView(APIView):
             enrollment.status = UserCourse.Status.REJECTED
             enrollment.reason = reason
             enrollment.save()
+            # Create notification DB record for learner (rejected)
+            message = f"Yêu cầu ghi danh của bạn vào khóa học '{enrollment.course.title}' đã bị từ chối."
+            notif_obj = Notification.objects.create(user=enrollment.user, description=message)
+            ser = NotificationSerializer(notif_obj).data
+            notif_payload = {**ser, 'link': f"/courses/{enrollment.course.id}", 'status': 'rejected', 'reason': reason, 'course_title': enrollment.course.title}
+            try:
+                send_user_notification(enrollment.user.id, {'unread_count': Notification.objects.filter(user=enrollment.user, status=Notification.Status.UNREAD).count(), 'notification': notif_payload})
+            except Exception:
+                pass
+
             return Response({'detail': 'Rejected successfully'})
             
         return Response({'detail': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)

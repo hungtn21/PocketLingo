@@ -20,7 +20,7 @@ const Badge = ({ status }) => {
     color: isActive ? "#28a745" : "#dc3545",
     border: `1px solid ${isActive ? "#28a745" : "#dc3545"}`,
   };
-  return <span style={style}>{isActive ? "Activate" : "Inactive"}</span>;
+  return <span style={style}>{isActive ? "Activate" : "Locked"}</span>;
 };
 
 const UserDetail = () => {

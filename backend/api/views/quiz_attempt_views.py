@@ -72,7 +72,9 @@ def create_quiz(request, lesson_id):
     
     serializer = QuizSerializer(data=data)
     if serializer.is_valid():
-        serializer.save()
+        # QuizSerializer marks `lesson` as read-only, so pass the lesson instance
+        # directly to save() so lesson_id is set on the created Quiz.
+        serializer.save(lesson=lesson)
         return Response({
             'success': True,
             'data': serializer.data

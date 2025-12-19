@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { initUserNotificationSocket } from "../utils/userNotificationSocket";
 import type { ReactNode } from "react";
 import { api } from "../api";
 
@@ -57,6 +58,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     };
     initUser();
   }, []);
+
+  // When user becomes available (login), initialize user websocket so
+  // realtime notifications arrive immediately without reloading.
+  useEffect(() => {
+    if (user) {
+      initUserNotificationSocket();
+    }
+  }, [user]);
 
   const refreshUser = async () => {
     await fetchUserData();

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Bell, User } from "lucide-react";
+import { User } from "lucide-react";
+import UserNotificationDropdown from "../Header/UserNotificationDropdown";
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
 import logo from "../../assets/logo.png";
@@ -56,9 +57,7 @@ const Header = () => {
         </div>
 
         <div className="header-actions">
-          <button className="notification-button" aria-label="Thông báo">
-            <Bell size={24} />
-          </button>
+          <UserNotificationDropdown />
 
           <div className="profile-container">
             <button

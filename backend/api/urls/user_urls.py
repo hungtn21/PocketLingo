@@ -2,6 +2,7 @@ from django.urls import path
 from ..views.user_views import RegisterUserView, RegisterAdminView, VerifyEmailView, SetPasswordView, ResetPasswordView, LoginView, LogoutView, MeView, ForgotPasswordView
 from ..views.user_views import UserProfileView, ChangePasswordView, RequestEmailChangeView, VerifyEmailChangeView, get_leaderboard
 from ..views.quiz_views import get_user_quiz_history
+from api.views.notification_views import get_user_notifications_db, delete_user_notification, mark_notification_read
 urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
     path('register-admin/', RegisterAdminView.as_view(), name='register_admin'),
@@ -18,4 +19,7 @@ urlpatterns = [
     path('verify-email-change/', VerifyEmailChangeView.as_view(), name='verify_email_change'),
     path('quiz-history/', get_user_quiz_history, name='user_quiz_history'),
     path('leaderboard/', get_leaderboard, name='leaderboard'),
+    path('notifications/db/', get_user_notifications_db, name='user_notifications_db'),
+    path('notifications/mark-read/', mark_notification_read, name='user_notification_mark_read'),
+    path('notifications/<int:notif_id>/delete/', delete_user_notification, name='user_notification_delete'),
 ]

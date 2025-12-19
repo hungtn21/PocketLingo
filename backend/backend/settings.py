@@ -44,7 +44,20 @@ INSTALLED_APPS = [
     'api',
     'cloudinary',
     'cloudinary_storage',
+    'channels',
 ]
+# Application definition
+
+# Channels config
+ASGI_APPLICATION = 'backend.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
