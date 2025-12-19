@@ -1,0 +1,82 @@
+.enrollment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enrollment-modal {
+  background: #fff;
+  border-radius: 16px;
+  min-width: 350px;
+  max-width: 400px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  padding: 0;
+  overflow: hidden;
+  animation: fadeInModal 0.2s;
+  border: 7px solid #5E3C86;
+}
+
+@keyframes fadeInModal {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.enrollment-modal__header {
+  color: #5E3C86;
+  padding: 24px 32px 0 32px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: none;
+  border-bottom: none;
+}
+
+.enrollment-modal__body {
+  padding: 24px 32px 12px 32px;
+}
+
+.enrollment-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 32px 24px 32px;
+  background: #fff;
+}
+
+.enrollment-modal__button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.enrollment-modal__button--primary {
+  background: #5E3C86;
+  color: #fff;
+}
+
+.enrollment-modal__button--secondary {
+  background: #fff;
+  color: #5E3C86;
+  border: 1.5px solid #5E3C86;
+}
+
+.enrollment-modal__button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.enrollment-modal__textarea {
+  border-radius: 8px;
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #d1d1d1;
+  resize: vertical;
+}

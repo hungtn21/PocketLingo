@@ -12,12 +12,19 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import LessonDetail from "../pages/User/LessonDetail/LessonDetail";
 import AdminProfile from "../pages/Admin/Profile/AdminProfile";
+import LessonManagement from "../pages/Admin/LessonManagement";
 import Quiz from "../pages/User/Quiz/Quiz";
 import QuizResult from "../pages/User/QuizResult/QuizResult";
+import UserList from "../pages/Admin/UserList/UserList";
+import AdminList from "../pages/Admin/Admins/AdminList";
 import FlashcardStudy from "../pages/User/StudySession/StudySession";
 import UserProfile from "../pages/User/Profile/UserProfile";
 import UserChangePassword from "../pages/User/ChangePassword/UserChangePassword";
 import MyCourses from "../pages/User/MyCourses/MyCourses";
+import CourseList from "../pages/Admin/CourseList/CourseList";
+import AdminCourseDetail from "../pages/Admin/CourseDetail/AdminCourseDetail";
+import EnrollmentRequests from "../pages/Admin/EnrollmentRequests/EnrollmentRequests";
+import UserDetail from "../pages/Admin/UserDetail/UserDetail";
 // Định nghĩa tất cả các routes của ứng dụng ở đây
 export const router = createBrowserRouter([
   // Routes dành cho learner
@@ -55,6 +62,34 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <AdminProfile />,
+      },
+      {
+        path: "learners",
+        element: <UserList />,
+      },
+      {
+        path: "learners/:learnerId",
+        element: <UserDetail />,
+      },
+      {
+        path: "admins",
+        element: <AdminList />,
+      },
+      {
+        path: "courses",
+        element: <CourseList />,
+      },
+      {
+        path: "courses/:courseId",
+        element: <AdminCourseDetail />,
+      },
+      {
+        path: "enrollments",
+        element: <EnrollmentRequests />,
+      },
+      {
+        path: "lessons/:lessonId/manage",
+        element: <LessonManagement />,
       },
       // Thêm các routes khác cho role admin ở đây
       // Ví dụ: 

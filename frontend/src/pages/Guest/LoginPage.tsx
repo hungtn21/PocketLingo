@@ -106,7 +106,7 @@ const LoginPage: React.FC = () => {
             boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           }}
         >
-          <h2 className="section-title">Đăng nhập</h2>
+          <h2 className="guest-form-title" style={{ textAlign: "center" }}>Đăng nhập</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="email" className="form-label">Email</label>

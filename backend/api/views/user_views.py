@@ -86,7 +86,9 @@ class SetPasswordView(APIView):
             return Response({'error': 'Token đã hết hạn.'}, status=400)
         except jwt.InvalidTokenError:
             return Response({'error': 'Token không hợp lệ.'}, status=400)
-        if data.get('purpose') != 'email_verify':
+
+        # Hỗ trợ cả đăng ký user thường, admin được mời bởi superadmin
+        if data.get('purpose') not in ['email_verify', 'create_admin_by_superadmin']:
             return Response({'error': 'Mục đích token không hợp lệ.'}, status=400)
 
         email = data['email']
@@ -95,13 +97,18 @@ class SetPasswordView(APIView):
         if User.objects.filter(email=email).exists():
             return Response({'error': 'Email đã được sử dụng.'}, status=400)
 
-        user = User.objects.create(
+        # Xác định role dựa trên purpose
+        role = User.Role.ADMIN if data.get('purpose') == 'create_admin_by_superadmin' else User.Role.LEARNER
+
+        user = User(
             email=email.strip(),
             name=name.strip(),
             password_hash=make_password(password),
-            role=User.Role.LEARNER,
+            role=role,
             status=User.Status.ACTIVE
         )
+        user.email_notifications_enabled = True  # Set the missing field
+        user.save()
 
         return Response({'message': 'Tài khoản đã được tạo thành công.', 'user_id': str(user.id)}, status=201)
 
@@ -375,7 +382,6 @@ class VerifyEmailChangeView(APIView):
 
         return Response({'message': 'Email đã được xác minh thành công.'}, status=200)
 
-
 @api_view(['GET'])
 @authentication_classes([JWTCookieAuthentication])
 @permission_classes([IsAuthenticated])
@@ -449,3 +455,60 @@ def get_leaderboard(request):
         'top_users': top_users,
         'my_rank': my_rank
     })
+
+class RegisterAdminView(APIView):
+    """Superadmin tạo account admin mới và gửi email để admin set password."""
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        # Chỉ SUPERADMIN mới được tạo admin khác
+        if request.user.role != User.Role.SUPERADMIN:
+            return Response({'error': 'Bạn không có quyền tạo admin.'}, status=403)
+        
+        email = request.data.get('email')
+        name = request.data.get('name')
+
+        if not email or not name:
+            return Response({'error': 'Vui lòng cung cấp đầy đủ thông tin.'}, status=400)
+        
+        try:
+            email = email.strip().lower()
+            validate_email(email)
+        except DjangoValidationError:
+            return Response({'error': 'Địa chỉ email không hợp lệ.'}, status=400)
+        
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'Email đã được sử dụng.'}, status=400)
+
+        # Tạo token với purpose riêng cho việc tạo admin bởi superadmin
+        payload = {
+            'email': email.strip(),
+            'name': name.strip(),
+            'purpose': 'create_admin_by_superadmin',
+            'created_by': str(request.user.id),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=TOKEN_EXPIRY_HOURS)
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        verify_link = f"{settings.FRONTEND_URL}/set-password?token={token}"
+        
+        # Template riêng cho admin được mời
+        html_message = render_to_string(
+            'invite_admin.html',  # Template khác với verify_email.html
+            {
+                'name': name, 
+                'verify_link': verify_link,
+                'invited_by': request.user.name
+            }
+        )
+
+        send_mail(
+            subject='Mời tham gia với vai trò Admin - PocketLingo',
+            message=f'Bạn được mời làm Admin bởi {request.user.name}. Vui lòng nhấp vào liên kết sau để đặt mật khẩu: {verify_link}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+            html_message=html_message
+        )
+
+        return Response({'message': f'Email mời đã được gửi tới {email}.'}, status=200)

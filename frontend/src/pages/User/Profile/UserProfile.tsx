@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import ToastMessage from "../../../component/ToastMessage";
 import QuizHistoryTab from "./QuizHistory/QuizHistoryTab";
 import LeaderboardTab from "./Leaderboard/LeaderboardTab";
+import ChristmasAvatar from "../../../component/ChristmasTheme/ChristmasAvatar";
 import "./UserProfile.css";
 
 const UserProfile: React.FC = () => {

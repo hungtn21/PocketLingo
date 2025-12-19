@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Bell, User } from "lucide-react";
+import { User } from "lucide-react";
+import UserNotificationDropdown from "../Header/UserNotificationDropdown";
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
 import logo from "../../assets/logo.png";
 import { api } from "../../api";
 import { useUser } from "../../context/UserContext.tsx";
+import ChristmasAvatar from "../ChristmasTheme/ChristmasAvatar";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -55,9 +57,7 @@ const Header = () => {
         </div>
 
         <div className="header-actions">
-          <button className="notification-button" aria-label="Thông báo">
-            <Bell size={24} />
-          </button>
+          <UserNotificationDropdown />
 
           <div className="profile-container">
             <button
@@ -65,15 +65,17 @@ const Header = () => {
               onClick={toggleDropdown}
               aria-label="Profile"
             >
-              {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user?.name || "Avatar"}
-                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
-                />
-              ) : (
-                <User size={24} />
-              )}
+              <ChristmasAvatar size={32}>
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user?.name || "Avatar"}
+                    style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <User size={24} />
+                )}
+              </ChristmasAvatar>
             </button>
 
             {isDropdownOpen && (

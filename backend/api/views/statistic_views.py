@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from django.utils.decorators import method_decorator
 from ..authentication import JWTCookieAuthentication
 from ..models import User, Course, Lesson, QuizAttempt, UserCourse, UserLesson
@@ -233,3 +234,94 @@ class CourseExportCSVView(APIView):
         resp = Response(output.getvalue(), content_type='text/csv')
         resp['Content-Disposition'] = 'attachment; filename="courses_stats.csv"'
         return resp
+
+# --- API: Tổng số lượt học (quiz + flashcard) ---
+@api_view(['GET'])
+@authentication_classes([JWTCookieAuthentication])
+@permission_classes([IsAuthenticated])
+def total_learning_sessions(request):
+    """
+    API trả về tổng số lượt học (làm quiz + học hết flashcard).
+    """
+    total_quiz_attempts = QuizAttempt.objects.count()
+    total_flashcard_sessions = UserLesson.objects.filter(flashcard_completed=True).count()
+    total_sessions = total_quiz_attempts + total_flashcard_sessions
+    return Response({
+        'total_sessions': total_sessions,
+        'quiz_attempts': total_quiz_attempts,
+        'flashcard_sessions': total_flashcard_sessions,
+    })
+
+
+# --- API: Lượt học theo thời gian (tùy chọn loại) ---
+@api_view(['GET'])
+@authentication_classes([JWTCookieAuthentication])
+@permission_classes([IsAuthenticated])
+def learning_sessions_over_time(request):
+    """
+    API trả về lượt học theo thời gian (theo ngày/tuần/tháng), cho phép chọn loại: quiz, flashcard, tổng.
+    Query params:
+        - start: ngày bắt đầu (ISO)
+        - end: ngày kết thúc (ISO)
+        - granularity: day/week/month
+        - type: quiz|flashcard|all (mặc định: all)
+    """
+    from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
+    type_ = request.GET.get('type', 'all')
+    granularity = request.GET.get('granularity', 'day')
+    end_str = request.GET.get('end')
+    start_str = request.GET.get('start')
+    try:
+        if end_str:
+            end = datetime.fromisoformat(end_str)
+        else:
+            end = timezone.now()
+    except Exception:
+        end = timezone.now()
+    try:
+        if start_str:
+            start = datetime.fromisoformat(start_str)
+        else:
+            start = end - timedelta(days=30)
+    except Exception:
+        start = end - timedelta(days=30)
+
+    if granularity == 'week':
+        trunc = TruncWeek
+    elif granularity == 'month':
+        trunc = TruncMonth
+    else:
+        trunc = TruncDay
+
+    data = []
+    if type_ == 'quiz':
+        qs = QuizAttempt.objects.filter(submitted_at__range=(start, end))
+        grouped = qs.annotate(period=trunc('submitted_at')).values('period').annotate(count=Count('id')).order_by('period')
+        for row in grouped:
+            data.append({'period': row['period'].isoformat(), 'count': row['count']})
+    elif type_ == 'flashcard':
+        qs = UserLesson.objects.filter(flashcard_completed=True, flashcard_completed_at__range=(start, end))
+        grouped = qs.annotate(period=trunc('flashcard_completed_at')).values('period').annotate(count=Count('id')).order_by('period')
+        for row in grouped:
+            data.append({'period': row['period'].isoformat(), 'count': row['count']})
+    else:  # all
+        # Lấy từng loại, merge lại theo period
+        quiz_qs = QuizAttempt.objects.filter(submitted_at__range=(start, end)).annotate(period=trunc('submitted_at')).values('period').annotate(count=Count('id')).order_by('period')
+        flashcard_qs = UserLesson.objects.filter(flashcard_completed=True, flashcard_completed_at__range=(start, end)).annotate(period=trunc('flashcard_completed_at')).values('period').annotate(count=Count('id')).order_by('period')
+        period_map = {}
+        for row in quiz_qs:
+            key = row['period'].isoformat()
+            period_map[key] = period_map.get(key, 0) + row['count']
+        for row in flashcard_qs:
+            key = row['period'].isoformat()
+            period_map[key] = period_map.get(key, 0) + row['count']
+        for period in sorted(period_map.keys()):
+            data.append({'period': period, 'count': period_map[period]})
+
+    return Response({
+        'start': start.isoformat(),
+        'end': end.isoformat(),
+        'granularity': granularity,
+        'type': type_,
+        'data': data,
+    })

@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { UserCircle } from "lucide-react";
 import { useUser } from "../../context/UserContext";
+import ChristmasAvatar from "../ChristmasTheme/ChristmasAvatar";
 import "./Sidebar.css";
 
 type SidebarProps = {
@@ -28,24 +29,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button className="sidebar-item" onClick={() => { navigate("/admin"); onClose(); }}>
           Dashboard
           </button>
-          <button className="sidebar-item">Quản lý học viên</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin/learners"); onClose(); }}>
+  Quản lý học viên
+</button>
           {user?.role === "superadmin" && (
-            <button className="sidebar-item">Quản lý admin</button>
+            <button
+              className="sidebar-item"
+              onClick={() => { navigate("/admin/admins"); onClose(); }}
+            >
+              Quản lý admin
+            </button>
           )} {/* Chỉ hiện cho superadmin */}
-          <button className="sidebar-item">Quản lý khóa học</button>
-          <button className="sidebar-item">Duyệt yêu cầu tham gia</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin/courses"); onClose(); }}>Quản lý khóa học</button>
+          <button className="sidebar-item" onClick={() => { navigate("/admin/enrollments"); onClose(); }}>Duyệt yêu cầu tham gia</button>
         </div>
 
         <div className="sidebar-footer">
-          {user?.avatar_url ? (
-            <img
-              src={user.avatar_url}
-              alt={user?.name || "Avatar"}
-              style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", marginRight: 8 }}
-            />
-          ) : (
-            <UserCircle size={32} className="me-2" />
-          )}
+          <ChristmasAvatar size={32} style={{ marginRight: 8 }}>
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={user?.name || "Avatar"}
+                style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              <UserCircle size={32} />
+            )}
+          </ChristmasAvatar>
           <span>{user?.name || "User"}</span>
         </div>
       </div>
