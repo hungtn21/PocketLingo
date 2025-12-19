@@ -1,5 +1,5 @@
 from django.urls import path
-from ..views.statistic_views import OverviewStatsView, LearningCountsView, CourseListView, CourseExportCSVView
+from ..views.statistic_views import OverviewStatsView, LearningCountsView, CourseListView, CourseExportCSVView, total_learning_sessions, learning_sessions_over_time
 from ..views.admin_lesson_views import get_admin_lesson_detail, update_admin_lesson
 from ..views.quiz_attempt_views import create_quiz, update_quiz, delete_quiz
 from ..views.question_views import create_question, update_question, delete_question
@@ -13,6 +13,8 @@ urlpatterns = [
     path('stats/learning-counts/', LearningCountsView.as_view(), name='admin_stats_learning_counts'),
     path('stats/courses/', CourseListView.as_view(), name='admin_stats_courses'),
     path('stats/courses/export/', CourseExportCSVView.as_view(), name='admin_stats_courses_export'),
+    path('stats/total-learning-sessions/', total_learning_sessions, name='admin_stats_total_learning_sessions'),
+    path('stats/learning-sessions-over-time/', learning_sessions_over_time, name='admin_stats_learning_sessions_over_time'),
     path('lessons/<int:lesson_id>/', get_admin_lesson_detail, name='admin_get_lesson_detail'),
     path('lessons/<int:lesson_id>/update/', update_admin_lesson, name='admin_update_lesson'),
     
