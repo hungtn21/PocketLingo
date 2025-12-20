@@ -48,19 +48,37 @@ def get_lesson_quiz(request, lesson_id):
             # Xử lý answers theo từng loại câu hỏi
             if question.question_type == 'multiple_choice':
                 # Chỉ gửi options, không gửi correct_answer
-                question_data["options"] = question.answer.get("options", [])
+                raw_options = question.answer.get("options", [])
+                # Chuyển đổi thành format {id: "A", text: "..."}
+                formatted_options = []
+                for idx, opt in enumerate(raw_options):
+                    # Generate ID: 0->A, 1->B, 2->C, 3->D...
+                    opt_id = chr(65 + idx) 
+                    formatted_options.append({"id": opt_id, "text": opt})
+                question_data["options"] = formatted_options
                 
             elif question.question_type == 'drag_drop':
                 # Chỉ gửi các items để kéo thả, không gửi correct_pairs
-                correct_pairs = question.answer.get("correct_pairs", [])
-                # Tạo danh sách các items riêng biệt từ side_a và side_b
-                side_a_items = [pair["side_a"] for pair in correct_pairs]
-                side_b_items = [pair["side_b"] for pair in correct_pairs]
+                # Admin lưu là "pairs" với "left"/"right", nhưng code cũ dùng "correct_pairs" với "side_a"/"side_b"
+                # Ưu tiên dùng "pairs" nếu có
+                pairs = question.answer.get("pairs", [])
+                if not pairs:
+                    # Fallback cho dữ liệu cũ
+                    correct_pairs = question.answer.get("correct_pairs", [])
+                    side_a_items = [pair["side_a"] for pair in correct_pairs]
+                    side_b_items = [pair["side_b"] for pair in correct_pairs]
+                else:
+                    side_a_items = [pair["left"] for pair in pairs]
+                    side_b_items = [pair["right"] for pair in pairs]
+                
                 # Shuffle để người dùng không đoán được thứ tự
                 import random
-                random.shuffle(side_b_items)
+                # Copy để không ảnh hưởng list gốc nếu cần
+                shuffled_b = list(side_b_items)
+                random.shuffle(shuffled_b)
+                
                 question_data["side_a_items"] = side_a_items
-                question_data["side_b_items"] = side_b_items
+                question_data["side_b_items"] = shuffled_b
                 
             elif question.question_type == 'fill_in':
                 # Không gửi accepted_answers
@@ -164,14 +182,28 @@ def submit_quiz(request, lesson_id):
             
             try:
                 if question.question_type == 'multiple_choice':
-                    correct_answer = question.answer.get("correct_answer")
-                    if user_answer == correct_answer:
+                    # Admin lưu correct_option là index (0, 1, 2...)
+                    # Frontend gửi lên ID là "A", "B", "C"...
+                    correct_option_idx = question.answer.get("correct_option")
+                    
+                    # Convert user answer "A" -> 0, "B" -> 1
+                    if isinstance(user_answer, str) and len(user_answer) == 1:
+                        user_answer_idx = ord(user_answer.upper()) - 65
+                        if user_answer_idx == correct_option_idx:
+                            correct_count += 1
+                    # Fallback: nếu user_answer là số (trường hợp client cũ?)
+                    elif isinstance(user_answer, int) and user_answer == correct_option_idx:
                         correct_count += 1
                         
                 elif question.question_type == 'drag_drop':
-                    correct_pairs = question.answer.get("correct_pairs", [])
-                    # Tạo dict từ correct_pairs
-                    correct_dict = {pair["side_a"]: pair["side_b"] for pair in correct_pairs}
+                    # Admin lưu "pairs" với "left"/"right"
+                    pairs = question.answer.get("pairs", [])
+                    if pairs:
+                        correct_dict = {pair["left"]: pair["right"] for pair in pairs}
+                    else:
+                        # Fallback cũ
+                        correct_pairs = question.answer.get("correct_pairs", [])
+                        correct_dict = {pair["side_a"]: pair["side_b"] for pair in correct_pairs}
                     
                     # So sánh user_answer với correct_dict
                     if isinstance(user_answer, dict) and user_answer == correct_dict:

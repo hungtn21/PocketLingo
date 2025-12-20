@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Bell, User, Menu } from "lucide-react";
+import { User, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../Header/Header.css";
 import "../AdminDashboard/AdminHeader.css";
 import logo from "../../assets/logo.png";
 import { api } from "../../api";
+import AdminNotificationDropdown from "./AdminNotificationDropdown";
 import { useUser } from "../../context/UserContext";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import ChristmasAvatar from "../ChristmasTheme/ChristmasAvatar";
 
 interface AdminHeaderProps {
   onHamburgerClick: () => void;
@@ -13,18 +16,27 @@ interface AdminHeaderProps {
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showConfirmLogout, setShowConfirmLogout] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { setUser, user } = useUser();
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const handleLogout = async () => {
+    setShowConfirmLogout(true);
+  };
+
+  const confirmLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await api.post("/users/logout/");
       setUser(null);
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
+      setIsLoggingOut(false);
+      setShowConfirmLogout(false);
     }
   };
 
@@ -70,21 +82,21 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
 
         {/* Nhóm icon bên phải */}
         <div className="header-actions header-right">
-          <button className="notification-button">
-            <Bell size={24} />
-          </button>
+          <AdminNotificationDropdown />
 
           <div className="profile-container">
             <button className="profile-button" onClick={toggleDropdown}>
-              {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user?.name || "Avatar"}
-                  style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
-                />
-              ) : (
-                <User size={24} />
-              )}
+              <ChristmasAvatar size={32}>
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user?.name || "Avatar"}
+                    style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <User size={24} />
+                )}
+              </ChristmasAvatar>
             </button>
 
             {isDropdownOpen && (
@@ -100,6 +112,18 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onHamburgerClick }) => {
         </div>
 
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmLogout}
+        title="Xác nhận đăng xuất"
+        message="Bạn chắc chắn muốn đăng xuất?"
+        confirmText="Đăng xuất"
+        cancelText="Hủy"
+        isDangerous={true}
+        onConfirm={confirmLogout}
+        onCancel={() => setShowConfirmLogout(false)}
+        isLoading={isLoggingOut}
+      />
     </header>
   );
 };

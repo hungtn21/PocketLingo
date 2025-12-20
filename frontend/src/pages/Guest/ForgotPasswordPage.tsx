@@ -81,7 +81,7 @@ const ForgotPasswordPage: React.FC = () => {
             boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           }}
         >
-          <h2 className="section-title">Quên mật khẩu</h2>
+          <h2 className="guest-form-title" style={{ textAlign: "center" }}>Quên mật khẩu</h2>
 
           {emailSent ? (
             <div style={{ textAlign: "center" }}>

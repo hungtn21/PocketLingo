@@ -13,7 +13,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'avatar_url', 'avatar', 'role', 'total_words_learned', 'total_quizzes_taken', 'courses_progress']
+        fields = ['id', 'name', 'email', 'avatar_url', 'avatar', 'role', 'status', 'xp', 'created_at', 'total_words_learned', 'total_quizzes_taken', 'courses_progress']
     
     def get_total_words_learned(self, obj):
         """Đếm số từ đã học (UserFlashcard có level >= 1)"""
@@ -31,51 +31,59 @@ class UserProfileSerializer(serializers.ModelSerializer):
         from ..models.lesson import Lesson
         from ..models.user_lesson import UserLesson
         from ..models.quiz_attempt import QuizAttempt
-        from ..models.quiz import Quiz
         from django.db.models import Avg
-        
-        # Lấy tất cả khóa học đã approved
-        user_courses = UserCourse.objects.filter(
-            user=obj, 
-            status=UserCourse.Status.APPROVED
-        ).select_related('course')
-        
+
+        # Lấy tất cả enrollment của user (bất kể trạng thái) và sử dụng progress_percent đã lưu nếu có
+        user_courses = UserCourse.objects.filter(user=obj).select_related('course')
+
         courses_data = []
         for uc in user_courses:
             course = uc.course
-            # Đếm tổng số bài học trong khóa
             total_lessons = Lesson.objects.filter(course=course).count()
-            
+
+            # Prefer stored progress_percent; fallback to computing from UserLesson when missing
+            progress = None
+            if uc.progress_percent is not None:
+                try:
+                    progress = float(uc.progress_percent)
+                except Exception:
+                    progress = None
+
+            completed_lessons = 0
             if total_lessons > 0:
-                # Đếm số bài học đã hoàn thành
-                completed_lessons = UserLesson.objects.filter(
-                    user=obj,
-                    lesson__course=course,
-                    completed=True
-                ).count()
-                
-                progress = round((completed_lessons / total_lessons) * 100, 1)
+                if progress is None:
+                    completed_lessons = UserLesson.objects.filter(
+                        user=obj,
+                        lesson__course=course,
+                        completed=True
+                    ).count()
+                    progress = round((completed_lessons / total_lessons) * 100, 1)
+                else:
+                    # Derive completed count from stored percent for display consistency
+                    completed_lessons = int(round((progress / 100.0) * total_lessons))
             else:
-                progress = 0
-            
-            # Tính điểm trung bình quiz của khóa học
+                # No lessons in course
+                progress = progress if progress is not None else 0
+                completed_lessons = 0
+
+            # Average quiz score (may be None)
             quiz_avg = QuizAttempt.objects.filter(
                 user=obj,
                 quiz__lesson__course=course
             ).aggregate(avg_score=Avg('score'))['avg_score']
-            
-            average_quiz_score = round(quiz_avg, 1) if quiz_avg is not None else 0
-            
+
+            average_quiz_score = round(quiz_avg, 1) if quiz_avg is not None else None
+
             courses_data.append({
                 'course_id': course.id,
                 'course_name': course.title,
                 'course_image': course.image_url,
-                'progress': progress,
-                'completed_lessons': completed_lessons if total_lessons > 0 else 0,
+                'progress': progress if progress is not None else 0,
+                'completed_lessons': completed_lessons,
                 'total_lessons': total_lessons,
                 'average_quiz_score': average_quiz_score
             })
-        
+
         return courses_data
 
     def update(self, instance, validated_data):
@@ -88,4 +96,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-        
+class LearnerListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'status', 'xp', 'avatar_url', 'created_at']
+
+class AdminListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'status', 'avatar_url', 'created_at']
+

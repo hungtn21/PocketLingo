@@ -119,7 +119,7 @@ const ResetPasswordPage: React.FC = () => {
             boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           }}
         >
-          <h2 className="section-title">Đặt lại mật khẩu</h2>
+          <h2 className="guest-form-title" style={{ textAlign: "center" }}>Đặt lại mật khẩu</h2>
           <p style={{ color: "#666", marginBottom: "1rem" }}>
             Vui lòng nhập mật khẩu mới cho tài khoản của bạn.
           </p>

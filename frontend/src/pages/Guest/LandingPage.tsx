@@ -79,7 +79,7 @@ const LandingPage: React.FC = () => {
 			setLoading(true);
 			try {
 				const params = { page: 1, page_size: 6 };
-				const res = await api.get(`$/courses/`, { params });
+				const res = await api.get(`/courses/`, { params });
 				if (res.data?.success) {
 					setCourses(res.data.data.courses);
 				}
@@ -104,7 +104,7 @@ const LandingPage: React.FC = () => {
 							<img className="hero-logo" src={HERO_LOGO_URL} alt="Logo" />
 						</div>
                         <div>
-                            <h2 className="section-title">Học ngôn ngữ dễ dàng với PocketLingo</h2>
+                            <h2 className="guest-form-title">Học ngôn ngữ dễ dàng với PocketLingo</h2>
                             <p className="hero-subtitle text-center text-muted">Nền tảng học ngôn ngữ trực tuyến hiệu quả, tiện lợi</p>
                         </div>
 						<div className="d-flex gap-2">
@@ -120,7 +120,7 @@ const LandingPage: React.FC = () => {
 
 				{/* Highlight */}
 				<section className="container py-3 border-bottom">
-					<h2 className="section-title">Tại sao nên chọn PocketLingo?</h2>
+					<h2 className="guest-form-title">Tại sao nên chọn PocketLingo?</h2>
 					<HighlightCarousel items={HIGHLIGHTS} />
 				</section>
 
@@ -140,7 +140,7 @@ const LandingPage: React.FC = () => {
                     {/* Nội dung */}
                     <div className="col-12 col-lg-5">
                     <div className="intro-content">
-                        <h2 className="section-title mb-3">Giới thiệu PocketLingo</h2>
+                        <h2 className=".guest-form-title mb-3">Giới thiệu PocketLingo</h2>
                         <p className="text-muted mb-3">
                         PocketLingo là nền tảng học ngôn ngữ trực tuyến hiện đại. Chúng tôi kết hợp 
                         <strong> công nghệ AI tiên tiến </strong> với phương pháp học tập được chứng minh khoa học, giúp bạn:
@@ -164,7 +164,7 @@ const LandingPage: React.FC = () => {
 
 				{/* Khóa học nổi bật */}
 				<section className="container py-3 border-bottom">
-					<h2 className="section-title">Khóa học nổi bật</h2>
+					<h2 className="guest-form-title">Khóa học nổi bật</h2>
 					{loading ? (
 						<div className="text-center my-3">Đang tải...</div>
 					) : (
@@ -180,7 +180,7 @@ const LandingPage: React.FC = () => {
 
 				{/* FAQ Accordion */}
 				<section className="container py-3 border-bottom">
-					<h2 className="section-title">FAQ</h2>
+					<h2 className="guest-form-title">FAQ</h2>
 					<div className="accordion" id="faqAccordion">
 						{FAQ_ITEMS.map((item, idx) => {
 							const headingId = `faq-heading-${idx}`;

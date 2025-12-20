@@ -1,0 +1,159 @@
+/* Quiz Config Modal Styles */
+
+.lesson-management__modal--quiz-config {
+  max-width: 480px;
+  width: 90%;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.quiz-config-title {
+  padding: 24px 24px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  border-bottom: 1px solid #f0f0f0;
+  margin: 0;
+}
+
+.quiz-config-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.quiz-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-config-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Time input styling */
+.quiz-time-input {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quiz-time-unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quiz-time-input__field {
+  width: 60px;
+  padding: 10px 12px;
+  border: 1px solid #d0d0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.quiz-time-input__field:focus {
+  outline: none;
+  border-color: #5E3C86;
+  box-shadow: 0 0 0 3px rgba(94, 60, 134, 0.1);
+}
+
+.quiz-time-unit__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  min-width: 20px;
+}
+
+/* Checkbox styling for inline placement */
+.quiz-config-checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 8px 0;
+}
+
+.quiz-config-checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #5E3C86;
+}
+
+.quiz-config-checkbox-text {
+  font-size: 14px;
+  color: #666;
+  user-select: none;
+}
+
+/* Score input styling */
+.quiz-config-input {
+  padding: 10px 12px;
+  border: 1px solid #d0d0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.quiz-config-input:focus {
+  outline: none;
+  border-color: #5E3C86;
+  box-shadow: 0 0 0 3px rgba(94, 60, 134, 0.1);
+}
+
+/* Footer styling */
+.quiz-config-footer {
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid #f0f0f0;
+}
+
+.quiz-config-button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-config-button--cancel {
+  background-color: #f3f3f7;
+  color: #666;
+}
+
+.quiz-config-button--cancel:hover:not(:disabled) {
+  background-color: #e8e8f0;
+}
+
+.quiz-config-button--cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quiz-config-button--save {
+  background-color: #5E3C86;
+  color: white;
+}
+
+.quiz-config-button--save:hover:not(:disabled) {
+  background-color: #4a2f6a;
+}
+
+.quiz-config-button--save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
