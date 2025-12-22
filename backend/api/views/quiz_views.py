@@ -12,6 +12,7 @@ from api.models.question import Question
 from api.models.quiz_attempt import QuizAttempt
 from api.models.user import User
 from api.models.user_lesson import UserLesson
+from api.models.user_course import UserCourse
 
 
 @api_view(['GET'])
@@ -236,6 +237,7 @@ def submit_quiz(request, lesson_id):
             xp_gained += 50
 
         milestone_awarded = False
+        course_completion_awarded = False
 
         # 5) Persist everything atomically
         with transaction.atomic():
@@ -254,6 +256,7 @@ def submit_quiz(request, lesson_id):
             )
 
             lesson = quiz.lesson
+            course = lesson.course
 
             # Ensure UserLesson exists (also used for flashcard completion milestone)
             user_lesson = (
@@ -285,6 +288,30 @@ def submit_quiz(request, lesson_id):
                 user_lesson.milestone_xp_awarded = True
                 milestone_awarded = True
 
+            # 4) Course completion reward (1000XP)
+            # Condition: this lesson is now completed AND user completed all lessons in the course
+            if is_passed:
+                total_lessons = Lesson.objects.filter(course=course).count()
+                completed_lessons = UserLesson.objects.filter(
+                    user=user,
+                    lesson__course=course,
+                    completed=True,
+                ).count()
+
+                if total_lessons > 0 and completed_lessons >= total_lessons:
+                    user_course = (
+                        UserCourse.objects.select_for_update()
+                        .filter(user=user, course=course)
+                        .first()
+                    )
+                    if user_course and not user_course.completion_xp_awarded:
+                        xp_gained += 1000
+                        user_course.completion_xp_awarded = True
+                        user_course.status = UserCourse.Status.COMPLETED
+                        user_course.progress_percent = 100
+                        user_course.save(update_fields=['completion_xp_awarded', 'status', 'progress_percent'])
+                        course_completion_awarded = True
+
             # Save UserLesson changes if any
             user_lesson.save()
 
@@ -302,6 +329,7 @@ def submit_quiz(request, lesson_id):
             "passed_score": quiz.passed_score,
             "xp_gained": xp_gained,
             "milestone_awarded": milestone_awarded,
+            "course_completion_awarded": course_completion_awarded,
             "total_xp": user.xp,
             "message": f"Bạn đã làm đúng {correct_count}/{total_questions} câu. Điểm: {score:.2f}%"
         }, status=status.HTTP_200_OK)
