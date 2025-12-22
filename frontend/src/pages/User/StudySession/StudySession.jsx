@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Bookmark } from "lucide-react";
+import { Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 import api from "../../../api";
 import Flashcard from "../../../component/Flashcard/Flashcard";
 import AIExplainModal from "../../../component/AIExplainModal/AIExplainModal";
@@ -360,7 +360,7 @@ return (
       </div>
 
       {/* Lesson Title */}
-      <div className="lesson-info">
+      <div className="study-lesson-info">
         <h1 className="lesson-title">{lessonData?.title}</h1>
         {mode === "practice" && (
           <span className="mode-badge">Luyện tập tự do</span>
@@ -379,7 +379,7 @@ return (
           onClick={handlePrevious}
           disabled={currentIndex === 0}
         >
-          ◀
+          <ChevronLeft size={22} />
         </button>
         <span className="card-counter">
           {currentIndex + 1}/{flashcards.length}
@@ -389,7 +389,7 @@ return (
           onClick={handleNext}
           disabled={currentIndex === flashcards.length - 1}
         >
-          ▶
+          <ChevronRight size={22} />
         </button>
       </div>
 
