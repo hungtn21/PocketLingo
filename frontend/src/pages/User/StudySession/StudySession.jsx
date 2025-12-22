@@ -155,8 +155,16 @@ const StudySession = () => {
       return;
     }
 
+    // Xác định field ID theo mode
+    const currentCardId = mode === "daily_review" 
+      ? currentCard.user_flashcard_id 
+      : currentCard.id;
+    const resultField = mode === "daily_review" 
+      ? "user_flashcard_id" 
+      : "flashcard_id";
+
     // Kiểm tra xem card này đã được mark chưa
-    const alreadyMarked = results.some(r => r.flashcard_id === currentCard.id);
+    const alreadyMarked = results.some(r => r[resultField] === currentCardId);
     
     if (alreadyMarked) {
       // Không cho đổi ý
@@ -167,11 +175,12 @@ const StudySession = () => {
       return;
     }
 
-    // Lưu kết quả mới
-    setResults((prev) => [
-      ...prev,
-      { flashcard_id: currentCard.id, remembered },
-    ]);
+    // Lưu kết quả mới với field name đúng
+    const resultData = {
+      [resultField]: currentCardId,
+      remembered,
+    };
+    setResults((prev) => [...prev, resultData]);
 
     // Hiện toast thông báo
     setToast({
@@ -237,13 +246,21 @@ const StudySession = () => {
   }, [mode, results, lessonId]);
 
   const handleReviewNotRemembered = () => {
+    // Xác định field ID theo mode
+    const resultField = mode === "daily_review" 
+      ? "user_flashcard_id" 
+      : "flashcard_id";
+
     const notRememberedIds = results
       .filter((r) => !r.remembered)
-      .map((r) => r.flashcard_id);
+      .map((r) => r[resultField]);
 
-    const notRememberedCards = originalFlashcards.filter((fc) =>
-      notRememberedIds.includes(fc.id)
-    );
+    const notRememberedCards = originalFlashcards.filter((fc) => {
+      const cardId = mode === "daily_review" 
+        ? fc.user_flashcard_id 
+        : fc.id;
+      return notRememberedIds.includes(cardId);
+    });
 
     if (notRememberedCards.length > 0) {
       setFlashcards(notRememberedCards);

@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.db.models import Count, Q
-from datetime import timedelta
 from api.models.user import User
 from api.models.notification import Notification
 from api.utils.notification_realtime import send_user_notification
