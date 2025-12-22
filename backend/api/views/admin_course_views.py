@@ -5,6 +5,10 @@ from rest_framework import status
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
+import logging
+
+logger = logging.getLogger(__name__)
 
 from ..authentication import JWTCookieAuthentication
 from ..models import User, Course, Lesson
@@ -54,7 +58,16 @@ class AdminCourseListView(APIView):
 
         serializer = CourseSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user)
+            try:
+                serializer.save(created_by=request.user)
+            except IntegrityError as e:
+                logger.warning("Failed to set created_by=%s due to IntegrityError: %s. Saving without created_by.", getattr(request.user, 'id', None), str(e))
+                # Fix tạm: Gán created_by=None do constraint FK trên database
+                serializer.save(created_by=None)
+                data = dict(serializer.data)
+                data['_warning'] = 'created_by was not set due to FK constraint on database (saved as null)'
+                return Response(data, status=status.HTTP_201_CREATED)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
