@@ -98,7 +98,7 @@ def get_lesson_detail(request, lesson_id):
     enrolled = UserCourse.objects.filter(
         user=user, 
         course=lesson.course, 
-        status=UserCourse.Status.APPROVED
+        status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
     ).exists()
     
     if not enrolled:

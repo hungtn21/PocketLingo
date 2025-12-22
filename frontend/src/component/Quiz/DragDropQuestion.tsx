@@ -28,7 +28,7 @@ const DragDropQuestion: React.FC<Props> = ({
 
   const handleSideBClick = (item: string) => {
     if (!selectedSideA) {
-      alert("Vui lòng chọn một mục từ cột Tiếng Anh trước!");
+      alert("Vui lòng chọn một mục từ cột A trước!");
       return;
     }
 
@@ -64,11 +64,11 @@ const DragDropQuestion: React.FC<Props> = ({
   return (
     <div className="drag-drop-question">
       <h2 className="question-content">{question.content}</h2>
-      <p className="instruction">Chọn một mục từ cột Tiếng Anh, sau đó chọn đáp án tương ứng từ cột Tiếng Việt</p>
+      <p className="instruction">Chọn một mục từ cột A, sau đó chọn đáp án tương ứng từ cột B</p>
 
       <div className="drag-drop-container">
         <div className="pairs-section">
-          <h3>Tiếng Anh</h3>
+          <h3>Cột A</h3>
           {question.side_a_items?.map((item) => (
             <div key={item} className="droppable-row">
               <div
@@ -89,7 +89,7 @@ const DragDropQuestion: React.FC<Props> = ({
         </div>
 
         <div className="items-section">
-          <h3>Tiếng Việt</h3>
+          <h3>Cột B</h3>
           <div className="items-pool">
             {availableSideBItems.map((item) => (
               <div

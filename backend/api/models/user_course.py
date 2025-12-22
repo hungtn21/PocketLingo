@@ -25,6 +25,7 @@ class UserCourse(models.Model):
     rating = models.FloatField(null=True, blank=True) 
     comment = models.TextField(blank=True, null=True)
     reason = models.TextField(blank=True, null=True)
+    completion_xp_awarded = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'user_courses'

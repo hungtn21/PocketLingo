@@ -195,7 +195,7 @@ def get_course_detail(request, course_id):
         user_course = UserCourse.objects.filter(
             user_id=getattr(user, 'id', None),
             course_id=course_id,
-            status=UserCourse.Status.APPROVED
+            status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
         ).first()
         
         if not user_course:
@@ -210,7 +210,7 @@ def get_course_detail(request, course_id):
                 print(f"DEBUG: Enrollment status: {any_enrollment.status}")
                 return Response({
                     'success': False,
-                    'message': f'Khóa học của bạn đang ở trạng thái: {any_enrollment.get_status_display()}. Chỉ có thể xem chi tiết khi đã được phê duyệt.'
+                    'message': f'Khóa học của bạn đang ở trạng thái: {any_enrollment.get_status_display()}. Chỉ có thể xem chi tiết khi đã được phê duyệt hoặc đã hoàn thành.'
                 }, status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response({
@@ -352,7 +352,7 @@ def create_course_review(request, course_id):
         user_course = UserCourse.objects.filter(
             user=user,
             course_id=course_id,
-            status=UserCourse.Status.APPROVED
+            status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
         ).first()
         
         #Check if user_course exists
