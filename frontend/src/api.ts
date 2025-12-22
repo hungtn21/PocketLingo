@@ -31,4 +31,20 @@ api.interceptors.request.use(
   }
 );
 
+// Daily Review API
+export const getDailyReviewSummary = async () => {
+  const response = await api.get('/review/summary/');
+  return response.data;
+};
+
+export const getDailyReviewSession = async () => {
+  const response = await api.get('/review/session/');
+  return response.data;
+};
+
+export const submitDailyReview = async (results: any[]) => {
+  const response = await api.post('/review/submit/', { results });
+  return response.data;
+};
+
 export default api;

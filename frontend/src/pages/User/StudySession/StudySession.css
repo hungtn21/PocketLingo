@@ -212,6 +212,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .nav-btn:hover:not(:disabled) {
@@ -223,11 +224,24 @@
   cursor: not-allowed;
 }
 
+.card-counter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .card-counter {
   font-size: 1rem;
   font-weight: 600;
   color: #374151;
-  min-width: 50px;
+  text-align: center;
+}
+
+.marked-counter {
+  font-size: 0.75rem;
+  color: #667eea;
+  font-weight: 600;
   text-align: center;
 }
 

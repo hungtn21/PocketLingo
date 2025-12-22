@@ -44,10 +44,14 @@ const StudySession = () => {
       try {
         setLoading(true);
 
-        const endpoint =
-          mode === "practice"
-            ? `/lessons/${lessonId}/practice/`
-            : `/lessons/${lessonId}/learn-new/`;
+        let endpoint;
+        if (mode === "daily_review") {
+          endpoint = `/review/session/`;
+        } else if (mode === "practice") {
+          endpoint = `/lessons/${lessonId}/practice/`;
+        } else {
+          endpoint = `/lessons/${lessonId}/learn-new/`;
+        }
 
         const response = await api.get(endpoint);
 
@@ -64,7 +68,13 @@ const StudySession = () => {
             return; // Không set flashcards, đợi useEffect chạy lại với mode mới
           }
           
-          setLessonData(data.lesson);
+          // Daily review không có lesson data
+          if (mode !== "daily_review") {
+            setLessonData(data.lesson);
+          } else {
+            setLessonData({ title: "Ôn Tập Hàng Ngày" });
+          }
+          
           setFlashcards(data.flashcards);
           setOriginalFlashcards(data.flashcards);
           
@@ -85,7 +95,7 @@ const StudySession = () => {
       }
     };
 
-    if (lessonId) {
+    if (mode === "daily_review" || lessonId) {
       fetchStudySession();
     }
   }, [lessonId, mode]);
@@ -145,7 +155,19 @@ const StudySession = () => {
       return;
     }
 
-    // Lưu kết quả
+    // Kiểm tra xem card này đã được mark chưa
+    const alreadyMarked = results.some(r => r.flashcard_id === currentCard.id);
+    
+    if (alreadyMarked) {
+      // Không cho đổi ý
+      setToast({
+        message: "Bạn đã đánh dấu thẻ này rồi!",
+        type: "error",
+      });
+      return;
+    }
+
+    // Lưu kết quả mới
     setResults((prev) => [
       ...prev,
       { flashcard_id: currentCard.id, remembered },
@@ -157,14 +179,18 @@ const StudySession = () => {
       type: remembered ? "success" : "error",
     });
 
-    // Chuyển thẻ tiếp theo hoặc hoàn thành
-    if (currentIndex < flashcards.length - 1) {
-      setTimeout(() => {
-        setCurrentIndex((prev) => prev + 1);
-      }, 300);
-    } else {
+    // Kiểm tra xem đã mark đủ hết chưa
+    const totalMarked = results.length + 1;
+    
+    if (totalMarked === flashcards.length) {
+      // Đã mark hết tất cả card → Hoàn thành
       setTimeout(() => {
         setIsCompleted(true);
+      }, 300);
+    } else if (currentIndex < flashcards.length - 1) {
+      // Chưa hết → Tự động chuyển thẻ tiếp theo
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
       }, 300);
     }
   };
@@ -172,7 +198,6 @@ const StudySession = () => {
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
-      setResults((prev) => prev.slice(0, -1));
     }
   };
 
@@ -183,22 +208,31 @@ const StudySession = () => {
   };
 
   const handleSubmitResults = useCallback(async () => {
-    if (mode === "learn_new" && results.length > 0) {
-      try {
-        const response = await api.post(
-          `/lessons/${lessonId}/learn-new/submit/`,
-          { results }
-        );
+    if (results.length === 0) return;
 
-        if (response.data.success) {
-          setToast({
-            message: `+${response.data.data.xp_gained} XP!`,
-            type: "success",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to submit results:", error);
+    try {
+      let endpoint, requestData;
+      
+      if (mode === "daily_review") {
+        endpoint = "/review/submit/";
+        requestData = { results };
+      } else if (mode === "learn_new") {
+        endpoint = `/lessons/${lessonId}/learn-new/submit/`;
+        requestData = { results };
+      } else {
+        return; // Practice mode không submit
       }
+
+      const response = await api.post(endpoint, requestData);
+
+      if (response.data.success) {
+        setToast({
+          message: `+${response.data.data.xp_gained} XP!`,
+          type: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to submit results:", error);
     }
   }, [mode, results, lessonId]);
 
@@ -224,8 +258,24 @@ const StudySession = () => {
     }
   };
 
-  const handleFinish = () => {
-    navigate(`/lessons/${lessonId}`);
+  const handleFinish = async () => {
+    if (mode === "daily_review") {
+      // Xóa notification daily review của ngày hôm nay
+      try {
+        const notifRes = await api.get('/users/notifications/db/');
+        const dailyReviewNotif = notifRes.data.notifications?.find(
+          n => n.message?.toLowerCase().includes('ôn tập') || n.message?.toLowerCase().includes('review')
+        );
+        if (dailyReviewNotif) {
+          await api.delete(`/users/notifications/${dailyReviewNotif.id}/delete/`);
+        }
+      } catch (e) {
+        console.error('Failed to delete notification:', e);
+      }
+      navigate("/");
+    } else {
+      navigate(`/lessons/${lessonId}`);
+    }
   };
 
   const handleBack = () => {
@@ -233,10 +283,18 @@ const StudySession = () => {
       if (
         window.confirm("Bạn có chắc muốn thoát? Tiến độ sẽ không được lưu.")
       ) {
-        navigate(`/lessons/${lessonId}`);
+        if (mode === "daily_review") {
+          navigate("/daily-review");
+        } else {
+          navigate(`/lessons/${lessonId}`);
+        }
       }
     } else {
-      navigate(`/lessons/${lessonId}`);
+      if (mode === "daily_review") {
+        navigate("/daily-review");
+      } else {
+        navigate(`/lessons/${lessonId}`);
+      }
     }
   };
 
@@ -250,7 +308,7 @@ const StudySession = () => {
 
   // Submit results when completed
   useEffect(() => {
-    if (isCompleted && mode === "learn_new") {
+    if (isCompleted && (mode === "learn_new" || mode === "daily_review")) {
       handleSubmitResults();
     }
   }, [isCompleted, mode, handleSubmitResults]);
@@ -381,9 +439,14 @@ return (
         >
           <ChevronLeft size={22} />
         </button>
-        <span className="card-counter">
-          {currentIndex + 1}/{flashcards.length}
-        </span>
+        <div className="card-counter-group">
+          <span className="card-counter">
+            {currentIndex + 1}/{flashcards.length}
+          </span>
+          <span className="marked-counter">
+            Đã đánh dấu: {results.length}/{flashcards.length}
+          </span>
+        </div>
         <button
           className="nav-btn"
           onClick={handleNext}
