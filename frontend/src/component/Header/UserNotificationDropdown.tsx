@@ -78,9 +78,23 @@ const UserNotificationDropdown: React.FC = () => {
         navigate(n.link);
       }
     } else {
-      // Các thông báo thường khác
-      setOpen(false);
-      if (n.link) navigate(n.link);
+      // Kiểm tra nếu là thông báo ôn tập hàng ngày (Daily Review)
+      // Dựa vào nội dung description từ send_daily_reminders.py
+      const isReviewNotif = 
+        n.message?.toLowerCase().includes('ôn tập') || 
+        n.message?.toLowerCase().includes('review') ||
+        n.description?.toLowerCase().includes('ôn tập') ||
+        n.description?.toLowerCase().includes('review');
+      
+      if (isReviewNotif) {
+        // Điều hướng tới Daily Review screen
+        setOpen(false);
+        navigate('/daily-review');
+      } else {
+        // Các thông báo thường khác
+        setOpen(false);
+        if (n.link) navigate(n.link);
+      }
     }
 
     // 2. Đánh dấu đã đọc nếu chưa đọc
