@@ -46,7 +46,7 @@ const StudyResult = ({
         <button className="result-btn secondary" onClick={onFinish}>
           KẾT THÚC
         </button>
-        {notRememberedCount > 0 && (
+        {notRememberedCount > 0 && mode !== "daily_review" && (
           <button className="result-btn primary" onClick={onReviewAgain}>
             ÔN TẬP LẠI
           </button>

@@ -21,6 +21,7 @@ import FlashcardStudy from "../pages/User/StudySession/StudySession";
 import UserProfile from "../pages/User/Profile/UserProfile";
 import UserChangePassword from "../pages/User/ChangePassword/UserChangePassword";
 import MyCourses from "../pages/User/MyCourses/MyCourses";
+import DailyReview from "../pages/User/DailyReview/DailyReview";
 import CourseList from "../pages/Admin/CourseList/CourseList";
 import AdminCourseDetail from "../pages/Admin/CourseDetail/AdminCourseDetail";
 import EnrollmentRequests from "../pages/Admin/EnrollmentRequests/EnrollmentRequests";
@@ -36,8 +37,10 @@ export const router = createBrowserRouter([
         path: "", 
         element: <Homepage /> 
       },
+      { path: "daily-review", element: <DailyReview /> },
       { path: "lessons/:lessonId", element: <LessonDetail /> },
       { path: "lessons/:lessonId/learn", element: <FlashcardStudy /> },
+      { path: "study-session", element: <FlashcardStudy /> },
       { path: "lessons/:lessonId/quiz", element: <Quiz /> },
       { path: "quiz-result/:attemptId", element: <QuizResult /> },
       { 
