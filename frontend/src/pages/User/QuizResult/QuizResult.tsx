@@ -12,7 +12,7 @@ interface Question {
   is_correct: boolean;
   options?: Array<string | { text?: string } | any>;
   correct_answer?: any;
-  correct_pairs?: Array<{ side_a: string; side_b: string }>;
+  correct_pairs?: Array<{ left: string; right: string }>
   correct_answers?: string[];
 }
 
@@ -157,11 +157,21 @@ const QuizResult = () => {
               <div className="answer-section">
                 <p className="answer-label">Đáp án:</p>
                 <ul className="pairs-list">
-                  {correct_pairs?.map((pair, idx) => (
-                    <li key={idx}>
-                      {pair.side_a} - {pair.side_b}
-                    </li>
-                  ))}
+                    {/* Hiển thị từ user_answer nếu correct_pairs rỗng */}
+                    {(question.correct_pairs && question.correct_pairs.length > 0) 
+                      ? question.correct_pairs.map((pair: any, idx: number) => (
+                          <li key={idx}>
+                            {pair.left || pair.side_a || ""} - {pair.right || pair.side_b || ""}
+                          </li>
+                        ))
+                      : user_answer && typeof user_answer === 'object'
+                      ? Object.entries(user_answer).map(([key, value], idx) => (
+                          <li key={idx}>
+                            {key} - {value as string}
+                          </li>
+                        ))
+                      : <li>Không có dữ liệu đáp án</li>
+                    }
                 </ul>
               </div>
             </div>

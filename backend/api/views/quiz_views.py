@@ -111,26 +111,6 @@ def submit_quiz(request, lesson_id):
     """
     Nộp bài quiz và chấm điểm
     POST /lessons/{lesson_id}/quiz/submit
-    Body: {
-        "quiz_id": 1,
-        "answers": [
-            {
-                "question_id": 1,
-                "answer": "B"  // Đối với multiple choice
-            },
-            {
-                "question_id": 2,
-                "answer": {    // Đối với drag and drop
-                    "Travel": "Du lịch",
-                    "Library": "Thư viện"
-                }
-            },
-            {
-                "question_id": 3,
-                "answer": "library"  // Đối với fill in
-            }
-        ]
-    }
     """
     try:
         user = request.user
@@ -140,7 +120,6 @@ def submit_quiz(request, lesson_id):
         print(f"DEBUG: request.user id: {getattr(user, 'id', 'NO ID')}, pk: {getattr(user, 'pk', 'NO PK')}")
         
         # Always reload user from database to ensure it's a proper instance
-        # This fixes issues with lazy objects or cached instances
         try:
             user_id = user.id if hasattr(user, 'id') else user.pk
             user = User.objects.get(id=user_id)
@@ -183,34 +162,45 @@ def submit_quiz(request, lesson_id):
             try:
                 if question.question_type == 'multiple_choice':
                     # Admin lưu correct_option là index (0, 1, 2...)
-                    # Frontend gửi lên ID là "A", "B", "C"...
-                    correct_option_idx = question.answer.get("correct_option")
+                    correct_option_idx = question.answer.get("correct_option", 0)
+                    options = question.answer.get("options", [])
                     
                     # Convert user answer "A" -> 0, "B" -> 1
                     if isinstance(user_answer, str) and len(user_answer) == 1:
                         user_answer_idx = ord(user_answer.upper()) - 65
-                        if user_answer_idx == correct_option_idx:
+                        if 0 <= user_answer_idx < len(options) and user_answer_idx == correct_option_idx:
                             correct_count += 1
-                    # Fallback: nếu user_answer là số (trường hợp client cũ?)
+                    # Fallback: nếu user_answer là số
                     elif isinstance(user_answer, int) and user_answer == correct_option_idx:
                         correct_count += 1
                         
                 elif question.question_type == 'drag_drop':
                     # Admin lưu "pairs" với "left"/"right"
                     pairs = question.answer.get("pairs", [])
-                    if pairs:
-                        correct_dict = {pair["left"]: pair["right"] for pair in pairs}
-                    else:
+                    if not pairs:
                         # Fallback cũ
                         correct_pairs = question.answer.get("correct_pairs", [])
-                        correct_dict = {pair["side_a"]: pair["side_b"] for pair in correct_pairs}
+                        pairs = [
+                            {"left": pair.get("side_a", ""), "right": pair.get("side_b", "")}
+                            for pair in correct_pairs
+                        ]
+                    
+                    # Tạo dict correct từ pairs
+                    correct_dict = {pair.get("left", ""): pair.get("right", "") for pair in pairs}
                     
                     # So sánh user_answer với correct_dict
                     if isinstance(user_answer, dict) and user_answer == correct_dict:
                         correct_count += 1
                         
                 elif question.question_type == 'fill_in':
+                    # Admin lưu "accepted_answers"
                     accepted_answers = question.answer.get("accepted_answers", [])
+                    if not accepted_answers:
+                        # Fallback cũ
+                        text_answer = question.answer.get("text", "")
+                        if text_answer:
+                            accepted_answers = [text_answer]
+                    
                     # So sánh không phân biệt hoa thường và khoảng trắng
                     if isinstance(user_answer, str) and user_answer.strip():
                         user_answer_normalized = user_answer.strip().lower()
@@ -226,7 +216,7 @@ def submit_quiz(request, lesson_id):
         score = (correct_count / total_questions * 100) if total_questions > 0 else 0
         quiz_status = QuizAttempt.Status.PASSED if score >= quiz.passed_score else QuizAttempt.Status.FAILED
         
-        # Lấy số lần làm bài (dùng user_id để tránh trường hợp user bị stringify)
+        # Lấy số lần làm bài
         previous_attempts = QuizAttempt.objects.filter(
             quiz=quiz,
             user_id=user.id
@@ -235,7 +225,7 @@ def submit_quiz(request, lesson_id):
         # Lưu kết quả
         quiz_attempt = QuizAttempt.objects.create(
             quiz=quiz,
-            user=user, # Truyền toàn bộ đối tượng user
+            user=user,
             quiz_answers=user_answers,
             status=quiz_status,
             score=score,
@@ -276,7 +266,7 @@ def submit_quiz(request, lesson_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
+# Fix hàm get_quiz_result
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_quiz_result(request, attempt_id):
@@ -315,32 +305,68 @@ def get_quiz_result(request, attempt_id):
                 "user_answer": user_answer,
             }
             
-            # Xử lý theo từng loại câu hỏi
+            # Xử lý theo từng loại câu hỏi - CHỈNH SỬA Ở ĐÂY
             if question.question_type == 'multiple_choice':
                 options = question.answer.get("options", [])
-                correct_answer = question.answer.get("correct_answer")
+                correct_option_idx = question.answer.get("correct_option", 0)
                 
-                question_data["options"] = options
+                # Format options cho frontend hiển thị đúng
+                formatted_options = []
+                for idx, opt in enumerate(options):
+                    option_letter = chr(65 + idx)  # A, B, C, D
+                    formatted_options.append({
+                        "id": option_letter,
+                        "text": opt
+                    })
+                
+                correct_answer = chr(65 + correct_option_idx) if options else ""
+                
+                question_data["options"] = formatted_options
                 question_data["correct_answer"] = correct_answer
                 
+                # Kiểm tra đúng/sai
                 if user_answer == correct_answer:
                     is_correct = True
                     
             elif question.question_type == 'drag_drop':
-                correct_pairs = question.answer.get("correct_pairs", [])
-                correct_dict = {pair["side_a"]: pair["side_b"] for pair in correct_pairs}
+                # Hỗ trợ cả 2 format: "pairs" (mới) và "correct_pairs" (cũ)
+                pairs = question.answer.get("pairs", [])
+                if not pairs:
+                    # Fallback cho dữ liệu cũ
+                    correct_pairs = question.answer.get("correct_pairs", [])
+                    pairs = [
+                        {"left": pair.get("side_a", ""), "right": pair.get("side_b", "")}
+                        for pair in correct_pairs
+                    ]
                 
-                question_data["correct_pairs"] = correct_pairs
+                # Format cho frontend
+                correct_dict = {pair.get("left", ""): pair.get("right", "") for pair in pairs}
+                
+                # Format đúng cho frontend hiển thị (dùng "left"/"right" thay vì "side_a"/"side_b")
+                formatted_pairs = [
+                    {"left": pair.get("left", ""), "right": pair.get("right", "")}
+                    for pair in pairs
+                ]
+                
+                question_data["correct_pairs"] = formatted_pairs
                 question_data["correct_answer"] = correct_dict
                 
+                # Kiểm tra đúng/sai
                 if isinstance(user_answer, dict) and user_answer == correct_dict:
                     is_correct = True
                     
             elif question.question_type == 'fill_in':
+                # Hỗ trợ cả "accepted_answers" (mới) và "text" (cũ)
                 accepted_answers = question.answer.get("accepted_answers", [])
+                if not accepted_answers:
+                    # Fallback cho dữ liệu cũ
+                    text_answer = question.answer.get("text", "")
+                    if text_answer:
+                        accepted_answers = [text_answer]
                 
                 question_data["correct_answers"] = accepted_answers
                 
+                # Kiểm tra đúng/sai
                 if isinstance(user_answer, str) and user_answer.strip():
                     user_answer_normalized = user_answer.strip().lower()
                     accepted_normalized = [str(ans).strip().lower() for ans in accepted_answers]
