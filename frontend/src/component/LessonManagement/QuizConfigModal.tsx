@@ -94,7 +94,7 @@ const QuizConfigModal = ({
           </div>
 
           <div className="lesson-management__field">
-            <label className="lesson-management__field-label">Điểm đặt yêu cầu</label>
+            <label className="lesson-management__field-label">Điểm đạt yêu cầu</label>
             <input
               className="lesson-management__input"
               type="number"

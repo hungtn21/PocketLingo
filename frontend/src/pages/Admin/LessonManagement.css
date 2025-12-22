@@ -1164,12 +1164,18 @@
 .lesson-management__time-input-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .lesson-management__input--time {
-  width: 50px;
+  width: 72px;
+  min-width: 56px;
+  height: 44px;
+  padding: 8px 10px;
+  font-size: 16px;
+  border-radius: 8px;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .lesson-management__time-label {
