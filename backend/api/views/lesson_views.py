@@ -32,7 +32,7 @@ def complete_lesson(request, lesson_id):
         #Check if user is enrolled in the course of the lesson
         user_course = user.user_courses.filter(
             course=lesson.course,
-            status=UserCourse.Status.APPROVED
+            status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
         ).first()
         
         if not user_course:

@@ -35,7 +35,7 @@ const CourseCard = ({ course, onEnrollmentChange }) => {
 
   // Get button config based on enrollment status
   const getButtonConfig = () => {
-    const status = course.user_status;
+    const status = (course.user_status || "").toLowerCase();
     switch (status) {
       case "pending":
         return {
@@ -59,7 +59,7 @@ const CourseCard = ({ course, onEnrollmentChange }) => {
         return {
           text: "Đã hoàn thành",
           className: "register-btn completed",
-          disabled: true,
+          disabled: false,
         };
       default:
         // null or not enrolled
@@ -124,13 +124,14 @@ const CourseCard = ({ course, onEnrollmentChange }) => {
   };
 
   const handleButtonClick = () => {
-    if (course.user_status === "approved") {
+    const status = (course.user_status || "").toLowerCase();
+    if (status === "approved" || status === "completed") {
       // Navigate to course details page
       navigate(`/courses/${course.id}`);
-    } else if (course.user_status === "rejected") {
+    } else if (status === "rejected") {
       // Show rejection reason modal
       handleShowRejectionReason();
-    } else if (!course.user_status) {
+    } else if (!status) {
       // Show confirmation modal for registration
       setShowConfirmModal(true);
     }

@@ -16,7 +16,7 @@ def check_enrollment(user, course):
     return UserCourse.objects.filter(
         user=user,
         course=course,
-        status=UserCourse.Status.APPROVED
+        status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
     ).exists()
 
 

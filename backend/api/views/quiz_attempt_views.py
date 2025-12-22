@@ -18,7 +18,7 @@ def check_lesson_access(user, lesson):
     return UserCourse.objects.filter(
         user=user,
         course=lesson.course,
-        status=UserCourse.Status.APPROVED
+        status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
     ).exists()
 
 
