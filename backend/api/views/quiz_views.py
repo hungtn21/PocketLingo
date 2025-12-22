@@ -5,6 +5,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Q
+from django.db import transaction
 from api.models.lesson import Lesson
 from api.models.quiz import Quiz
 from api.models.question import Question
@@ -222,30 +223,75 @@ def submit_quiz(request, lesson_id):
             user_id=user.id
         ).count()
         
-        # Lưu kết quả
-        quiz_attempt = QuizAttempt.objects.create(
-            quiz=quiz,
-            user=user,
-            quiz_answers=user_answers,
-            status=quiz_status,
-            score=score,
-            submitted_at=timezone.now(),
-            attempt_no=previous_attempts + 1
-        )
-        
-        # Nếu passed, cập nhật lesson thành completed
-        if quiz_status == QuizAttempt.Status.PASSED:
-            lesson = quiz.lesson
-            user_lesson, created = UserLesson.objects.get_or_create(
+        # ==================== XP LOGIC (Quiz completion) ====================
+        # 1) Init
+        xp_gained = 0
+
+        # 2) Quiz reward (effort & accuracy)
+        is_perfect = total_questions > 0 and correct_count == total_questions
+        is_passed = quiz_status == QuizAttempt.Status.PASSED
+        if is_perfect:
+            xp_gained += 100
+        elif is_passed:
+            xp_gained += 50
+
+        milestone_awarded = False
+
+        # 5) Persist everything atomically
+        with transaction.atomic():
+            # Lock user row to avoid XP race conditions
+            user = User.objects.select_for_update().get(id=user.id)
+
+            # Save attempt
+            quiz_attempt = QuizAttempt.objects.create(
+                quiz=quiz,
                 user=user,
-                lesson=lesson,
-                defaults={'completed': True, 'completed_at': timezone.now()}
+                quiz_answers=user_answers,
+                status=quiz_status,
+                score=score,
+                submitted_at=timezone.now(),
+                attempt_no=previous_attempts + 1,
             )
-            # Nếu đã tồn tại nhưng chưa completed, cập nhật
-            if not created and not user_lesson.completed:
+
+            lesson = quiz.lesson
+
+            # Ensure UserLesson exists (also used for flashcard completion milestone)
+            user_lesson = (
+                UserLesson.objects.select_for_update()
+                .filter(user=user, lesson=lesson)
+                .first()
+            )
+            if not user_lesson:
+                user_lesson = UserLesson.objects.create(
+                    user=user,
+                    lesson=lesson,
+                    completed=is_passed,
+                    completed_at=timezone.now() if is_passed else None,
+                )
+
+            # If passed, mark lesson completed
+            if is_passed and not user_lesson.completed:
                 user_lesson.completed = True
                 user_lesson.completed_at = timezone.now()
-                user_lesson.save()
+
+            # 3) Milestone reward (lesson completion)
+            # Condition: flashcard session done AND quiz passed AND not already rewarded
+            if (
+                is_passed
+                and user_lesson.flashcard_completed
+                and not user_lesson.milestone_xp_awarded
+            ):
+                xp_gained += 100
+                user_lesson.milestone_xp_awarded = True
+                milestone_awarded = True
+
+            # Save UserLesson changes if any
+            user_lesson.save()
+
+            # Update user XP
+            if xp_gained:
+                user.xp = (user.xp or 0) + xp_gained
+                user.save(update_fields=['xp'])
         
         return Response({
             "attempt_id": quiz_attempt.id,
@@ -254,6 +300,9 @@ def submit_quiz(request, lesson_id):
             "total_questions": total_questions,
             "status": quiz_status,
             "passed_score": quiz.passed_score,
+            "xp_gained": xp_gained,
+            "milestone_awarded": milestone_awarded,
+            "total_xp": user.xp,
             "message": f"Bạn đã làm đúng {correct_count}/{total_questions} câu. Điểm: {score:.2f}%"
         }, status=status.HTTP_200_OK)
         

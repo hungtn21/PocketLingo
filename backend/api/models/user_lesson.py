@@ -18,6 +18,7 @@ class UserLesson(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     flashcard_completed = models.BooleanField(default=False)
     flashcard_completed_at = models.DateTimeField(null=True, blank=True)
+    milestone_xp_awarded = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'user_lessons'
