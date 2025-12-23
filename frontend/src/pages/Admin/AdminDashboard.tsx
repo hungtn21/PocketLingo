@@ -48,10 +48,20 @@ const AdminDashboard: React.FC = () => {
         const fetchChartData = async () => {
             setLoadingChart(true);
             try {
+                const formatLocalEndOfDay = (dateStr: string) => {
+                    const d = new Date(dateStr);
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    return `${yyyy}-${mm}-${dd}T23:59:59`;
+                };
+                const startParam = dateRange.start; // YYYY-MM-DD
+                const endParam = formatLocalEndOfDay(dateRange.end); // YYYY-MM-DDT23:59:59 to include whole day
+
                 const res = await api.get('/admins/stats/learning-sessions-over-time/', {
                     params: {
-                        start: dateRange.start,
-                        end: dateRange.end,
+                        start: startParam,
+                        end: endParam,
                         granularity,
                         type: chartType,
                     },
