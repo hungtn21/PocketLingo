@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useUser } from "../context/UserContext.tsx";
+import ChristmasLoader from "../component/ChristmasTheme/ChristmasLoader";
 
 type ProtectedRouteProps = {
   allowRoles?: string[];
@@ -10,7 +11,7 @@ export default function ProtectedRoute({ allowRoles }: ProtectedRouteProps) {
   try {
     const { user, loading } = useUser();
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <ChristmasLoader size="large" text="Đang xác thực..." />;
     if (!user) return <Navigate to="/landing" replace />;
 
     if (allowRoles && !allowRoles.map(r => r.toLowerCase()).includes(user.role.toLowerCase())) {

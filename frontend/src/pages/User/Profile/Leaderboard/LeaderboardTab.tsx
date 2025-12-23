@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Trophy, Crown, Medal } from "lucide-react";
 import api from "../../../../api";
+import ChristmasLoader from "../../../../component/ChristmasTheme/ChristmasLoader";
 import "./LeaderboardTab.css";
 
 interface LeaderboardEntry {
@@ -52,9 +53,9 @@ const LeaderboardTab: React.FC<LeaderboardTabProps> = ({ courses }) => {
   };
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Crown size={20} color="#FFD700" />;
-    if (rank === 2) return <Medal size={20} color="#C0C0C0" />;
-    if (rank === 3) return <Medal size={20} color="#CD7F32" />;
+    if (rank === 1) return <span style={{ fontSize: '20px' }}>🎄</span>; // Christmas tree for #1
+    if (rank === 2) return <span style={{ fontSize: '20px' }}>🎅</span>; // Santa for #2
+    if (rank === 3) return <span style={{ fontSize: '20px' }}>🎅</span>; // Santa for #3
     return null;
   };
 
@@ -89,9 +90,7 @@ const LeaderboardTab: React.FC<LeaderboardTabProps> = ({ courses }) => {
       </div>
 
       {loading ? (
-        <div className="leaderboard-loading">
-          <p>Đang tải bảng xếp hạng...</p>
-        </div>
+        <ChristmasLoader size="medium" text="Đang tải bảng xếp hạng..." />
       ) : error ? (
         <div className="leaderboard-error">
           <p>{error}</p>

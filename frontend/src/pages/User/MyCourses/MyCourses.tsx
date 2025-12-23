@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { GraduationCap, ArrowLeft, Search } from "lucide-react";
 import api from "../../../api";
 import ToastMessage from "../../../component/ToastMessage";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import "./MyCourses.css";
 
 interface CourseProgress {
@@ -123,7 +124,7 @@ const MyCourses: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="loading-container">Đang tải...</div>
+          <ChristmasLoader size="large" text="Đang tải khóa học của bạn..." />
         ) : coursesProgress.length === 0 ? (
           <div className="empty-state">
             <GraduationCap size={64} strokeWidth={1} />

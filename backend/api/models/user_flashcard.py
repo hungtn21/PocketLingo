@@ -27,10 +27,10 @@ class UserFlashcard(models.Model):
     
     # Level: 0 = chưa nhớ, 1-7 = các cấp độ nhớ
     level = models.PositiveSmallIntegerField(default=0)
-    
+
     # Ngày ôn tập tiếp theo
     next_review_date = models.DateField(null=True, blank=True)
-    
+
     # Tracking
     last_reviewed_at = models.DateTimeField(null=True, blank=True)
     times_reviewed = models.PositiveIntegerField(default=0)

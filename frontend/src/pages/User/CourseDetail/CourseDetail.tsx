@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../api';
+import ChristmasLoader from '../../../component/ChristmasTheme/ChristmasLoader';
 import './CourseDetail.css';
 
 interface Lesson {
@@ -137,7 +138,7 @@ const CourseDetail: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="loading">Đang tải...</div>;
+    return <ChristmasLoader size="large" text="Đang tải khóa học..." />;
   }
 
   if (!course) {

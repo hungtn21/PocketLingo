@@ -6,6 +6,7 @@ import FilterPanel from "../../../component/Homepage/FilterPanel";
 import CourseCard from "../../../component/Homepage/CourseCard";
 import ToastMessage from "../../../component/ToastMessage";
 import AIChatBot from "../../../component/AIChatBot/AIChatBot.tsx";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import { useUser } from "../../../context/UserContext.tsx";
 import "./Homepage.css";
 
@@ -157,7 +158,7 @@ const Homepage = () => {
         </div>
 
         {loading ? (
-          <div className="loading">Đang tải...</div>
+          <ChristmasLoader size="large" text="Đang tải khóa học..." />
         ) : (
           <>
             <div className="courses-grid">

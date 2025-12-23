@@ -14,8 +14,8 @@ const Flashcard = ({ data }) => {
   }
 
   return (
-    <div 
-      className={`flashcard-wrapper ${isFlipped ? 'flipped' : ''}`} 
+    <div
+      className={`flashcard-wrapper ${isFlipped ? 'flipped' : ''}`}
       onClick={handleClick}
     >
       <div className="flashcard-inner">

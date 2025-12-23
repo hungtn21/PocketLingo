@@ -7,6 +7,7 @@ import logo from "../../assets/logo.png";
 import { api } from "../../api";
 import { useUser } from "../../context/UserContext.tsx";
 import ChristmasAvatar from "../ChristmasTheme/ChristmasAvatar";
+import ChristmasLights from "../ChristmasTheme/ChristmasLights";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -44,7 +45,8 @@ const Header = () => {
   }, [isDropdownOpen]);
 
   return (
-    <header className="header">
+    <header className="header" style={{ position: 'relative' }}>
+      <ChristmasLights />
       <div className="header-container">
         <div className="logo-section">
           <img 
