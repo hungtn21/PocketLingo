@@ -13,6 +13,9 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 import csv
 from io import StringIO
+from io import BytesIO
+import pandas as pd
+from django.http import HttpResponse
 
 
 def _require_admin(user):
@@ -231,8 +234,74 @@ class CourseExportCSVView(APIView):
                 completion_rate,
             ])
 
-        resp = Response(output.getvalue(), content_type='text/csv')
+        # Return bytes with UTF-8 BOM so Excel opens Vietnamese correctly
+        csv_bytes = output.getvalue().encode('utf-8-sig')
+        resp = HttpResponse(csv_bytes, content_type='text/csv; charset=utf-8')
         resp['Content-Disposition'] = 'attachment; filename="courses_stats.csv"'
+        return resp
+
+
+class CourseExportExcelView(APIView):
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not _require_admin(request.user):
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        search = request.GET.get('search')
+        start_str = request.GET.get('start')
+        end_str = request.GET.get('end')
+
+        try:
+            if end_str:
+                end = datetime.fromisoformat(end_str)
+            else:
+                end = timezone.now()
+        except Exception:
+            end = timezone.now()
+        try:
+            if start_str:
+                start = datetime.fromisoformat(start_str)
+            else:
+                start = end - timedelta(days=30)
+        except Exception:
+            start = end - timedelta(days=30)
+
+        qs = Course.objects.all()
+        if search:
+            qs = qs.filter(title__icontains=search)
+
+        qs = qs.annotate(
+            lessons_count=Count('lessons', distinct=True),
+            attempts_count=Count('lessons__quizzes__attempts', filter=Q(lessons__quizzes__attempts__submitted_at__range=(start, end)), distinct=True),
+            avg_score=Avg('lessons__quizzes__attempts__score', filter=Q(lessons__quizzes__attempts__submitted_at__range=(start, end)))
+        )
+
+        rows = []
+        for course in qs.order_by('title'):
+            total_enrolls = UserCourse.objects.filter(course=course).count()
+            completed_enrolls = UserCourse.objects.filter(course=course, status=UserCourse.Status.COMPLETED).count()
+            completion_rate = 0
+            if total_enrolls > 0:
+                completion_rate = round((completed_enrolls / total_enrolls) * 100, 2)
+
+            rows.append({
+                'Tên khóa học': course.title,
+                'Lượt học': getattr(course, 'attempts_count', 0) or 0,
+                'Điểm TB': float(getattr(course, 'avg_score', 0) or 0),
+                'Tỉ lệ hoàn thành (%)': completion_rate,
+            })
+
+        df = pd.DataFrame.from_records(rows)
+        output = BytesIO()
+        # Use pandas to write Excel file (requires openpyxl in requirements)
+        df.to_excel(output, index=False, sheet_name='Courses')
+        output.seek(0)
+
+        excel_bytes = output.getvalue()
+        resp = HttpResponse(excel_bytes, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        resp['Content-Disposition'] = 'attachment; filename="courses_stats.xlsx"'
         return resp
 
 # --- API: Tổng số lượt học (quiz + flashcard) ---

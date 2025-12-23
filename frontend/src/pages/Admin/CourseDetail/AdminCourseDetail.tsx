@@ -51,6 +51,47 @@ const AdminCourseDetail = () => {
     }
   };
 
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+  };
+
+  const getFilenameFromHeader = (header: any, fallback: string) => {
+    try {
+      const cd = header['content-disposition'] || header['Content-Disposition'];
+      if (!cd) return fallback;
+      const match = /filename\*=UTF-8''(.+)$/.exec(cd) || /filename="?([^";]+)"?/.exec(cd);
+      if (match) return decodeURIComponent(match[1]);
+    } catch (e) {}
+    return fallback;
+  };
+
+  const exportParticipantsCSV = async () => {
+    try {
+      const res = await api.get(`/admins/courses/${courseId}/export/participants/csv/`, { responseType: 'blob' });
+      const filename = getFilenameFromHeader(res.headers, `course_${courseId}_participants.csv`);
+      downloadBlob(res.data, filename);
+    } catch (e: any) {
+      setToast({ message: e?.response?.data?.detail || 'Xuất CSV thất bại', type: 'error' });
+    }
+  };
+
+  const exportParticipantsExcel = async () => {
+    try {
+      const res = await api.get(`/admins/courses/${courseId}/export/participants/excel/`, { responseType: 'blob' });
+      const filename = getFilenameFromHeader(res.headers, `course_${courseId}_participants.xlsx`);
+      downloadBlob(res.data, filename);
+    } catch (e: any) {
+      setToast({ message: e?.response?.data?.detail || 'Xuất Excel thất bại', type: 'error' });
+    }
+  };
+
   useEffect(() => {
     if (courseId) fetchCourseDetail();
   }, [courseId]);
@@ -150,6 +191,24 @@ const AdminCourseDetail = () => {
           background-color: #5E3C86 !important;
           color: white !important;
         }
+        .export-btn {
+          border-radius: 6px;
+          border-color: #5E3C86 !important;
+          color: #5E3C86 !important;
+          background: transparent !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 8px 16px !important;
+          height: 40px !important;
+          font-size: 1rem !important;
+          line-height: 1 !important;
+        }
+        .export-btn:hover {
+          background-color: #efe5fb !important;
+          border-color: #d5bdf6 !important;
+          color: #5E3C86 !important;
+        }
       `}</style>
       <AdminHeader onHamburgerClick={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
@@ -174,14 +233,22 @@ const AdminCourseDetail = () => {
                  </div>
                </div>
                <div className="ms-auto">
-                 <button 
-                    className="btn btn-primary" 
-                    style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }}
-                    onClick={openAddModal}
-                 >
-                    <Plus size={18} className="me-2" />
-                    Thêm bài học
-                 </button>
+                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                   <button className="btn btn-outline-secondary btn-sm export-btn" onClick={exportParticipantsCSV}>
+                     Xuất CSV
+                   </button>
+                   <button className="btn btn-outline-secondary btn-sm export-btn" onClick={exportParticipantsExcel}>
+                     Xuất Excel
+                   </button>
+                   <button 
+                      className="btn btn-primary" 
+                      style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }}
+                      onClick={openAddModal}
+                   >
+                      <Plus size={18} className="me-2" />
+                      Thêm bài học
+                   </button>
+                 </div>
                </div>
             </div>
           </div>
