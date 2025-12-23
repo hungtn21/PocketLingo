@@ -10,10 +10,9 @@ class UserLesson(models.Model):
     )
     lesson = models.ForeignKey(
         'Lesson', # Dùng tên model dưới dạng chuỗi
-        on_delete=models.CASCADE, 
+        on_delete=models.CASCADE,
         related_name='user_lessons'
     )
-    bookmark = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
     flashcard_completed = models.BooleanField(default=False)

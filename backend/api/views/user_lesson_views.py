@@ -158,11 +158,10 @@ def get_lesson_detail(request, lesson_id):
             })
 
     # 6. User Lesson Status
-    user_lesson_data = {'bookmark': False, 'completed': False, 'completed_at': None}
+    user_lesson_data = {'completed': False, 'completed_at': None}
     try:
         ul = UserLesson.objects.get(user_id=user.id, lesson=lesson)
         user_lesson_data = {
-            'bookmark': ul.bookmark,
             'completed': ul.completed,
             'completed_at': ul.completed_at
         }

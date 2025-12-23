@@ -108,7 +108,7 @@ def get_learn_new_session(request, lesson_id):
                 'redirect': 'practice'
             }
         }, status=status.HTTP_200_OK)
-    
+
     # 3. Format response
     flashcards_data = [
         {
@@ -120,7 +120,7 @@ def get_learn_new_session(request, lesson_id):
         }
         for fc in flashcards
     ]
-    
+
     return Response({
         'success': True,
         'data': {
@@ -167,25 +167,25 @@ def get_practice_session(request, lesson_id):
             'success': False,
             'error': 'Bài học này chưa có flashcard.'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     # 3. Get user progress for display (optional)
     user_flashcard_map = {
         uf.flashcard_id: uf
         for uf in UserFlashcard.objects.filter(user=user, flashcard__lesson=lesson)
     }
-    
-    flashcards_data = [
-        {
+
+    flashcards_data = []
+    for fc in flashcards:
+        uf = user_flashcard_map.get(fc.id)
+        flashcards_data.append({
             'id': fc.id,
             'word': fc.word,
             'meaning': fc.meaning,
             'example': fc.example,
             'image_url': fc.image_url,
-            'level': user_flashcard_map.get(fc.id).level if fc.id in user_flashcard_map else None,
-        }
-        for fc in flashcards
-    ]
-    
+            'level': uf.level if uf else None,
+        })
+
     return Response({
         'success': True,
         'data': {

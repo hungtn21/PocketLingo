@@ -1,3 +1,1 @@
-import pymysql
-
-pymysql.install_as_MySQLdb()
+# MySQLclient is now installed, no need for PyMySQL wrapper

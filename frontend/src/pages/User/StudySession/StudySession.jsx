@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import api from "../../../api";
 import Flashcard from "../../../component/Flashcard/Flashcard";
 import AIExplainModal from "../../../component/AIExplainModal/AIExplainModal";
@@ -23,7 +23,6 @@ const StudySession = () => {
   const [results, setResults] = useState([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [isShuffleAnimating, setIsShuffleAnimating] = useState(false);
 
   // UI states
@@ -74,10 +73,10 @@ const StudySession = () => {
           } else {
             setLessonData({ title: "Ôn Tập Hàng Ngày" });
           }
-          
+
           setFlashcards(data.flashcards);
           setOriginalFlashcards(data.flashcards);
-          
+
           // Reset states khi fetch data mới
           setCurrentIndex(0);
           setResults([]);
@@ -315,14 +314,6 @@ const StudySession = () => {
     }
   };
 
-  const handleToggleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    setToast({
-      message: isBookmarked ? "Đã bỏ lưu bài học" : "Đã lưu bài học",
-      type: "success",
-    });
-  };
-
   // Submit results when completed
   useEffect(() => {
     if (isCompleted && (mode === "learn_new" || mode === "daily_review")) {
@@ -341,9 +332,7 @@ const StudySession = () => {
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: "0%" }}></div>
           </div>
-          <button className="bookmark-btn">
-            <Bookmark size={20} />
-          </button>
+          <div style={{ width: 40 }}></div>
         </div>
         <div className="loading-container">Đang tải...</div>
       </div>
@@ -416,22 +405,13 @@ return (
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progress}%` }}></div>
         </div>
-        <div className="header-actions">
-          <button
-            className={`header-icon-btn ${isShuffled ? "active" : ""}`}
-            onClick={handleToggleShuffle}
-            title={isShuffled ? "Thứ tự gốc" : "Trộn từ"}
-          >
-            🔀
-          </button>
-          <button
-            className={`header-icon-btn ${isBookmarked ? "active" : ""}`}
-            onClick={handleToggleBookmark}
-            title={isBookmarked ? "Bỏ lưu" : "Lưu bài học"}
-          >
-            <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
-          </button>
-        </div>
+        <button
+          className={`header-icon-btn ${isShuffled ? "active" : ""}`}
+          onClick={handleToggleShuffle}
+          title={isShuffled ? "Thứ tự gốc" : "Trộn từ"}
+        >
+          🔀
+        </button>
       </div>
 
       {/* Lesson Title */}

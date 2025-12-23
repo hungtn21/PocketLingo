@@ -21,9 +21,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return UserFlashcard.objects.filter(user=obj, level__gte=1).count()
     
     def get_total_quizzes_taken(self, obj):
-        """Đếm số quiz đã làm"""
+        """Đếm số quiz đã pass (không đếm số lần làm)"""
         from ..models.quiz_attempt import QuizAttempt
-        return QuizAttempt.objects.filter(user=obj).count()
+        from django.db.models import Q
+
+        # Đếm số quiz KHÁC NHAU mà user đã pass ít nhất 1 lần
+        passed_quiz_ids = QuizAttempt.objects.filter(
+            user=obj,
+            status=QuizAttempt.Status.PASSED
+        ).values_list('quiz_id', flat=True).distinct()
+
+        return len(passed_quiz_ids)
     
     def get_courses_progress(self, obj):
         """Đếm tiến độ các khóa học đã đăng ký"""
