@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Avg
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 import logging
@@ -13,6 +13,11 @@ logger = logging.getLogger(__name__)
 from ..authentication import JWTCookieAuthentication
 from ..models import User, Course, Lesson
 from ..serializers.course_serializers import CourseSerializer, LessonSerializer
+from ..models import UserCourse, QuizAttempt
+from django.http import HttpResponse
+import csv
+from io import StringIO, BytesIO
+import pandas as pd
 
 def _require_admin(user):
     return user.role in [User.Role.ADMIN, User.Role.SUPERADMIN]
@@ -142,3 +147,83 @@ class AdminLessonDetailView(APIView):
         lesson = get_object_or_404(Lesson, id=lesson_id)
         lesson.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CourseParticipantsExportCSVView(APIView):
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+        if not _require_admin(request.user):
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        course = get_object_or_404(Course, id=course_id)
+
+        qs = UserCourse.objects.filter(course=course).select_related('user')
+
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['User ID', 'Email', 'Name', 'Trạng thái', 'Tiến độ (%)', 'Đăng kí lúc', 'Phê duyệt lúc', 'Số lần làm bài quiz', 'Điểm trung bình quiz'])
+
+        for uc in qs.order_by('requested_at'):
+            user = uc.user
+            attempts = QuizAttempt.objects.filter(user=user, quiz__lesson__course=course)
+            attempts_count = attempts.count()
+            avg_score = attempts.aggregate(avg=Avg('score'))['avg'] if attempts_count > 0 else 0
+            avg_score = float(avg_score or 0)
+
+            writer.writerow([
+                user.id,
+                user.email,
+                user.name,
+                uc.status,
+                float(uc.progress_percent or 0),
+                uc.requested_at.isoformat() if uc.requested_at else '',
+                uc.approved_at.isoformat() if uc.approved_at else '',
+                attempts_count,
+                avg_score,
+            ])
+
+        csv_bytes = output.getvalue().encode('utf-8-sig')
+        resp = HttpResponse(csv_bytes, content_type='text/csv; charset=utf-8')
+        resp['Content-Disposition'] = f'attachment; filename="course_{course_id}_participants.csv"'
+        return resp
+
+
+class CourseParticipantsExportExcelView(APIView):
+    authentication_classes = [JWTCookieAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+        if not _require_admin(request.user):
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        course = get_object_or_404(Course, id=course_id)
+        qs = UserCourse.objects.filter(course=course).select_related('user')
+
+        rows = []
+        for uc in qs.order_by('requested_at'):
+            user = uc.user
+            attempts = QuizAttempt.objects.filter(user=user, quiz__lesson__course=course)
+            attempts_count = attempts.count()
+            avg_score = attempts.aggregate(avg=Avg('score'))['avg'] if attempts_count > 0 else 0
+            rows.append({
+                'User ID': user.id,
+                'Email': user.email,
+                'Name': user.name,
+                'Trạng thái': uc.status,
+                'Tiến độ (%)': float(uc.progress_percent or 0),
+                'Đăng kí lúc': uc.requested_at.isoformat() if uc.requested_at else '',
+                'Phê duyệt lúc': uc.approved_at.isoformat() if uc.approved_at else '',
+                'Số lần làm bài quiz': attempts_count,
+                'Điểm trung bình quiz': float(avg_score or 0),
+            })
+
+        df = pd.DataFrame.from_records(rows)
+        output = BytesIO()
+        df.to_excel(output, index=False, sheet_name='Participants')
+        output.seek(0)
+
+        resp = HttpResponse(output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        resp['Content-Disposition'] = f'attachment; filename="course_{course_id}_participants.xlsx"'
+        return resp
