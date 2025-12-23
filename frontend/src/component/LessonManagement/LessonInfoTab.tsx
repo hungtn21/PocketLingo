@@ -1,4 +1,5 @@
 import { Pencil } from "lucide-react";
+import ChristmasLoader from '../ChristmasTheme/ChristmasLoader';
 
 interface LessonInfo {
   id: number;
@@ -18,7 +19,7 @@ interface LessonInfoTabProps {
 
 const LessonInfoTab = ({ lesson, loading, onEditClick }: LessonInfoTabProps) => {
   if (loading) {
-    return <div className="lesson-management__card">Đang tải...</div>;
+    return <ChristmasLoader size="medium" text="Đang tải thông tin bài học..." />;
   }
 
   if (!lesson) {

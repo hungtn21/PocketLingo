@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api"; 
 import Flashcard from "../../../component/Flashcard/Flashcard";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import "./LessonDetail.css";
 
 const LessonDetail = () => {
@@ -56,7 +57,7 @@ const LessonDetail = () => {
         <div className="lesson-header-bar">
           <button className="back-button" onClick={handleBack}>← Quay lại</button>
         </div>
-        <div className="loading-container">Đang tải nội dung bài học...</div>
+        <ChristmasLoader size="large" text="Đang tải nội dung bài học..." />
       </div>
     );
   }

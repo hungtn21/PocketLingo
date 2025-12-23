@@ -8,6 +8,7 @@ import ToastMessage from "../../../component/ToastMessage";
 import QuizHistoryTab from "./QuizHistory/QuizHistoryTab";
 import LeaderboardTab from "./Leaderboard/LeaderboardTab";
 import ChristmasAvatar from "../../../component/ChristmasTheme/ChristmasAvatar";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import "./UserProfile.css";
 
 const UserProfile: React.FC = () => {
@@ -118,7 +119,7 @@ const UserProfile: React.FC = () => {
 
       <div className="user-profile-container">
         {loadingProfile ? (
-          <div className="text-center py-5">Đang tải...</div>
+          <ChristmasLoader size="large" text="Đang tải hồ sơ..." />
         ) : (
           <>
             <h2 className="profile-title">Hồ sơ học tập</h2>

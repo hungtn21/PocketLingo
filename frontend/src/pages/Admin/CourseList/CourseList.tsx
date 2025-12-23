@@ -6,6 +6,7 @@ import api from "../../../api";
 import { Search, Eye, Edit, Trash2, Plus, Upload } from "lucide-react";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
 import ToastMessage from "../../../component/ToastMessage";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 
 const CourseList = () => {
   const navigate = useNavigate();

@@ -1,4 +1,5 @@
 import { Pencil, Save, Check, Trash2, Search, X } from "lucide-react";
+import ChristmasLoader from "../ChristmasTheme/ChristmasLoader";
 
 interface Flashcard {
   id: number | null;
@@ -76,7 +77,7 @@ const FlashcardTab = ({
       </div>
 
       {flashLoading ? (
-        <div className="flashcard-list__empty">Đang tải flashcards...</div>
+        <ChristmasLoader size="medium" text="Đang tải flashcards..." />
       ) : filteredFlashcards.length === 0 ? (
         <div className="flashcard-list__empty" />
       ) : (

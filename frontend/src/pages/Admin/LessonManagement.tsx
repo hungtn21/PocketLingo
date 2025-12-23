@@ -10,6 +10,7 @@ import QuizConfigModal from "../../component/LessonManagement/QuizConfigModal";
 import EditLessonModal from "../../component/LessonManagement/EditLessonModal";
 import LessonInfoTab from "../../component/LessonManagement/LessonInfoTab";
 import FlashcardTab from "../../component/LessonManagement/FlashcardTab";
+import ChristmasLoader from "../../component/ChristmasTheme/ChristmasLoader";
 import "./LessonManagement.css";
 
 interface LessonInfo {
@@ -1125,7 +1126,7 @@ const LessonManagement = () => {
 
   const renderQuizTab = () => {
     if (quizLoading) {
-      return <div className="lesson-management__card lesson-management__card--purple">Đang tải...</div>;
+      return <ChristmasLoader size="medium" text="Đang tải quiz..." />;
     }
 
     if (!quiz) {

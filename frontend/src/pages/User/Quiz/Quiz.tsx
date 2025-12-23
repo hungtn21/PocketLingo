@@ -4,6 +4,7 @@ import api from "../../../api";
 import MultipleChoiceQuestion from "../../../component/Quiz/MultipleChoiceQuestion";
 import DragDropQuestion from "../../../component/Quiz/DragDropQuestion";
 import FillInQuestion from "../../../component/Quiz/FillInQuestion";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import "./Quiz.css";
 
 interface Question {
@@ -138,7 +139,7 @@ const Quiz: React.FC = () => {
   if (loading) {
     return (
       <div className="quiz-container">
-        <div className="loading">Đang tải quiz...</div>
+        <ChristmasLoader size="large" text="Đang tải quiz..." />
       </div>
     );
   }

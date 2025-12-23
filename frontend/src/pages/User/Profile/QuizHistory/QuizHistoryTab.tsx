@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, Calendar, Award, BookOpen } from "lucide-react";
+import ChristmasLoader from "../../../../component/ChristmasTheme/ChristmasLoader";
 import "./QuizHistoryTab.css";
 
 interface QuizAttempt {
@@ -40,8 +41,7 @@ const QuizHistoryTab: React.FC<QuizHistoryTabProps> = ({ history, historyLoaded 
   if (!historyLoaded) {
     return (
       <div className="quiz-history-loading">
-        <div className="loading-spinner"></div>
-        <p>Đang tải lịch sử...</p>
+        <ChristmasLoader size="medium" text="Đang tải lịch sử..." />
       </div>
     );
   }

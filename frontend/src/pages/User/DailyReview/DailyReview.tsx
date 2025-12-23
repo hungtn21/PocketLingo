@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDailyReviewSummary } from '../../../api';
+import ChristmasLoader from '../../../component/ChristmasTheme/ChristmasLoader';
 import './DailyReview.css';
 
 interface LessonSummary {
@@ -44,7 +45,7 @@ const DailyReview: React.FC = () => {
   if (loading) {
     return (
       <div className="daily-review-container">
-        <div className="loading">Đang tải dữ liệu ôn tập...</div>
+        <ChristmasLoader size="large" text="Đang tải dữ liệu ôn tập..." />
       </div>
     );
   }

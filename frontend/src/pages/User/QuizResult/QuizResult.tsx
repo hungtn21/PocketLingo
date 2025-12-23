@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../../api';
+import ChristmasLoader from '../../../component/ChristmasTheme/ChristmasLoader';
 import './QuizResult.css';
 
 interface Question {
@@ -182,7 +183,7 @@ const QuizResult = () => {
   };
 
   if (loading) {
-    return <div className="loading">Đang tải kết quả...</div>;
+    return <ChristmasLoader size="large" text="Đang tải kết quả..." />;
   }
 
   if (!result) {

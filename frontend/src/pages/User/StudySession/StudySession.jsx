@@ -6,6 +6,7 @@ import Flashcard from "../../../component/Flashcard/Flashcard";
 import AIExplainModal from "../../../component/AIExplainModal/AIExplainModal";
 import StudyResult from "../StudyResult/StudyResult";
 import ToastMessage from "../../../component/ToastMessage";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import "./StudySession.css";
 
 const StudySession = () => {
@@ -334,7 +335,7 @@ const StudySession = () => {
           </div>
           <div style={{ width: 40 }}></div>
         </div>
-        <div className="loading-container">Đang tải...</div>
+        <ChristmasLoader size="large" text="Đang tải bài học..." />
       </div>
     );
   }
