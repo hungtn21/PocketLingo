@@ -34,6 +34,11 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+- Chạy server có websocket để nhận notification real-time
+```
+uvicorn backend.asgi:application --host 127.0.0.1 --port 8000 --reload
+```
 Backend chạy mặc định tại: http://localhost:8000/
 
 
