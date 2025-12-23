@@ -8,6 +8,7 @@ from ..views.admin_course_views import AdminCourseListView, AdminCourseDetailVie
 from ..views.upload_views import UploadImageView
 from ..views.admin_enrollment_views import EnrollmentRequestListView, EnrollmentActionView
 from api.views.notification_views import delete_admin_notification
+from api.views.notification_views import get_admin_notifications_db, mark_notification_read, create_admin_notification, mark_all_admin_notifications_read
 
 urlpatterns = [
     path('stats/overview/', OverviewStatsView.as_view(), name='admin_stats_overview'),
@@ -16,6 +17,11 @@ urlpatterns = [
     path('stats/courses/export/', CourseExportCSVView.as_view(), name='admin_stats_courses_export'),
     path('stats/total-learning-sessions/', total_learning_sessions, name='admin_stats_total_learning_sessions'),
     path('stats/learning-sessions-over-time/', learning_sessions_over_time, name='admin_stats_learning_sessions_over_time'),
+    # Admin notifications (DB-backed)
+    path('notifications/db/', get_admin_notifications_db, name='admin_notifications_db'),
+    path('notifications/mark-read/', mark_notification_read, name='admin_notifications_mark_read'),
+    path('notifications/mark-all-read/', mark_all_admin_notifications_read, name='admin_notifications_mark_all_read'),
+    path('notifications/create/', create_admin_notification, name='admin_notifications_create'),
     path('lessons/<int:lesson_id>/', get_admin_lesson_detail, name='admin_get_lesson_detail'),
     path('lessons/<int:lesson_id>/update/', update_admin_lesson, name='admin_update_lesson'),
     

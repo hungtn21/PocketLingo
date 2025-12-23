@@ -82,9 +82,7 @@ const UserNotificationDropdown: React.FC = () => {
       // Dựa vào nội dung description từ send_daily_reminders.py
       const isReviewNotif = 
         n.message?.toLowerCase().includes('ôn tập') || 
-        n.message?.toLowerCase().includes('review') ||
-        n.description?.toLowerCase().includes('ôn tập') ||
-        n.description?.toLowerCase().includes('review');
+        n.message?.toLowerCase().includes('review');
       
       if (isReviewNotif) {
         // Điều hướng tới Daily Review screen

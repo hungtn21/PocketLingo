@@ -26,9 +26,28 @@ const AdminNotificationDropdown: React.FC = () => {
     fetchNotifications();
     initNotificationSocket();
     const unsubscribe = subscribeNotification((payload) => {
+      // If server sends unread_count update, apply it
       if (payload && typeof payload.unread_count === 'number') {
         setUnreadCount(payload.unread_count);
-      } else {
+      }
+
+      // If server provided a notification payload, persist it for this admin
+      if (payload && payload.notification) {
+        (async () => {
+          try {
+            const msg = payload.notification.message || payload.notification.description || '';
+            const res = await api.post('/admins/notifications/create/', { message: msg });
+            const created = res.data.notification;
+            const count = res.data.unread_count || 0;
+            setNotifications((prev) => [created, ...prev]);
+            setUnreadCount(count);
+          } catch (e) {
+            console.warn('Failed to persist admin notification, refreshing list', e);
+            fetchNotifications();
+          }
+        })();
+      } else if (!payload || (typeof payload.unread_count !== 'number' && !payload.notification)) {
+        // Fallback: refresh from server when payload is unexpected
         fetchNotifications();
       }
     });
@@ -87,6 +106,18 @@ const AdminNotificationDropdown: React.FC = () => {
     }
   };
 
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await api.post('/admins/notifications/mark-all-read/');
+      // optimistically update UI
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(res.data.unread_count ?? 0);
+    } catch (e) {
+      // fallback: refetch list
+      fetchNotifications();
+    }
+  };
+
   return (
     <div className="admin-notification-dropdown-wrapper" ref={dropdownRef}>
       <button className="notification-button" onClick={() => setOpen((o) => !o)}>
@@ -98,7 +129,19 @@ const AdminNotificationDropdown: React.FC = () => {
           {notifications.length === 0 ? (
             <div className="no-notification">Không có thông báo nào</div>
           ) : (
-            <ul className="notification-list">
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 12px' }}>
+                <button
+                  className="mark-all-read-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMarkAllRead();
+                  }}
+                >
+                  Đánh dấu tất cả là đã đọc
+                </button>
+              </div>
+              <ul className="notification-list">
               {notifications.map((notif) => {
                 // Logic màu sắc:
                 // - Chưa đọc: nền tím (status-approved-unread)
@@ -132,6 +175,7 @@ const AdminNotificationDropdown: React.FC = () => {
                 );
               })}
             </ul>
+            </div>
           )}
         </div>
       )}

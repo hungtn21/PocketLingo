@@ -5,6 +5,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from ..models import UserCourse, Course, User
+from ..models import Notification
+from ..serializers.notification_serializers import NotificationSerializer
+from ..utils.notification_realtime import send_admin_notification
 
 
 def get_user_from_token(request):
@@ -56,6 +59,34 @@ def enroll_course(request, course_id):
             existing_enrollment.requested_at = timezone.now()
             existing_enrollment.reason = None  # Xóa lý do từ chối cũ
             existing_enrollment.save()
+            # Notify admins about resubmitted enrollment request
+            try:
+                message = f"Người dùng {user.name} ({user.email}) đã gửi lại yêu cầu ghi danh vào khóa học '{course.title}'."
+
+                # Persist a notification for each admin so admin UI shows persisted items
+                try:
+                    admin_users = User.objects.filter(role__in=[User.Role.ADMIN, User.Role.SUPERADMIN])
+                    for admin in admin_users:
+                        Notification.objects.create(user=admin, description=message)
+                except Exception:
+                    # ignore admin-notify failures
+                    pass
+
+                # Broadcast a realtime payload to admin group (not tied to learner)
+                notif_payload = {
+                    'message': message,
+                    'link': f"/admin/enrollments/requests",
+                    'user_name': user.name,
+                    'user_email': user.email,
+                    'course_title': course.title,
+                    'created_at': timezone.now().isoformat(),
+                }
+                try:
+                    send_admin_notification({'unread_count': Notification.objects.filter(status=Notification.Status.UNREAD).count(), 'notification': notif_payload})
+                except Exception:
+                    pass
+            except Exception:
+                pass
             return Response({
                 'message': 'Đã gửi lại yêu cầu đăng ký thành công.',
                 'enrollment': {
@@ -71,6 +102,30 @@ def enroll_course(request, course_id):
         course=course,
         status=UserCourse.Status.PENDING
     )
+    # Persist copies for admins and broadcast realtime event
+    try:
+        message = f"Người dùng {user.name} ({user.email}) đã gửi yêu cầu ghi danh vào khóa học '{course.title}'."
+        try:
+            admin_users = User.objects.filter(role__in=[User.Role.ADMIN, User.Role.SUPERADMIN])
+            for admin in admin_users:
+                Notification.objects.create(user=admin, description=message)
+        except Exception:
+            pass
+
+        notif_payload = {
+            'message': message,
+            'link': f"/admin/enrollments/requests",
+            'user_name': user.name,
+            'user_email': user.email,
+            'course_title': course.title,
+            'created_at': timezone.now().isoformat(),
+        }
+        try:
+            send_admin_notification({'unread_count': Notification.objects.filter(status=Notification.Status.UNREAD).count(), 'notification': notif_payload})
+        except Exception:
+            pass
+    except Exception:
+        pass
     
     return Response({
         'message': 'Đăng ký thành công. Vui lòng chờ duyệt.',
