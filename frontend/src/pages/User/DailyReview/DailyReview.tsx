@@ -82,7 +82,7 @@ const DailyReview: React.FC = () => {
           <div className="empty-state">
             <div className="empty-icon">✨</div>
             <p className="empty-message">Tuyệt vời! Bạn đã hoàn thành hết bài ôn tập hôm nay.</p>
-            <button className="secondary-btn" onClick={() => navigate('/dashboard')}>
+            <button className="secondary-btn" onClick={() => navigate('/')}>
               Quay về trang chủ
             </button>
           </div>

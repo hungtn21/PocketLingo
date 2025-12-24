@@ -92,13 +92,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS Configuration
+# For production, add your domain to CORS_ALLOWED_ORIGINS_PROD in .env
+CORS_ALLOWED_ORIGINS_PROD = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if os.getenv('CORS_ALLOWED_ORIGINS') else []
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:4173",
-]
+    "http://localhost",
+    "http://127.0.0.1",
+] + CORS_ALLOWED_ORIGINS_PROD
 
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS_PROD = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if os.getenv('CSRF_TRUSTED_ORIGINS') else []
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
@@ -106,7 +115,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://localhost:4173",
-]
+    "http://localhost",
+    "http://127.0.0.1",
+] + CSRF_TRUSTED_ORIGINS_PROD
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -180,7 +191,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
