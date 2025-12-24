@@ -1,24 +1,24 @@
 #!/bin/bash
 
-echo "🚀 Starting deployment on $(hostname)..."
+echo "🚀 Bắt đầu deploy tại $(hostname)..."
 
-# Stop existing containers
+# Dừng các container đang chạy
 docker-compose -f docker-compose.prod.yml down
 
-# Build and start
+# Build và khởi động
 docker-compose -f docker-compose.prod.yml build
 docker-compose -f docker-compose.prod.yml up -d
 
-# Wait for backend to be ready
-echo "⏳ Waiting for backend to be healthy..."
+# Chờ backend sẵn sàng
+echo "⏳ Đang chờ backend sẵn sàng..."
 sleep 10
 
-# Run migrations (chạy trên cả 2 nhưng chỉ 1 lần thực thi)
-echo "🗄️ Running migrations..."
+# Chạy migrations (chạy trên cả 2 nhưng chỉ 1 lần thực thi)
+echo "🗄️ Đang chạy migrations..."
 docker-compose -f docker-compose.prod.yml exec backend python manage.py migrate --noinput
 
-# Collect static files
-echo "📁 Collecting static files..."
+# Lấy static files
+echo "📁 Đang lấy static files..."
 docker-compose -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
 
 echo "✅ Deployment completed on $(hostname)!"
