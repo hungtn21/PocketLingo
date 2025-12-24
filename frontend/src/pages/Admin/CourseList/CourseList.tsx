@@ -248,7 +248,7 @@ const CourseList = () => {
           color: white !important;
         }
         .export-btn {
-          border-radius: 6px;
+          border-radius: 999px;
           border-color: #5E3C86 !important;
           color: #5E3C86 !important;
           background: transparent !important;

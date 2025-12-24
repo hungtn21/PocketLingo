@@ -41,8 +41,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         from ..models.quiz_attempt import QuizAttempt
         from django.db.models import Avg
 
-        # Lấy tất cả enrollment của user (bất kể trạng thái) và sử dụng progress_percent đã lưu nếu có
-        user_courses = UserCourse.objects.filter(user=obj).select_related('course')
+        # Lấy tất cả enrollment của user nhưng chỉ những enrollment đã được duyệt hoặc hoàn thành
+        user_courses = UserCourse.objects.filter(
+            user=obj,
+            status__in=[UserCourse.Status.APPROVED, UserCourse.Status.COMPLETED]
+        ).select_related('course')
 
         courses_data = []
         for uc in user_courses:

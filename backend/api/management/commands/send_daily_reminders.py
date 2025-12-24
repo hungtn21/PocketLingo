@@ -6,6 +6,7 @@ from api.models.notification import Notification
 from api.utils.notification_realtime import send_user_notification
 from django.core.mail import send_mail
 from django.conf import settings
+from django.template.loader import render_to_string
 
 
 class Command(BaseCommand):
@@ -33,8 +34,10 @@ class Command(BaseCommand):
             
             if count <= 50:
                 msg_text = f"Bạn có {count} từ vựng cần ôn tập hôm nay."
+                due_count_display = str(count)
             else:
                 msg_text = f"Bạn có 50+ từ vựng đang chờ. Hãy ôn tập ngay để tránh quên nhé!"
+                due_count_display = "50+"
 
             noti = Notification.objects.create(
                 user=user,
@@ -55,12 +58,21 @@ class Command(BaseCommand):
 
             if count >= 5:
                 try:
+                    # Render HTML email from template
+                    html_message = render_to_string('reminder.html', {
+                        'name': user.name,
+                        'message': msg_text,
+                        'due_count': count,
+                        'due_count_display': due_count_display,
+                        'frontend_url': settings.FRONTEND_URL
+                    })
                     send_mail(
                         subject="PocketLingo: Đừng để quên kiến thức!",
                         message=f"Chào {user.name},\n\n{msg_text}\nTruy cập app để học ngay: {settings.FRONTEND_URL}",
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[user.email],
                         fail_silently=True,
+                        html_message=html_message,
                     )
                 except Exception:
                     pass

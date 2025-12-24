@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
-import { Lock, Unlock } from "lucide-react";
+import { Lock, Unlock, User as UserIcon } from "lucide-react";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
 
 const Badge = ({ status }) => {
@@ -92,8 +92,12 @@ const UserDetail = () => {
         ) : (
           <div className="card p-4 shadow-sm">
             <div className="d-flex align-items-center" style={{ gap: 20 }}>
-              <div style={{ width: 96, height: 96, borderRadius: 12, overflow: 'hidden', background: '#f0f0f0' }}>
-                <img src={user.avatar_url || "/public/default-avatar.png"} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ width: 96, height: 96, borderRadius: 12, overflow: 'hidden', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <UserIcon size={56} strokeWidth={1.5} color="#5E3C86" />
+                )}
               </div>
               <div style={{ flex: 1 }}>
                 <h4 className="mb-1">{user.name}</h4>
