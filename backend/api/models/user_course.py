@@ -22,6 +22,7 @@ class UserCourse(models.Model):
     progress_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     requested_at = models.DateTimeField(auto_now_add=True)
     approved_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     rating = models.FloatField(null=True, blank=True) 
     comment = models.TextField(blank=True, null=True)
     reason = models.TextField(blank=True, null=True)
