@@ -12,6 +12,7 @@ interface Notification {
   link: string;
   is_read: boolean;
   created_at: string;
+  description?: string;
   status?: 'approved' | 'rejected' | string;
   reason?: string;
   course_title?: string;
