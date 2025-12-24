@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './Snowfall.css';
+import './snowfall.css';
 
 interface SnowflakeProps {
   id: number;
