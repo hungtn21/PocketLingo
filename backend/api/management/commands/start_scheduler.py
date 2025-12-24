@@ -4,9 +4,10 @@ Sử dụng: python manage.py start_scheduler
 """
 
 from django.core.management.base import BaseCommand
-from django_apscheduler.schedulers import DjangoScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from django.core.management import call_command
+from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,44 +17,41 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            scheduler = DjangoScheduler()
-            
+            # Sử dụng BlockingScheduler thay vì DjangoScheduler
+            scheduler = BlockingScheduler(timezone='Asia/Ho_Chi_Minh')
+
             # Chạy lúc 7:00 sáng mỗi ngày (giờ Việt Nam)
             scheduler.add_job(
                 self.run_daily_reminders,
-                trigger=CronTrigger(hour=7, minute=0),
+                trigger=CronTrigger(hour=7, minute=0, timezone='Asia/Ho_Chi_Minh'),
                 id='send_daily_reminders',
                 name='Send Daily Review Reminders',
-                replace_existing=True,
-                timezone='Asia/Ho_Chi_Minh'
+                replace_existing=True
             )
-            
-            scheduler.start()
+
             self.stdout.write(
                 self.style.SUCCESS(
-                    '✅ Scheduler started! Sẽ gửi reminder lúc 7:00 sáng mỗi ngày (Giờ Việt Nam)'
+                    'Scheduler started! Se gui reminder luc 7:00 sang moi ngay (Gio Viet Nam)'
                 )
             )
-            
-            # Keep scheduler running
+
+            # Start scheduler (blocking - will run forever)
             try:
-                import time
-                while True:
-                    time.sleep(1)
+                scheduler.start()
             except KeyboardInterrupt:
                 scheduler.shutdown()
-                self.stdout.write(self.style.WARNING('⏹️  Scheduler stopped'))
-                
+                self.stdout.write(self.style.WARNING('Scheduler stopped'))
+
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f'❌ Error: {e}'))
+            self.stdout.write(self.style.ERROR(f'Error: {e}'))
             logger.error(f"Scheduler error: {e}", exc_info=True)
         
     def run_daily_reminders(self):
-        """Gọi command send_daily_reminders"""
+        """Goi command send_daily_reminders"""
         try:
             call_command('send_daily_reminders')
-            self.stdout.write(self.style.SUCCESS('✅ Daily reminders sent successfully'))
-            logger.info("✅ Daily reminders sent successfully")
+            logger.info("Daily reminders sent successfully")
+            print("Daily reminders sent successfully")
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f'❌ Error sending daily reminders: {e}'))
             logger.error(f"Error sending daily reminders: {e}", exc_info=True)
+            print(f"Error sending daily reminders: {e}")
