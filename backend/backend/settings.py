@@ -27,6 +27,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
+# Ensure SECRET_KEY exists in production
+if not SECRET_KEY and not DEBUG:
+    raise RuntimeError("SECRET_KEY must be set in production")
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
@@ -53,16 +57,28 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'backend.asgi.application'
 
 # Redis configuration for Django Channels
+REDIS_URL = os.getenv('REDIS_URL', '').strip()
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
+REDIS_USE_TLS = os.getenv('REDIS_USE_TLS', 'false').lower() == 'true'
 USE_REDIS = os.getenv('USE_REDIS', 'false').lower() == 'true'
 
 if USE_REDIS:
+    if REDIS_URL:
+        redis_hosts = [REDIS_URL]
+    else:
+        if REDIS_PASSWORD:
+            scheme = 'rediss' if REDIS_USE_TLS else 'redis'
+            redis_hosts = [f"{scheme}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"]
+        else:
+            redis_hosts = [(REDIS_HOST, REDIS_PORT)]
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                'hosts': [(REDIS_HOST, REDIS_PORT)],
+                'hosts': redis_hosts,
             },
         },
     }
@@ -213,12 +229,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
 }
 
-FRONTEND_URL = "http://localhost:5173" #dev only
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+INTERNAL_RUN_DAILY_TOKEN = os.getenv('INTERNAL_RUN_DAILY_TOKEN', '')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
