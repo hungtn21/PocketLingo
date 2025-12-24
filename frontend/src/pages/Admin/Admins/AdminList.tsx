@@ -6,6 +6,7 @@ import AdminHeader from "../../../component/AdminDashboard/AdminHeader";
 import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
 import ToastMessage from "../../../component/ToastMessage";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 import { Lock, Unlock, Search } from "lucide-react";
 
 const Badge = ({ status }: { status: string }) => {
@@ -109,7 +110,7 @@ export default function AdminList() {
           </div>
           <button className="btn btn-primary" style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }} onClick={() => fetchAdmins(1)}>Tìm kiếm</button>
         </div>
-        {loading ? <div className="text-center py-4">Đang tải...</div> : (
+        {loading ? <div className="text-center py-4"><ChristmasLoader /></div> : (
           <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
             <div className="table-responsive">
               <table className="table mb-0 align-middle">

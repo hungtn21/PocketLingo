@@ -137,12 +137,22 @@ class LoginView(APIView):
 
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
         response = Response({'role': user.role})
+        # Config cookies cho production và development
+        # Khi dev: SameSite=Lax, secure=False
+        # Khi prod: SameSite=None, secure=True
+        if settings.DEBUG:
+            cookie_samesite = 'Lax'
+            cookie_secure = False
+        else:
+            cookie_samesite = 'None'
+            cookie_secure = True
+
         response.set_cookie(
             key='jwt',
             value=token,
             httponly=True,
-            secure=not settings.DEBUG,
-            samesite='Lax',
+            secure=cookie_secure,
+            samesite=cookie_samesite,
             max_age=7*24*60*60
         )
         return response

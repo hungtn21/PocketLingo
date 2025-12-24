@@ -1,6 +1,6 @@
 from django.urls import path
 from ..views.statistic_views import OverviewStatsView, LearningCountsView, CourseListView, CourseExportCSVView, CourseExportExcelView, total_learning_sessions, learning_sessions_over_time
-from ..views.admin_lesson_views import get_admin_lesson_detail, update_admin_lesson
+from ..views.admin_lesson_views import update_admin_lesson
 from ..views.quiz_attempt_views import create_quiz, update_quiz, delete_quiz
 from ..views.question_views import create_question, update_question, delete_question
 from ..views.admin_views import LearnerListView, LearnerDetailView, LearnerStatusView, AdminListView, AdminStatusView
@@ -24,7 +24,6 @@ urlpatterns = [
     path('notifications/mark-read/', mark_notification_read, name='admin_notifications_mark_read'),
     path('notifications/mark-all-read/', mark_all_admin_notifications_read, name='admin_notifications_mark_all_read'),
     path('notifications/create/', create_admin_notification, name='admin_notifications_create'),
-    path('lessons/<int:lesson_id>/', get_admin_lesson_detail, name='admin_get_lesson_detail'),
     path('lessons/<int:lesson_id>/update/', update_admin_lesson, name='admin_update_lesson'),
     
     # Quiz management

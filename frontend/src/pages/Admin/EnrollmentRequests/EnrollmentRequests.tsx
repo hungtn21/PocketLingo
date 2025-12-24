@@ -7,6 +7,7 @@ import api from "../../../api";
 import { useLocation } from "react-router-dom";
 import "./highlight-row.css";
 import { Search, Check, X } from "lucide-react";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 
 const EnrollmentRequests = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -202,7 +203,7 @@ const EnrollmentRequests = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="text-center py-4">
-                      Đang tải...
+                      <ChristmasLoader />
                     </td>
                   </tr>
                 ) : requests.length === 0 ? (

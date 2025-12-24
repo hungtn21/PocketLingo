@@ -2,6 +2,7 @@ from django.urls import path
 from django.http import JsonResponse
 from django.db import connections
 from django.conf import settings
+from django.utils import timezone
 import redis
 import logging
 
@@ -37,11 +38,17 @@ def health_check(request):
     # Check overall status
     all_healthy = all(status == 'healthy' for status in checks.values())
     
+    try:
+        timestamp = timezone.now().isoformat()
+    except Exception:
+        import datetime
+        timestamp = datetime.datetime.utcnow().isoformat()
+
     response_data = {
         'status': 'healthy' if all_healthy else 'unhealthy',
         'checks': checks,
         'instance': getattr(settings, 'INSTANCE_ID', 'unknown'),
-        'timestamp': timezone.now().isoformat()
+        'timestamp': timestamp
     }
     
     status_code = 200 if all_healthy else 503

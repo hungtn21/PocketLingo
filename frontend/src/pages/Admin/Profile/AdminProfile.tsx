@@ -6,7 +6,7 @@ import api from "../../../api";
 import { User as UserIcon, Edit2 } from "lucide-react";
 import ToastMessage from "../../../component/ToastMessage";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
-import ChristmasAvatar from "../../../component/ChristmasTheme/ChristmasAvatar";
+import ChristmasLoader from '../../../component/ChristmasTheme/ChristmasLoader';
 import "./AdminProfile.css";
 
 const AdminProfile: React.FC = () => {
@@ -139,7 +139,7 @@ const AdminProfile: React.FC = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {loadingProfile ? (
-        <div className="text-center py-5">Đang tải...</div>
+        <div className="text-center py-4"><ChristmasLoader /></div>
       ) : (
         <div className="admin-profile-wrapper">
           <h2 className="mb-4 fw-bold text-center">Thông tin cá nhân</h2>
