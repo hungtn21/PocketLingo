@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Avg
+from django.utils import timezone
 from api.models.course import Course
 from api.models.lesson import Lesson
 from api.models.user_course import UserCourse
@@ -273,7 +274,7 @@ def get_course_detail(request, course_id):
         reviews = UserCourse.objects.filter(
             course_id=course_id,
             rating__isnull=False
-        ).select_related('user').order_by('-requested_at')
+        ).select_related('user').order_by('-reviewed_at', '-requested_at')
         
         # Check if current user has already reviewed
         user_has_reviewed = user_course.rating is not None
@@ -289,7 +290,7 @@ def get_course_detail(request, course_id):
                 'user_name': user_course_review.user.username or user_course_review.user.email,
                 'rating': user_course_review.rating,
                 'comment': user_course_review.comment,
-                'created_at': user_course_review.requested_at,
+                'created_at': user_course_review.reviewed_at or user_course_review.requested_at,
                 'is_own_review': user_course_review.user_id == user.id
             })
         
@@ -386,6 +387,7 @@ def create_course_review(request, course_id):
         # Update rating and comment in user_course
         user_course.rating = rating
         user_course.comment = comment
+        user_course.reviewed_at = timezone.now()
         user_course.save()
         
         # Calculate new average rating
@@ -401,7 +403,8 @@ def create_course_review(request, course_id):
                     'id': user_course.id,
                     'rating': user_course.rating,
                     'comment': user_course.comment,
-                    'created_at': user_course.requested_at
+                    #Created_at is the time when the review was created or updated
+                    'created_at': user_course.reviewed_at or user_course.requested_at
                 },
                 'course_avg_rating': round(course.avg_rating, 1) if course.avg_rating else 0.0
             }
