@@ -56,10 +56,10 @@ def get_admin_notifications_db(request):
         if not (user and (getattr(user, 'is_staff', False) or getattr(user, 'is_superuser', False) or getattr(user, 'role', None) in [User.Role.ADMIN, User.Role.SUPERADMIN])):
             return Response({'error': 'Không có quyền truy cập.'}, status=403)
 
-        # For admin notifications, return the most recent notifications (system-wide)
-        notifications = Notification.objects.all().order_by('-created_at')[:100]
-        # Can't filter a sliced queryset; compute unread count from full queryset instead
-        unread_count = Notification.objects.filter(status=Notification.Status.UNREAD).count()
+        # For admin notifications, return notifications intended for the current admin user
+        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:100]
+        # Unread count only for this admin
+        unread_count = Notification.objects.filter(user=user, status=Notification.Status.UNREAD).count()
         serializer = NotificationSerializer(notifications, many=True)
         return Response({'notifications': serializer.data, 'unread_count': unread_count})
     except Exception as e:
@@ -111,9 +111,9 @@ def mark_all_admin_notifications_read(request):
     if not user or not (user.is_staff or user.is_superuser):
         return Response({'error': 'Không có quyền truy cập.'}, status=403)
     try:
-        # Mark all admin notifications (system-wide) as read
-        Notification.objects.filter(status=Notification.Status.UNREAD).update(status=Notification.Status.READ)
-        unread_count = Notification.objects.filter(status=Notification.Status.UNREAD).count()
+        # Mark all admin notifications for this admin user as read
+        Notification.objects.filter(user=user, status=Notification.Status.UNREAD).update(status=Notification.Status.READ)
+        unread_count = Notification.objects.filter(user=user, status=Notification.Status.UNREAD).count()
         return Response({'success': True, 'unread_count': unread_count})
     except Exception as e:
         return Response({'error': 'Lỗi server khi đánh dấu tất cả là đã đọc', 'details': str(e)}, status=500)
