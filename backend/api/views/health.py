@@ -23,12 +23,19 @@ def health_check(request):
     # Check Redis if enabled
     if getattr(settings, 'USE_REDIS', False):
         try:
-            redis_client = redis.Redis(
-                host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                password=getattr(settings, 'REDIS_PASSWORD', None),
-                socket_connect_timeout=2
-            )
+            # Prefer REDIS_URL if available (handles TLS and auth), otherwise build client
+            if getattr(settings, 'REDIS_URL', ''):
+                redis_client = redis.from_url(settings.REDIS_URL, socket_connect_timeout=2)
+            else:
+                conn_kwargs = {
+                    'host': settings.REDIS_HOST,
+                    'port': settings.REDIS_PORT,
+                    'password': getattr(settings, 'REDIS_PASSWORD', None),
+                    'socket_connect_timeout': 2,
+                }
+                if getattr(settings, 'REDIS_USE_TLS', False):
+                    conn_kwargs['ssl'] = True
+                redis_client = redis.Redis(**conn_kwargs)
             redis_client.ping()
             checks['redis'] = 'healthy'
         except Exception as e:

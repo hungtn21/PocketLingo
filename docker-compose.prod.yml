@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+  #redis
+  redis:
+    image: redis:7-alpine
+    container_name: pocketlingo-redis
+    command: redis-server --appendonly yes --maxclients 10000
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - pocketlingo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Django Backend
   backend:
     build:
@@ -17,10 +33,10 @@ services:
       - pocketlingo-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 5
+      start_period: 60s
 
   # Cronjob Scheduler (chỉ chạy trên VM1)
   scheduler:
@@ -71,14 +87,29 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
       - frontend_volume:/usr/share/nginx/html:ro
       - certbot_data:/etc/letsencrypt 
-      - certbot_www:/var/www/certbot  
+      - certbot_www:/var/www/certbot:rw
     depends_on:
       - backend
       - frontend
+    restart: unless-stopped
+    networks:
+      - pocketlingo-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: pocketlingo-certbot
+    volumes:
+      - certbot_data:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: ""
+    command: sleep infinity
+    depends_on:
+      - nginx
     restart: unless-stopped
     networks:
       - pocketlingo-network
@@ -87,6 +118,9 @@ volumes:
   static_volume:
   media_volume:
   frontend_volume:
+  certbot_www:
+  certbot_data:
+  redis_data:
 
 networks:
   pocketlingo-network:
