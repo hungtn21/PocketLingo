@@ -5,6 +5,7 @@ import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
 import { Lock, Unlock, User as UserIcon } from "lucide-react";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
+import ChristmasLoader from '../../../component/ChristmasTheme/ChristmasLoader';
 
 const Badge = ({ status }) => {
   const isActive = status === "active";
@@ -86,7 +87,7 @@ const UserDetail = () => {
 
         {error && <div className="alert alert-danger">{error}</div>}
         {loading ? (
-          <div className="text-center py-4">Đang tải...</div>
+          <div className="text-center py-4"><ChristmasLoader /></div>
         ) : !user ? (
           <div className="text-center py-4">Không tìm thấy người dùng</div>
         ) : (

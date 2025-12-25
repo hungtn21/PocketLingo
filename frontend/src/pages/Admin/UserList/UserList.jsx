@@ -5,6 +5,7 @@ import api from "../../../api";
 import { Link } from "react-router-dom";
 import { Lock, Unlock, Search } from "lucide-react";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
+import ChristmasLoader from '../../../component/ChristmasTheme/ChristmasLoader';
 
 const Badge = ({ status }) => {
   const isActive = status === "active";
@@ -134,7 +135,7 @@ const UserList = () => {
 
         {error && <div className="alert alert-danger">{error}</div>}
         {loading ? (
-          <div className="text-center py-4">Đang tải...</div>
+          <div className="text-center py-4"><ChristmasLoader /></div>
         ) : (
           <div className="card shadow-sm" style={tableStyle}>
             <div className="table-responsive">

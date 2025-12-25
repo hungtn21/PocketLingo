@@ -6,6 +6,7 @@ import api from "../../../api";
 import { Trash2, Plus, ArrowLeft, Eye, Edit } from "lucide-react";
 import ConfirmModal from "../../../component/ConfirmModal/ConfirmModal";
 import ToastMessage from "../../../component/ToastMessage";
+import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 
 const AdminCourseDetail = () => {
   const { courseId } = useParams();
@@ -145,14 +146,16 @@ const AdminCourseDetail = () => {
   };
 
   const confirmDelete = async () => {
-    if (!lessonToDelete) return;
+    if (!lessonToDelete) return false;
     try {
       await api.delete(`/admins/lessons/${lessonToDelete}/`);
       fetchCourseDetail();
       setShowDeleteModal(false);
       setLessonToDelete(null);
+      return true;
     } catch (e) {
       alert("Không thể xóa bài học");
+      return false;
     }
   };
 
@@ -182,7 +185,7 @@ const AdminCourseDetail = () => {
     borderBottom: "none"
   };
 
-  if (loading) return <div className="text-center py-5">Đang tải...</div>;
+  if (loading) return <div className="text-center py-5"><ChristmasLoader /></div>;
 
   return (
     <div className="admin-dashboard-page">
@@ -203,6 +206,12 @@ const AdminCourseDetail = () => {
           height: 40px !important;
           font-size: 1rem !important;
           line-height: 1 !important;
+        }
+        /* When export-btn is used with btn-primary, keep purple background and white text */
+        .export-btn.btn-primary, .btn.btn-primary.export-btn {
+          background-color: #5E3C86 !important;
+          border-color: #5E3C86 !important;
+          color: #fff !important;
         }
         .export-btn:hover {
           background-color: #efe5fb !important;
@@ -241,7 +250,7 @@ const AdminCourseDetail = () => {
                      Xuất Excel
                    </button>
                    <button 
-                      className="btn btn-primary" 
+                      className="btn btn-primary export-btn" 
                       style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }}
                       onClick={openAddModal}
                    >
@@ -398,6 +407,20 @@ const AdminCourseDetail = () => {
         isDangerous={confirmModal.isDangerous}
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* ConfirmModal for deleting a lesson */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title={'Xác nhận xóa'}
+        message={'Bạn chắc chắn muốn xóa bài học này? Hành động không thể hoàn tác.'}
+        confirmText={'Xóa'}
+        isDangerous={true}
+        onConfirm={async () => {
+          const ok = await confirmDelete();
+          if (ok) setToast({ message: 'Xóa bài học thành công', type: 'success' });
+        }}
+        onCancel={() => { setShowDeleteModal(false); setLessonToDelete(null); }}
       />
 
       {/* ToastMessage for notifications */}

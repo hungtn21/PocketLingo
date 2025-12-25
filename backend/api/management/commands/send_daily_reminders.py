@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 class Command(BaseCommand):
     help = 'Send daily review reminders to users with overdue flashcards'
 
-    def handle(self, *args, **kwargs):
+    def _send(self):
         today = timezone.now().date()
 
         self.stdout.write(f"Scanning overdue flashcards as of {today}...")
@@ -80,3 +80,30 @@ class Command(BaseCommand):
             count_sent += 1
 
         self.stdout.write(self.style.SUCCESS(f"Đã gửi nhắc nhở cho {count_sent} người dùng."))
+
+    def handle(self, *args, **kwargs):
+        # Use Redis lock when available to avoid duplicate runs across multiple instances
+        use_redis = getattr(__import__('django.conf').conf.settings, 'USE_REDIS', False)
+        if use_redis:
+            try:
+                import redis
+                from django.conf import settings
+                r = redis.Redis(host=settings.REDIS_HOST, port=getattr(settings, 'REDIS_PORT', 6379), password=getattr(settings, 'REDIS_PASSWORD', None))
+                lock = r.lock('send_daily_reminders_lock', timeout=3600)
+                acquired = lock.acquire(blocking=False)
+                if not acquired:
+                    self.stdout.write("Another instance is running; exiting")
+                    return
+                try:
+                    self._send()
+                finally:
+                    try:
+                        lock.release()
+                    except Exception:
+                        pass
+            except Exception as exc:
+                self.stdout.write(f"Failed to use redis lock (will run anyway): {exc}")
+                # fallback to single run
+                self._send()
+        else:
+            self._send()

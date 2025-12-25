@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from api.views import course_views
+from api.views.health import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +27,7 @@ urlpatterns = [
     path('api/courses/filter-options/', course_views.get_filter_options, name='get_filter_options'),
     # Lấy tất cả urls từ app api
     path('api/', include('api.urls')),
+    path('health/', health_check, name='health'),
 ]
 
 if settings.DEBUG:

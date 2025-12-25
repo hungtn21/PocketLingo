@@ -27,6 +27,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
+# Ensure SECRET_KEY exists in production
+if not SECRET_KEY and not DEBUG:
+    raise RuntimeError("SECRET_KEY must be set in production")
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
@@ -53,16 +57,28 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'backend.asgi.application'
 
 # Redis configuration for Django Channels
+REDIS_URL = os.getenv('REDIS_URL', '').strip()
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
+REDIS_USE_TLS = os.getenv('REDIS_USE_TLS', 'false').lower() == 'true'
 USE_REDIS = os.getenv('USE_REDIS', 'false').lower() == 'true'
 
 if USE_REDIS:
+    if REDIS_URL:
+        redis_hosts = [REDIS_URL]
+    else:
+        if REDIS_PASSWORD:
+            scheme = 'rediss' if REDIS_USE_TLS else 'redis'
+            redis_hosts = [f"{scheme}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"]
+        else:
+            redis_hosts = [(REDIS_HOST, REDIS_PORT)]
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                'hosts': [(REDIS_HOST, REDIS_PORT)],
+                'hosts': redis_hosts,
             },
         },
     }
@@ -92,13 +108,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS Configuration
+# For production, add your domain to CORS_ALLOWED_ORIGINS_PROD in .env
+CORS_ALLOWED_ORIGINS_PROD = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if os.getenv('CORS_ALLOWED_ORIGINS') else []
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:4173",
-]
+    "http://localhost",
+    "http://127.0.0.1",
+] + CORS_ALLOWED_ORIGINS_PROD
 
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS_PROD = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if os.getenv('CSRF_TRUSTED_ORIGINS') else []
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
@@ -106,7 +131,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://localhost:4173",
-]
+    "http://localhost",
+    "http://127.0.0.1",
+] + CSRF_TRUSTED_ORIGINS_PROD
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -180,7 +207,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -201,12 +229,24 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
 }
 
-FRONTEND_URL = "http://localhost:5173" #dev only
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+INTERNAL_RUN_DAILY_TOKEN = os.getenv('INTERNAL_RUN_DAILY_TOKEN', '')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+# Production --> thêm redis caches thay cho caches mặc định, uncomment khi chạy trên server
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }

@@ -1,0 +1,32 @@
+# .github/workflows/deploy.yml
+name: Deploy code lên Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy lên VM1
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: 136.112.26.100
+          username: kq161204
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/PocketLingo
+            git pull origin main
+            ./deploy.sh
+      
+      - name: Deploy lên VM2
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: 35.193.44.85
+          username: kq161204
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/PocketLingo
+            git pull origin main
+            ./deploy.sh

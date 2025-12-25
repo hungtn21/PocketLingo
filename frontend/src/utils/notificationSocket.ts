@@ -1,5 +1,5 @@
 // Simple singleton WebSocket manager that emits events on new notifications
-const HOST = window.location.host.replace(/:[0-9]+$/, ':8000');
+const HOST = window.location.host;
 export const notificationEvents = new EventTarget();
 let socket: WebSocket | null = null;
 let initialized = false;

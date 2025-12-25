@@ -140,6 +140,67 @@ class AdminLessonDetailView(APIView):
     authentication_classes = [JWTCookieAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, lesson_id):
+        # Provide detail of a lesson (flashcards, quiz, questions) for admin
+        if not _require_admin(request.user):
+            return Response({'success': False, 'error': 'Bạn không có quyền truy cập.'}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            lesson = Lesson.objects.select_related('course').get(id=lesson_id)
+        except Lesson.DoesNotExist:
+            return Response({'success': False, 'error': 'Bài học không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Fetch Flashcards
+        flashcards_qs = Flashcard.objects.filter(lesson=lesson).order_by('id')
+        flashcards_data = [
+            {
+                'id': fc.id,
+                'word': fc.word,
+                'meaning': fc.meaning,
+                'example': fc.example,
+                'image_url': fc.image_url,
+            }
+            for fc in flashcards_qs
+        ]
+
+        # Fetch Quiz
+        quiz = Quiz.objects.filter(lesson=lesson).first()
+        quiz_data = None
+        questions_data = []
+        if quiz:
+            quiz_data = {
+                'id': quiz.id,
+                'time_limit': quiz.time_limit,
+                'passed_score': quiz.passed_score,
+            }
+            questions = Question.objects.filter(quiz=quiz).order_by('order_index')
+            for q in questions:
+                questions_data.append({
+                    'id': q.id,
+                    'question_text': q.question_text,
+                    'question_type': q.question_type,
+                    'order_index': q.order_index,
+                    'answer': q.answer,
+                })
+
+        return Response({
+            'success': True,
+            'data': {
+                'lesson': {
+                    'id': lesson.id,
+                    'course_id': lesson.course_id,
+                    'course_title': lesson.course.title,
+                    'title': lesson.title,
+                    'description': lesson.description,
+                    'order_index': lesson.order_index,
+                    'status': lesson.status,
+                },
+                'flashcards': flashcards_data,
+                'quiz': quiz_data,
+                'questions': questions_data,
+            }
+        }, status=status.HTTP_200_OK)
+
     def delete(self, request, lesson_id):
         if not _require_admin(request.user):
             return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)

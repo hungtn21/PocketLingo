@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import AdminHeader from '../../component/AdminDashboard/AdminHeader';
 import Sidebar from '../../component/Sidebar/Sidebar';
 import api from '../../api';
+import ChristmasLoader from '../../component/ChristmasTheme/ChristmasLoader';
 
 interface OverviewStats {
     total_learners: number;
@@ -187,11 +188,7 @@ const AdminDashboard: React.FC = () => {
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
             <div className="container-fluid px-2" style={{ marginTop: '40px', maxWidth: '900px', margin: '20px auto 0' }}>
                 {loading ? (
-                    <div className="text-center">
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
+                    <div className="text-center py-4"><ChristmasLoader /></div>
                 ) : (
                     <div>
                         {/* Top row: 3 cards */}
@@ -263,7 +260,7 @@ const AdminDashboard: React.FC = () => {
                                     </div>
                                     <div style={{ width: 870, maxWidth: '100%', margin: '0 auto' }}>
                                         {loadingChart ? (
-                                            <div className="text-center">Đang tải biểu đồ...</div>
+                                            <div className="text-center py-4"><ChristmasLoader /></div>
                                         ) : (
                                             <ResponsiveContainer width="100%" height={350}>
                                                 <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -303,7 +300,7 @@ const AdminDashboard: React.FC = () => {
                                 </div>
 
                                 {loadingCourses ? (
-                                    <div className="text-center py-4">Đang tải...</div>
+                                    <div className="text-center py-4"><ChristmasLoader /></div>
                                 ) : (
                                     <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
                                         <div className="table-responsive">

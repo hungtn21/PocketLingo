@@ -334,7 +334,7 @@ const CourseList = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-4">Đang tải...</div>
+          <div className="text-center py-4"><ChristmasLoader /></div>
         ) : (
           <div className="card shadow-sm" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #e7e7e7", borderTop: "4px solid #5E3C86" }}>
             <div className="table-responsive">
