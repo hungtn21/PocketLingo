@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from ..authentication import JWTCookieAuthentication
-from ..models import User, Course, Lesson
+from ..models import User, Course, Lesson, Flashcard, Quiz, Question
 from ..serializers.course_serializers import CourseSerializer, LessonSerializer
 from ..models import UserCourse, QuizAttempt
 from django.http import HttpResponse
