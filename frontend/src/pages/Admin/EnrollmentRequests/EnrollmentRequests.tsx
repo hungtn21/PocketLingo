@@ -6,6 +6,7 @@ import Sidebar from "../../../component/Sidebar/Sidebar";
 import api from "../../../api";
 import { useLocation } from "react-router-dom";
 import "./highlight-row.css";
+import Portal from "../../../component/Portal/Portal";
 import { Search, Check, X } from "lucide-react";
 import ChristmasLoader from "../../../component/ChristmasTheme/ChristmasLoader";
 
@@ -275,82 +276,87 @@ const EnrollmentRequests = () => {
         )}
       </div>
 
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <div
-          className={styles["enrollment-modal-backdrop"]}
-          onClick={() => setShowRejectModal(false)}
-        >
+      {/* Reject Modal (rendered in portal to avoid ancestor stacking context issues) */}
+      <Portal>
+        {showRejectModal && (
           <div
-            className={styles["enrollment-modal"]}
-            onClick={(e) => e.stopPropagation()}
+            className={styles["enrollment-modal-backdrop"]}
+            onClick={() => setShowRejectModal(false)}
           >
-            <div className={styles["enrollment-modal__header"]}>
-              Lý do từ chối
-            </div>
-            <div className={styles["enrollment-modal__body"]}>
-              <textarea
-                className={styles["enrollment-modal__textarea"]}
-                rows={4}
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Nhập lý do từ chối..."
-              />
-            </div>
-            <div className={styles["enrollment-modal__footer"]}>
-              <button
-                className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--secondary"]}`}
-                onClick={() => setShowRejectModal(false)}
-              >
-                Huỷ
-              </button>
-              <button
-                className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--primary"]}`}
-                onClick={handleReject}
-              >
-                Lưu
-              </button>
+            <div
+              className={styles["enrollment-modal"]}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles["enrollment-modal__header"]}>
+                Lý do từ chối
+              </div>
+              <div className={styles["enrollment-modal__body"]}>
+                <textarea
+                  className={styles["enrollment-modal__textarea"]}
+                  rows={4}
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Nhập lý do từ chối..."
+                />
+              </div>
+              <div className={styles["enrollment-modal__footer"]}>
+                <button
+                  className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--secondary"]}`}
+                  onClick={() => setShowRejectModal(false)}
+                >
+                  Huỷ
+                </button>
+                <button
+                  className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--primary"]}`}
+                  onClick={handleReject}
+                >
+                  Lưu
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Portal>
 
       {/* Approve Modal */}
-      {showApproveModal && (
-        <div
-          className={styles["enrollment-modal-backdrop"]}
-          onClick={() => setShowApproveModal(false)}
-        >
+      {/* Approve Modal (rendered in portal to avoid ancestor stacking context issues) */}
+      <Portal>
+        {showApproveModal && (
           <div
-            className={styles["enrollment-modal"]}
-            onClick={(e) => e.stopPropagation()}
+            className={styles["enrollment-modal-backdrop"]}
+            onClick={() => setShowApproveModal(false)}
           >
-            <div className={styles["enrollment-modal__header"]}>
-              Xác nhận duyệt yêu cầu
-            </div>
             <div
-              className={styles["enrollment-modal__body"]}
-              style={{ textAlign: "center" }}
+              className={styles["enrollment-modal"]}
+              onClick={(e) => e.stopPropagation()}
             >
-              Bạn có chắc chắn muốn duyệt yêu cầu?
-            </div>
-            <div className={styles["enrollment-modal__footer"]}>
-              <button
-                className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--secondary"]}`}
-                onClick={() => setShowApproveModal(false)}
+              <div className={styles["enrollment-modal__header"]}>
+                Xác nhận duyệt yêu cầu
+              </div>
+              <div
+                className={styles["enrollment-modal__body"]}
+                style={{ textAlign: "center" }}
               >
-                Huỷ
-              </button>
-              <button
-                className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--primary"]}`}
-                onClick={confirmApprove}
-              >
-                Duyệt
-              </button>
+                Bạn có chắc chắn muốn duyệt yêu cầu?
+              </div>
+              <div className={styles["enrollment-modal__footer"]}>
+                <button
+                  className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--secondary"]}`}
+                  onClick={() => setShowApproveModal(false)}
+                >
+                  Huỷ
+                </button>
+                <button
+                  className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--primary"]}`}
+                  onClick={confirmApprove}
+                >
+                  Duyệt
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Portal>
     </div>
   );
 };

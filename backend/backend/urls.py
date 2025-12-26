@@ -22,7 +22,7 @@ from api.views import course_views
 from api.views.health import health_check
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin-django/', admin.site.urls),
     path('api/courses/', course_views.get_courses, name='get_courses'),
     path('api/courses/filter-options/', course_views.get_filter_options, name='get_filter_options'),
     # Lấy tất cả urls từ app api

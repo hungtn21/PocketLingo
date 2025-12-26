@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   #redis
   redis:
@@ -48,7 +46,7 @@ services:
       sh -c "
         if [ \"$$IS_PRIMARY\" = \"true\" ]; then
           echo 'Running as primary instance with scheduler';
-          python manage.py run_huey --worker-type process --workers 2;
+            python manage.py start_scheduler;
         else
           echo 'Running as secondary instance, skipping scheduler';
           tail -f /dev/null;
