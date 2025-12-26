@@ -286,6 +286,7 @@ const EnrollmentRequests = () => {
             <div
               className={styles["enrollment-modal"]}
               onClick={(e) => e.stopPropagation()}
+              style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1001, maxWidth: '90%' }}
             >
               <div className={styles["enrollment-modal__inner"]}>
                 <div className={styles["enrollment-modal__header"]}>
@@ -331,6 +332,7 @@ const EnrollmentRequests = () => {
             <div
               className={styles["enrollment-modal"]}
               onClick={(e) => e.stopPropagation()}
+              style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1001, maxWidth: '90%' }}
             >
               <div className={styles["enrollment-modal__inner"]}>
                 <div className={styles["enrollment-modal__header"]}>
