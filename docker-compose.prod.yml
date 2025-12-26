@@ -1,5 +1,6 @@
+version: '3.8'
+
 services:
-  #redis
   redis:
     image: redis:7-alpine
     container_name: pocketlingo-redis
@@ -15,7 +16,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Django Backend
   backend:
     build:
       context: ./backend
@@ -36,7 +36,36 @@ services:
       retries: 5
       start_period: 60s
 
-  # Cronjob Scheduler (chỉ chạy trên VM1)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pocketlingo-frontend
+    volumes:
+      - frontend_volume:/usr/share/nginx/html
+    restart: unless-stopped
+    networks:
+      - pocketlingo-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: pocketlingo-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # QUAN TRỌNG: Mount SSL certs
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+      - frontend_volume:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - pocketlingo-network
+
   scheduler:
     build:
       context: ./backend
@@ -46,7 +75,7 @@ services:
       sh -c "
         if [ \"$$IS_PRIMARY\" = \"true\" ]; then
           echo 'Running as primary instance with scheduler';
-            python manage.py start_scheduler;
+          python manage.py start_scheduler;
         else
           echo 'Running as secondary instance, skipping scheduler';
           tail -f /dev/null;
@@ -63,61 +92,10 @@ services:
     networks:
       - pocketlingo-network
 
-  # React Frontend (build và serve static)
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: pocketlingo-frontend
-    volumes:
-      - frontend_volume:/usr/share/nginx/html
-    restart: unless-stopped
-    networks:
-      - pocketlingo-network
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: pocketlingo-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-      - frontend_volume:/usr/share/nginx/html:ro
-      - certbot_data:/etc/letsencrypt 
-      - certbot_www:/var/www/certbot:rw
-    depends_on:
-      - backend
-      - frontend
-    restart: unless-stopped
-    networks:
-      - pocketlingo-network
-
-  certbot:
-    image: certbot/certbot
-    container_name: pocketlingo-certbot
-    volumes:
-      - certbot_data:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
-    entrypoint: ""
-    command: sleep infinity
-    depends_on:
-      - nginx
-    restart: unless-stopped
-    networks:
-      - pocketlingo-network
-
 volumes:
   static_volume:
   media_volume:
   frontend_volume:
-  certbot_www:
-  certbot_data:
   redis_data:
 
 networks:
