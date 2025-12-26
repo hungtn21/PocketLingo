@@ -16,13 +16,25 @@
   box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   padding: 0;
   overflow: hidden;
-  animation: fadeInModal 0.2s;
   border: 7px solid #5E3C86;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  max-width: 90%;
 }
 
-@keyframes fadeInModal {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: none; opacity: 1; }
+/* Inner wrapper animation: slide up and fade in without touching the
+   outer centering transform. */
+.enrollment-modal__inner {
+  display: block;
+  animation: slideInModal 0.18s ease-out forwards;
+}
+
+@keyframes slideInModal {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .enrollment-modal__header {

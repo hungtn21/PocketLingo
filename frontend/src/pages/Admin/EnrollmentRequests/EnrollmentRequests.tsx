@@ -287,10 +287,11 @@ const EnrollmentRequests = () => {
               className={styles["enrollment-modal"]}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className={styles["enrollment-modal__header"]}>
+              <div className={styles["enrollment-modal__inner"]}>
+                <div className={styles["enrollment-modal__header"]}>
                 Lý do từ chối
-              </div>
-              <div className={styles["enrollment-modal__body"]}>
+                </div>
+                <div className={styles["enrollment-modal__body"]}>
                 <textarea
                   className={styles["enrollment-modal__textarea"]}
                   rows={4}
@@ -313,6 +314,7 @@ const EnrollmentRequests = () => {
                   Lưu
                 </button>
               </div>
+              </div>
             </div>
           </div>
         )}
@@ -330,28 +332,30 @@ const EnrollmentRequests = () => {
               className={styles["enrollment-modal"]}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className={styles["enrollment-modal__header"]}>
-                Xác nhận duyệt yêu cầu
-              </div>
-              <div
-                className={styles["enrollment-modal__body"]}
-                style={{ textAlign: "center" }}
-              >
-                Bạn có chắc chắn muốn duyệt yêu cầu?
-              </div>
-              <div className={styles["enrollment-modal__footer"]}>
-                <button
-                  className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--secondary"]}`}
-                  onClick={() => setShowApproveModal(false)}
+              <div className={styles["enrollment-modal__inner"]}>
+                <div className={styles["enrollment-modal__header"]}>
+                  Xác nhận duyệt yêu cầu
+                </div>
+                <div
+                  className={styles["enrollment-modal__body"]}
+                  style={{ textAlign: "center" }}
                 >
-                  Huỷ
-                </button>
-                <button
-                  className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--primary"]}`}
-                  onClick={confirmApprove}
-                >
-                  Duyệt
-                </button>
+                  Bạn có chắc chắn muốn duyệt yêu cầu?
+                </div>
+                <div className={styles["enrollment-modal__footer"]}>
+                  <button
+                    className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--secondary"]}`}
+                    onClick={() => setShowApproveModal(false)}
+                  >
+                    Huỷ
+                  </button>
+                  <button
+                    className={`${styles["enrollment-modal__button"]} ${styles["enrollment-modal__button--primary"]}`}
+                    onClick={confirmApprove}
+                  >
+                    Duyệt
+                  </button>
+                </div>
               </div>
             </div>
           </div>
