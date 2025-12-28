@@ -218,12 +218,6 @@ def submit_quiz(request, lesson_id):
         score = (correct_count / total_questions * 100) if total_questions > 0 else 0
         quiz_status = QuizAttempt.Status.PASSED if score >= quiz.passed_score else QuizAttempt.Status.FAILED
         
-        # Lấy số lần làm bài
-        previous_attempts = QuizAttempt.objects.filter(
-            quiz=quiz,
-            user_id=user.id
-        ).count()
-        
         # ==================== XP LOGIC (Quiz completion) ====================
         # 1) Init
         xp_gained = 0
@@ -243,6 +237,12 @@ def submit_quiz(request, lesson_id):
         with transaction.atomic():
             # Lock user row to avoid XP race conditions
             user = User.objects.select_for_update().get(id=user.id)
+
+            # Compute attempt_no under the same lock to avoid duplicate numbers
+            previous_attempts = QuizAttempt.objects.filter(
+                quiz=quiz,
+                user_id=user.id,
+            ).count()
 
             # Save attempt
             quiz_attempt = QuizAttempt.objects.create(
@@ -288,6 +288,9 @@ def submit_quiz(request, lesson_id):
                 user_lesson.milestone_xp_awarded = True
                 milestone_awarded = True
 
+            # Save UserLesson changes before counting completed lessons
+            user_lesson.save()
+
             # 4) Course completion reward (1000XP)
             # Condition: this lesson is now completed AND user completed all lessons in the course
             if is_passed:
@@ -311,9 +314,6 @@ def submit_quiz(request, lesson_id):
                         user_course.progress_percent = 100
                         user_course.save(update_fields=['completion_xp_awarded', 'status', 'progress_percent'])
                         course_completion_awarded = True
-
-            # Save UserLesson changes if any
-            user_lesson.save()
 
             # Update user XP
             if xp_gained:
