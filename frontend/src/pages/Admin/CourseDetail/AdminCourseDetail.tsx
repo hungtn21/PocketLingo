@@ -350,7 +350,7 @@ const AdminCourseDetail = () => {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Tên bài học</label>
                   <input
-                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                     type="text"
                     value={currentLesson.title}
                     onChange={e => setCurrentLesson({ ...currentLesson, title: e.target.value })}
@@ -360,7 +360,7 @@ const AdminCourseDetail = () => {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Mô tả bài học</label>
                   <textarea
-                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                     rows={2}
                     value={currentLesson.description}
                     onChange={e => setCurrentLesson({ ...currentLesson, description: e.target.value })}
@@ -369,7 +369,7 @@ const AdminCourseDetail = () => {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Trạng thái</label>
                   <select
-                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                     value={currentLesson.status}
                     onChange={e => setCurrentLesson({ ...currentLesson, status: e.target.value })}
                   >

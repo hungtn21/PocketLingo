@@ -106,7 +106,7 @@ export default function AdminList() {
               className="form-control" value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === "Enter" && fetchAdmins(1)}
-              style={{ border: "none", background: "transparent", boxShadow: "none" }} />
+              style={{ border: "none", background: "transparent", boxShadow: "none", color: "#333" }} />
           </div>
           <button className="btn btn-primary" style={{ backgroundColor: "#5E3C86", borderColor: "#5E3C86" }} onClick={() => fetchAdmins(1)}>Tìm kiếm</button>
         </div>

@@ -306,7 +306,7 @@ const CourseList = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              style={{ border: "none", background: "transparent", boxShadow: "none", height: 28 }}
+              style={{ border: "none", background: "transparent", boxShadow: "none", height: 28, color: "#333" }}
             />
           </div>
           <select 
@@ -417,7 +417,7 @@ const CourseList = () => {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Tên khóa học</label>
                   <input
-                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                     type="text"
                     value={currentCourse.title}
                     onChange={e => setCurrentCourse({ ...currentCourse, title: e.target.value })}
@@ -427,7 +427,7 @@ const CourseList = () => {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Mô tả</label>
                   <textarea
-                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                     rows={2}
                     value={currentCourse.description}
                     onChange={e => setCurrentCourse({ ...currentCourse, description: e.target.value })}
@@ -436,7 +436,7 @@ const CourseList = () => {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Mức độ</label>
                   <select
-                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                    style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                     value={currentCourse.level}
                     onChange={e => setCurrentCourse({ ...currentCourse, level: e.target.value })}
                     required
@@ -453,7 +453,7 @@ const CourseList = () => {
                       {currentCourse.image_url && (
                         <img src={currentCourse.image_url} alt="Ảnh bìa" style={{ maxWidth: '100%', maxHeight: 120, borderRadius: 8, marginBottom: 4, border: '1px solid #eee' }} />
                       )}
-                      <button type="button" style={{ borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: '1rem', background: '#eee', border: 'none', cursor: 'pointer', width: 'fit-content' }} onClick={handleUploadClick}><Upload size={16}/> Upload ảnh</button>
+                      <button type="button" style={{ borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: '1rem', background: '#eee', border: 'none', cursor: 'pointer', width: 'fit-content', color: '#333' }} onClick={handleUploadClick}><Upload size={16}/> Upload ảnh</button>
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -466,7 +466,7 @@ const CourseList = () => {
                   <div style={{ flex: 1 }}>
                     <label style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>Ngôn ngữ</label>
                     <select
-                      style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0 }}
+                      style={{ borderRadius: 8, width: '100%', padding: 8, fontSize: '1rem', border: '1px solid #d1d1d1', marginBottom: 0, color: '#333', background: 'white' }}
                       value={currentCourse.language}
                       onChange={e => setCurrentCourse({ ...currentCourse, language: e.target.value })}
                       required

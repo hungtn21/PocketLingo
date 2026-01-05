@@ -165,6 +165,7 @@ const EnrollmentRequests = () => {
               border: "none",
               background: "transparent",
               boxShadow: "none",
+              color: "#333",
             }}
           />
         </div>

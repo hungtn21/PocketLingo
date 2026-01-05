@@ -26,6 +26,7 @@
   border: 3px solid #6b4b9e;
   border-radius: 12px;
   background: white;
+  color: #333;
   text-align: center;
   transition: all 0.3s ease;
 }
