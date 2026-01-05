@@ -224,6 +224,8 @@
   border: 2px solid #e5e7eb;
   border-radius: 25px;
   font-size: 0.9rem;
+  color: #333;
+  background: white;
   outline: none;
   transition: border-color 0.2s;
 }

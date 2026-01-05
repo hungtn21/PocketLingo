@@ -12,6 +12,28 @@
   width: 100% !important;
 }
 
+/* Fix autofill text visibility in dark mode */
+.login-page input.form-control,
+.login-page input[type="email"],
+.login-page input[type="password"],
+.login-page input[type="text"] {
+  color: #333 !important;
+  background-color: #fff !important;
+}
+
+/* Override browser autofill styles */
+.login-page input:-webkit-autofill,
+.login-page input:-webkit-autofill:hover,
+.login-page input:-webkit-autofill:focus,
+.login-page input:-webkit-autofill:active {
+  -webkit-text-fill-color: #333 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+  box-shadow: 0 0 0px 1000px #fff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: #fff !important;
+  color: #333 !important;
+}
+
 /* Hero */
 .hero-logo-wrapper {
   width: 320px;

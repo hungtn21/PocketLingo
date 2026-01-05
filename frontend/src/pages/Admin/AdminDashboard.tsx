@@ -294,7 +294,7 @@ const AdminDashboard: React.FC = () => {
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
                                             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                            style={{ border: "none", background: "transparent", boxShadow: "none", height: 28 }}
+                                            style={{ border: "none", background: "transparent", boxShadow: "none", height: 28, color: "#333" }}
                                         />
                                     </div>
                                 </div>
