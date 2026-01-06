@@ -495,8 +495,10 @@
   .profile-actions button {
     width: 100%;
     justify-content: center;
-  }-progress-card {
-    min-width: 280px
+  }
+  .course-progress-card {
+    min-width: 280px;
+  }
   .courses-scroll-container {
     grid-template-columns: 1fr;
   }
